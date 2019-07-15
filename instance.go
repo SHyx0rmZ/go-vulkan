@@ -46,6 +46,8 @@ type ApplicationInfo struct {
 	APIVersion         uint32
 }
 
+const ptrSize = 4 << (^uintptr(0) >> 63)
+
 func CreateInstance(info CreateInfo) (Instance, error) {
 	var instance Instance
 	_info := createInfo{
@@ -58,21 +60,31 @@ func CreateInstance(info CreateInfo) (Instance, error) {
 		EnabledExtensionCount: uint32(len(info.EnabledExtensions)),
 		EnabledExtensionNames: nil,
 	}
-	if _info.EnabledExtensionCount > 0 {
-		var l int
-		for _, ext := range info.EnabledExtensions {
-			l += len(ext) + 1
+	if _info.EnabledLayerCount > 0 {
+		p := C.malloc(C.size_t(len(info.EnabledLayers)) * ptrSize)
+		var o uintptr
+		for _, layer := range info.EnabledLayers {
+			*(**C.char)(unsafe.Pointer(uintptr(p) + o)) = C.CString(layer)
+			o += ptrSize
 		}
-		p := C.malloc(C.size_t(len(info.EnabledExtensions)) * C.size_t(unsafe.Sizeof(uintptr(0))))
+		_info.EnabledLayerNames = (*C.char)(p)
+		defer func() {
+			for o := uintptr(0); o < uintptr(_info.EnabledLayerCount)*ptrSize; o += ptrSize {
+				C.free(unsafe.Pointer(uintptr(unsafe.Pointer(_info.EnabledLayerNames)) + o))
+			}
+		}()
+	}
+	if _info.EnabledExtensionCount > 0 {
+		p := C.malloc(C.size_t(len(info.EnabledExtensions)) * ptrSize)
 		fmt.Println(p)
 		var o uintptr
 		for _, ext := range info.EnabledExtensions {
 			*(**C.char)(unsafe.Pointer(uintptr(p) + o)) = C.CString(ext)
-			o += unsafe.Sizeof(uintptr(0))
+			o += ptrSize
 		}
 		_info.EnabledExtensionNames = (*C.char)(p)
 		defer func() {
-			for o := uintptr(0); o < uintptr(_info.EnabledExtensionCount)*unsafe.Sizeof(uintptr(0)); o += unsafe.Sizeof(uintptr(0)) {
+			for o := uintptr(0); o < uintptr(_info.EnabledExtensionCount)*ptrSize; o += ptrSize {
 				C.free(unsafe.Pointer(uintptr(unsafe.Pointer(_info.EnabledExtensionNames)) + o))
 			}
 		}()
@@ -88,6 +100,16 @@ type Instance uintptr
 
 func (i Instance) Destroy() {
 	C.vkDestroyInstance((C.VkInstance)(unsafe.Pointer(i)), nil)
+}
+
+type Surface uintptr
+
+type XlibSurfaceCreateInfo struct {
+}
+
+func (i Instance) CreateXlibSurface(info XlibSurfaceCreateInfo) (Surface, error) {
+	var surface Surface
+	C.vkCreateXlibSurfaceKHR((C.VkInstance)(unsafe.Pointer(i)), (*C.struct_VkXlibSurfaceCreateInfo)(unsafe.Pointer(&info)), nil, (*C.Surface)(unsafe.Pointer(&surface)))
 }
 
 type PhysicalDevice uintptr
