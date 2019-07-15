@@ -2,6 +2,7 @@ package vulkan
 
 import "C"
 import (
+	"bytes"
 	"fmt"
 	"unsafe"
 )
@@ -68,15 +69,13 @@ func CreateInstance(info CreateInfo) (Instance, error) {
 		for _, ext := range info.EnabledExtensions {
 			*(**C.char)(unsafe.Pointer(uintptr(p) + o)) = C.CString(ext)
 			o += unsafe.Sizeof(uintptr(0))
-			// for _, c := range []byte(ext) {
-			// 	*(*uint8)(unsafe.Pointer(uintptr(p) + o)) = c
-			// 	o++
-			// }
-			// *(*uint8)(unsafe.Pointer(uintptr(p) + o)) = 0
-			// o++
 		}
 		_info.EnabledExtensionNames = (*C.char)(p)
-		defer C.free(unsafe.Pointer(_info.EnabledExtensionNames))
+		defer func() {
+			for o := uintptr(0); o < uintptr(_info.EnabledExtensionCount)*unsafe.Sizeof(uintptr(0)); o += unsafe.Sizeof(uintptr(0)) {
+				C.free(unsafe.Pointer(uintptr(unsafe.Pointer(_info.EnabledExtensionNames)) + o))
+			}
+		}()
 	}
 	result := C.vkCreateInstance((*C.struct_VkInstanceCreateInfo)(unsafe.Pointer(&_info)), nil, (*C.VkInstance)(unsafe.Pointer(&instance)))
 	if result != C.VK_SUCCESS {
@@ -122,14 +121,18 @@ func (i Instance) EnumeratePhysicalDevices() ([]PhysicalDevice, error) {
 	}
 	devices := make([]PhysicalDevice, count)
 	result = C.vkEnumeratePhysicalDevices((C.VkInstance)(unsafe.Pointer(i)), &count, (*C.VkPhysicalDevice)(unsafe.Pointer(&devices[0])))
-	C._f = C.vkGetInstanceProcAddr((C.VkInstance)(unsafe.Pointer(i)), C.CString("vkGetPhysicalDeviceProperties2KHR"))
-	if C._f == nil {
-		panic("empty function pointer")
-	}
+	// C._f = C.vkGetInstanceProcAddr((C.VkInstance)(unsafe.Pointer(i)), C.CString("vkGetPhysicalDeviceProperties2KHR"))
+	// if C._f == nil {
+	// 	panic("empty function pointer")
+	// }
 	for _, device := range devices {
-		var properties PhysicalDeviceProperties2KHR
-		properties.Type = 1000059001
-		C.doInvoke((C.VkPhysicalDevice)(unsafe.Pointer(device)), (*C.VkPhysicalDeviceProperties2KHR)(unsafe.Pointer(&properties)))
+		var properties PhysicalDeviceProperties
+		// properties.Type = 1000059001
+		// C.doInvoke((C.VkPhysicalDevice)(unsafe.Pointer(device)), (*C.VkPhysicalDeviceProperties2KHR)(unsafe.Pointer(&properties)))
+		C.vkGetPhysicalDeviceProperties((C.VkPhysicalDevice)(unsafe.Pointer(device)), (*C.VkPhysicalDeviceProperties)(unsafe.Pointer(&properties)))
+		fmt.Println("- physical device found:")
+		fmt.Println("  name:", string(properties.DeviceName[:bytes.IndexByte(properties.DeviceName[:], 0)]))
+		fmt.Println("  uuid:", string(properties.PipelineCacheUUID[:bytes.IndexByte(properties.PipelineCacheUUID[:], 0)]))
 	}
-	return nil, nil
+	return devices, nil
 }
