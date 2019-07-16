@@ -222,6 +222,37 @@ func (d Device) DestroySwapchain(swapchain Swapchain) {
 	C._vkDestroySwapchainKHR((C.VkDevice)(unsafe.Pointer(d)), (C.VkSwapchainKHR)(unsafe.Pointer(swapchain)), nil)
 }
 
+type Queue uintptr
+
+type PresentInfo struct {
+	Type               C.VkStructureType
+	Next               uintptr
+	WaitSemaphoreCount uint32
+	WaitSemaphores     uintptr
+	SwapchainCount     uint32
+	Swapchains         uintptr
+	ImageIndices       *uint32
+	Results            *uint32
+}
+
+func (q Queue) Present(info PresentInfo) error {
+	p := C.malloc(C.size_t(unsafe.Sizeof(C.uint32_t(0)) * 1))
+	*(*uint32)(p) = 0
+	defer C.free(p)
+	info.ImageIndices = (*uint32)(p)
+	result := C.vkQueuePresentKHR((C.VkQueue)(unsafe.Pointer(q)), (*C.VkPresentInfoKHR)(unsafe.Pointer(&info)))
+	if result != C.VK_SUCCESS {
+		return fmt.Errorf("present error")
+	}
+	return nil
+}
+
+func (d Device) GetQueue(queueFamilyIndex, queueIndex uint32) Queue {
+	var queue Queue
+	C.vkGetDeviceQueue((C.VkDevice)(unsafe.Pointer(d)), C.uint32_t(queueFamilyIndex), C.uint32_t(queueIndex), (*C.VkQueue)(unsafe.Pointer(&queue)))
+	return queue
+}
+
 type DeviceCreateInfo struct {
 	Type              C.VkStructureType
 	Next              *DeviceCreateInfo
