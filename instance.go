@@ -11,6 +11,8 @@ import (
 // #include <stdlib.h>
 // #include <X11/X.h>
 // #define VK_USE_PLATFORM_XLIB_KHR 1
+// #define VK_KHR_SURFACE 1
+// #define VK_KHR_SWAPCHAIN 1
 // #include <vulkan/vulkan.h>
 // void (*_f)(VkPhysicalDevice device, VkPhysicalDeviceProperties2KHR *properties);
 // void doInvoke(VkPhysicalDevice device, VkPhysicalDeviceProperties2KHR *properties) {
@@ -19,6 +21,14 @@ import (
 // VkResult (*_ptr_vkCreateXlibSurfaceKHR)(VkInstance instance, const VkXlibSurfaceCreateInfoKHR *info, const VkAllocationCallbacks *allocator, VkSurfaceKHR *surface);
 // VkResult _vkCreateXlibSurfaceKHR(VkInstance instance, const VkXlibSurfaceCreateInfoKHR *info, const VkAllocationCallbacks *allocator, VkSurfaceKHR *surface) {
 //   return _ptr_vkCreateXlibSurfaceKHR(instance, info, allocator, surface);
+// }
+// VkResult (*_ptr_vkCreateSwapchainKHR)(VkDevice device, const VkSwapchainCreateInfoKHR *info, const VkAllocationCallbacks *allocator, VkSwapchainKHR *swapchain);
+// VkResult _vkCreateSwapchainKHR(VkDevice device, const VkSwapchainCreateInfoKHR *info, const VkAllocationCallbacks *allocator, VkSwapchainKHR *swapchain) {
+//   return _ptr_vkCreateSwapchainKHR(device, info, allocator, swapchain);
+// }
+// void (*_ptr_vkDestroySwapchainKHR)(VkDevice device, VkSwapchainKHR swapchain, const VkAllocationCallbacks *allocator);
+// void _vkDestroySwapchainKHR(VkDevice device, VkSwapchainKHR swapchain, const VkAllocationCallbacks *allocator) {
+//   return _ptr_vkDestroySwapchainKHR(device, swapchain, allocator);
 // }
 import "C"
 
@@ -135,6 +145,173 @@ func (i Instance) DestroySurface(surface Surface) {
 }
 
 type PhysicalDevice uintptr
+
+type Device uintptr
+
+func (d Device) Destroy() {
+	C.vkDestroyDevice((C.VkDevice)(unsafe.Pointer(d)), nil)
+}
+
+type SwapchainCreateInfo struct {
+	Type            C.VkStructureType
+	Next            uintptr
+	Flags           C.VkSwapchainCreateFlagsKHR
+	Surface         C.VkSurfaceKHR
+	MinImageCount   uint32
+	Format          C.VkFormat
+	ImageColorSpace C.VkColorSpaceKHR
+	ImageExtent     struct {
+		Width  uint32
+		Height uint32
+	}
+	ImageArrayLayers      uint32
+	ImageUsage            C.VkImageUsageFlags
+	ImageSharingMode      C.VkSharingMode
+	QueueFamilyIndexCount uint32
+	QueueFamilyIndices    *uint32
+	PreTransform          C.VkSurfaceTransformFlagBitsKHR
+	CompositeAlpha        C.VkCompositeAlphaFlagBitsKHR
+	PresentMode           C.VkPresentModeKHR
+	Clipped               C.VkBool32
+	OldSwapchain          C.VkSwapchainKHR
+}
+
+type Swapchain uintptr
+
+func (d Device) CreateSwapchain(info SwapchainCreateInfo, surface Surface) (Swapchain, error) {
+	str := C.CString("vkCreateSwapchainKHR")
+	defer C.free(unsafe.Pointer(str))
+	C._ptr_vkCreateSwapchainKHR = C.vkGetDeviceProcAddr((C.VkDevice)(unsafe.Pointer(d)), str)
+	var swapchain Swapchain
+	fmt.Println("vkCreateSwapchainKHR", unsafe.Pointer(C._ptr_vkCreateSwapchainKHR))
+	info = SwapchainCreateInfo{
+		Type:            1000001000,
+		Surface:         (C.VkSurfaceKHR)(unsafe.Pointer(surface)),
+		MinImageCount:   2,
+		Format:          27,
+		ImageColorSpace: 0,
+		ImageExtent: struct {
+			Width  uint32
+			Height uint32
+		}{
+			Width:  1280,
+			Height: 800,
+		},
+		ImageArrayLayers:      1,
+		ImageUsage:            0,
+		ImageSharingMode:      C.VK_SHARING_MODE_EXCLUSIVE,
+		QueueFamilyIndexCount: 0,
+		QueueFamilyIndices:    nil,
+		PreTransform:          0x100,
+		CompositeAlpha:        1,
+		PresentMode:           C.VK_PRESENT_MODE_IMMEDIATE_KHR,
+		Clipped:               C.VK_TRUE,
+		OldSwapchain:          nil,
+	}
+	result := C._vkCreateSwapchainKHR((C.VkDevice)(unsafe.Pointer(d)), (*C.VkSwapchainCreateInfoKHR)(unsafe.Pointer(&info)), nil, (*C.VkSwapchainKHR)(unsafe.Pointer(&swapchain)))
+	if result != C.VK_SUCCESS {
+		return 0, fmt.Errorf("swapchain error")
+	}
+	return swapchain, nil
+}
+
+func (d Device) DestroySwapchain(swapchain Swapchain) {
+	str := C.CString("vkDestroySwapchainKHR")
+	defer C.free(unsafe.Pointer(str))
+	C._ptr_vkDestroySwapchainKHR = C.vkGetDeviceProcAddr((C.VkDevice)(unsafe.Pointer(d)), str)
+	C._vkDestroySwapchainKHR((C.VkDevice)(unsafe.Pointer(d)), (C.VkSwapchainKHR)(unsafe.Pointer(swapchain)), nil)
+}
+
+type DeviceCreateInfo struct {
+	Type              C.VkStructureType
+	Next              *DeviceCreateInfo
+	Flags             C.VkDeviceCreateFlags
+	QueueCreateInfos  []DeviceQueueCreateInfo
+	EnabledLayers     []string
+	EnabledExtensions []string
+	EnabledFeatures   *C.VkPhysicalDeviceFeatures
+}
+
+type deviceCreateInfo struct {
+	Type                  C.VkStructureType
+	Next                  uintptr
+	Flags                 C.VkDeviceCreateFlags
+	QueueCreateInfoCount  uint32
+	QueueCreateInfos      *DeviceQueueCreateInfo
+	EnabledLayerCount     uint32
+	EnabledLayerNames     *C.char
+	EnabledExtensionCount uint32
+	EnabledExtensionNames *C.char
+	EnabledFeatures       *C.VkPhysicalDeviceFeatures
+}
+
+type DeviceQueueCreateInfo struct {
+	Type             C.VkStructureType
+	Next             uintptr
+	Flags            C.VkDeviceQueueCreateFlags
+	QueueFamilyIndex uint32
+	QueueCount       uint32
+	QueuePriorities  uintptr // todo
+}
+
+func (d PhysicalDevice) CreateDevice(info DeviceCreateInfo) (Device, error) {
+	var device Device
+	_info := deviceCreateInfo{
+		Type:                  info.Type,
+		Next:                  0, // todo
+		Flags:                 info.Flags,
+		QueueCreateInfoCount:  uint32(len(info.QueueCreateInfos)),
+		EnabledLayerCount:     uint32(len(info.EnabledLayers)),
+		EnabledExtensionCount: uint32(len(info.EnabledExtensions)),
+		EnabledFeatures:       info.EnabledFeatures,
+	}
+	if _info.QueueCreateInfoCount > 0 {
+		sz := unsafe.Sizeof(DeviceQueueCreateInfo{})
+		var l uintptr
+		for range info.QueueCreateInfos {
+			l += 1 * unsafe.Sizeof(float32(0))
+		}
+		p := C.malloc(C.size_t(len(info.QueueCreateInfos))*C.size_t(sz) + C.size_t(l))
+		var o uintptr
+		for _, info := range info.QueueCreateInfos {
+			*(*DeviceQueueCreateInfo)(unsafe.Pointer(uintptr(p) + o)) = DeviceQueueCreateInfo{
+				Type:             info.Type,
+				Next:             info.Next,
+				Flags:            info.Flags,
+				QueueFamilyIndex: info.QueueFamilyIndex,
+				QueueCount:       info.QueueCount,
+				QueuePriorities:  uintptr(p) + o + sz,
+			}
+			o += sz
+			*(*float32)(unsafe.Pointer(uintptr(p) + o)) = 1.0
+			o += unsafe.Sizeof(float32(0))
+		}
+		_info.QueueCreateInfos = (*DeviceQueueCreateInfo)(p)
+		defer func() {
+			C.free(unsafe.Pointer(_info.QueueCreateInfos))
+		}()
+	}
+	if _info.EnabledExtensionCount > 0 {
+		p := C.malloc(C.size_t(len(info.EnabledExtensions) * ptrSize))
+		var o uintptr
+		for _, ext := range info.EnabledExtensions {
+			*(**C.char)(unsafe.Pointer(uintptr(p) + o)) = C.CString(ext)
+			o += ptrSize
+		}
+		_info.EnabledExtensionNames = (*C.char)(p)
+		defer func() {
+			for o := uintptr(0); o < uintptr(_info.EnabledExtensionCount)*ptrSize; o += ptrSize {
+				C.free(unsafe.Pointer(*(**C.char)(unsafe.Pointer(uintptr(p) + o))))
+			}
+			C.free(unsafe.Pointer(p))
+		}()
+	}
+	result := C.vkCreateDevice((C.VkPhysicalDevice)(unsafe.Pointer(d)), (*C.VkDeviceCreateInfo)(unsafe.Pointer(&_info)), nil, (*C.VkDevice)(unsafe.Pointer(&device)))
+	if result != C.VK_SUCCESS {
+		return 0, fmt.Errorf("device error")
+	}
+	return device, nil
+}
 
 type PhysicalDeviceProperties2KHR struct {
 	Type C.VkStructureType
