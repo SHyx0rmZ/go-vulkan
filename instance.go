@@ -34,7 +34,7 @@ type CreateInfo struct {
 
 type createInfo struct {
 	Type                  C.VkStructureType
-	Next                  *CreateInfo
+	Next                  *createInfo
 	Flags                 C.VkInstanceCreateFlags
 	ApplicationInfo       *ApplicationInfo
 	EnabledLayerCount     uint32
@@ -83,11 +83,48 @@ func fillNames(slice []string, count *uint32, names **C.char) interface{ Free() 
 	})
 }
 
+const MaxExtensionNameSize int = C.VK_MAX_EXTENSION_NAME_SIZE
+const MaxDescriptionSize int = C.VK_MAX_DESCRIPTION_SIZE
+
+type Layer struct {
+	LayerName             [MaxExtensionNameSize]uint8
+	SpecVersion           uint32
+	ImplementationVersion uint32
+	Description           [MaxDescriptionSize]uint8
+}
+
 func CreateInstance(info CreateInfo) (Instance, error) {
+	var count uint32
+	result := C.vkEnumerateInstanceLayerProperties((*C.uint32_t)(unsafe.Pointer(&count)), nil)
+	if result != C.VK_SUCCESS {
+		panic("enum")
+	}
+	fmt.Println(count, "layers")
+	layers := make([]Layer, count)
+	result = C.vkEnumerateInstanceLayerProperties((*C.uint32_t)(unsafe.Pointer(&count)), (*C.VkLayerProperties)(unsafe.Pointer(&layers[0])))
+	if result != C.VK_SUCCESS {
+		panic("enum2")
+	}
+	layers = layers[:0]
+	for _, layer := range layers {
+		name := string(layer.LayerName[:])
+		if off := bytes.IndexByte(layer.LayerName[:], 0); off != -1 {
+			name = string(layer.LayerName[:off])
+		}
+		description := string(layer.Description[:])
+		if off := bytes.IndexByte(layer.Description[:], 0); off != -1 {
+			description = string(layer.Description[:off])
+		}
+
+		fmt.Println(name)
+		fmt.Println(description)
+		fmt.Println()
+	}
+
 	var instance Instance
 	_info := createInfo{
-		Type:                  info.Type,
-		Next:                  nil, // todo
+		Type: info.Type,
+		//Next:                  nil, // todo
 		Flags:                 info.Flags,
 		ApplicationInfo:       info.ApplicationInfo,
 		EnabledLayerCount:     uint32(len(info.EnabledLayers)),
@@ -97,7 +134,8 @@ func CreateInstance(info CreateInfo) (Instance, error) {
 	}
 	defer fillNames(info.EnabledLayers, &_info.EnabledLayerCount, &_info.EnabledLayerNames).Free()
 	defer fillNames(info.EnabledExtensions, &_info.EnabledExtensionCount, &_info.EnabledExtensionNames).Free()
-	result := C.vkCreateInstance((*C.struct_VkInstanceCreateInfo)(unsafe.Pointer(&_info)), nil, (*C.VkInstance)(unsafe.Pointer(&instance)))
+	_info.Next = (*createInfo)(unsafe.Pointer(uintptr(0)))
+	result = C.vkCreateInstance((*C.VkInstanceCreateInfo)(unsafe.Pointer(&_info)), nil, (*C.VkInstance)(unsafe.Pointer(&instance)))
 	if result != C.VK_SUCCESS {
 		return 0, fmt.Errorf("vulkan error")
 	}
@@ -125,6 +163,7 @@ func (i Instance) CreateXlibSurface(info XlibSurfaceCreateInfo) (Surface, error)
 	defer C.free(unsafe.Pointer(str))
 	C._ptr_vkCreateXlibSurfaceKHR = C.vkGetInstanceProcAddr((C.VkInstance)(unsafe.Pointer(i)), str)
 	var surface Surface
+	info.Next = nil
 	result := C.vkCreateXlibSurfaceKHR((C.VkInstance)(unsafe.Pointer(i)), (*C.struct_VkXlibSurfaceCreateInfoKHR)(unsafe.Pointer(&info)), nil, (*C.VkSurfaceKHR)(unsafe.Pointer(&surface)))
 	if result != C.VK_SUCCESS {
 		return 0, fmt.Errorf("surface error")
@@ -207,6 +246,12 @@ type DeviceQueueCreateInfo struct {
 	QueuePriorities  uintptr // todo
 }
 
+//type deviceQueueCreateInfo struct {
+//	Type C.VkStructureType
+//	Next uintptr
+//	Flags C.VkDeviceQueueCreateFlags
+//}
+
 func (i Instance) EnumeratePhysicalDevices() ([]PhysicalDevice, error) {
 	var count C.uint32_t
 	// var devices uintptr
@@ -228,8 +273,42 @@ func (i Instance) EnumeratePhysicalDevices() ([]PhysicalDevice, error) {
 		// C.doInvoke((C.VkPhysicalDevice)(unsafe.Pointer(device)), (*C.VkPhysicalDeviceProperties2KHR)(unsafe.Pointer(&properties)))
 		C.vkGetPhysicalDeviceProperties((C.VkPhysicalDevice)(unsafe.Pointer(device)), (*C.VkPhysicalDeviceProperties)(unsafe.Pointer(&properties)))
 		fmt.Println("- physical device found:")
-		fmt.Println("  name:", string(properties.DeviceName[:bytes.IndexByte(properties.DeviceName[:], 0)]))
-		fmt.Println("  uuid:", string(properties.PipelineCacheUUID[:bytes.IndexByte(properties.PipelineCacheUUID[:], 0)]))
+		// fmt.Println("  name:", string(propertieis.DeviceName[:bytes.IndexByte(properties.DeviceName[:], 0)]))
+		// fmt.Println("  uuid:", string(properties.PipelineCacheUUID[:bytes.IndexByte(properties.PipelineCacheUUID[:], 0)]))
+		name := string(properties.DeviceName[:])
+		if off := bytes.IndexByte(properties.DeviceName[:], 0); off != -1 {
+			name = string(properties.DeviceName[:off])
+		}
+		uuid := fmt.Sprintf(
+			"%02x%02x%02x%02x-%02x%02x-%02x%02x-%02x%02x-%02x%02x%02x%02x%02x%02x",
+			properties.PipelineCacheUUID[0],
+			properties.PipelineCacheUUID[1],
+			properties.PipelineCacheUUID[2],
+			properties.PipelineCacheUUID[3],
+			properties.PipelineCacheUUID[4],
+			properties.PipelineCacheUUID[5],
+			properties.PipelineCacheUUID[6],
+			properties.PipelineCacheUUID[7],
+			properties.PipelineCacheUUID[8],
+			properties.PipelineCacheUUID[9],
+			properties.PipelineCacheUUID[10],
+			properties.PipelineCacheUUID[11],
+			properties.PipelineCacheUUID[12],
+			properties.PipelineCacheUUID[13],
+			properties.PipelineCacheUUID[14],
+			properties.PipelineCacheUUID[15],
+		)
+		fmt.Println("  name:", name)
+		fmt.Println("  uuid:", uuid)
 	}
 	return devices, nil
+}
+
+func (d PhysicalDevice) GetSurfaceSupport(queueFamilyIndex uint32, surface Surface) (bool, error) {
+	var supported uint32
+	result := C.vkGetPhysicalDeviceSurfaceSupportKHR((C.VkPhysicalDevice)(unsafe.Pointer(d)), (C.uint32_t)(queueFamilyIndex), (C.VkSurfaceKHR)(unsafe.Pointer(surface)), (*C.VkBool32)(unsafe.Pointer(&supported)))
+	if result != C.VK_SUCCESS {
+		return false, fmt.Errorf("surface support error")
+	}
+	return supported == C.VK_TRUE, nil
 }

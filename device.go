@@ -41,7 +41,7 @@ func (d Device) CreateSwapchain(info SwapchainCreateInfo, surface Surface) (Swap
 			Height: 800,
 		},
 		ImageArrayLayers:      1,
-		ImageUsage:            0,
+		ImageUsage:            C.VK_IMAGE_USAGE_TRANSFER_SRC_BIT | C.VK_IMAGE_USAGE_TRANSFER_DST_BIT,
 		ImageSharingMode:      C.VK_SHARING_MODE_EXCLUSIVE,
 		QueueFamilyIndexCount: 0,
 		QueueFamilyIndices:    nil,
@@ -51,6 +51,10 @@ func (d Device) CreateSwapchain(info SwapchainCreateInfo, surface Surface) (Swap
 		Clipped:               C.VK_TRUE,
 		OldSwapchain:          nil,
 	}
+	p := C.malloc(4)
+	*(*uint32)(p) = 0
+	info.QueueFamilyIndices = (*uint32)(p)
+	defer C.free(p)
 	fmt.Println("internal ", unsafe.Pointer(C.vkCreateSwapchainKHR))
 	result := C.vkCreateSwapchainKHR((C.VkDevice)(unsafe.Pointer(d)), (*C.VkSwapchainCreateInfoKHR)(unsafe.Pointer(&info)), nil, (*C.VkSwapchainKHR)(unsafe.Pointer(&swapchain)))
 	if result != C.VK_SUCCESS {
@@ -69,4 +73,83 @@ func (d Device) GetQueue(queueFamilyIndex, queueIndex uint32) Queue {
 	var queue Queue
 	C.vkGetDeviceQueue((C.VkDevice)(unsafe.Pointer(d)), C.uint32_t(queueFamilyIndex), C.uint32_t(queueIndex), (*C.VkQueue)(unsafe.Pointer(&queue)))
 	return queue
+}
+
+type Image uintptr
+
+type ImageCreateInfo struct {
+	Type      C.VkStructureType
+	Next      uintptr
+	Flags     C.VkImageCreateFlags
+	ImageType C.VkImageType
+	Format    C.VkFormat
+	Extent    struct {
+		Width  uint32
+		Height uint32
+		Depth  uint32
+	}
+	MipLevels             uint32
+	ArrayLayers           uint32
+	Samples               C.VkSampleCountFlagBits
+	Tiling                C.VkImageTiling
+	Usage                 C.VkImageUsageFlags
+	SharingMode           C.VkSharingMode
+	QueueFamilyIndexCount uint32
+	QueueFamilyIndices    *uint32
+	InitialLayout         C.VkImageLayout
+}
+
+func (d Device) GetSwapchainImages(swapchain Swapchain) {
+	var count uint32
+	result := C.vkGetSwapchainImagesKHR((C.VkDevice)(unsafe.Pointer(d)), (C.VkSwapchainKHR)(unsafe.Pointer(swapchain)), (*C.uint32_t)(unsafe.Pointer(&count)), nil)
+	if result != C.VK_SUCCESS {
+		panic("asdds")
+	}
+	images := make([]Image, count)
+	result = C.vkGetSwapchainImagesKHR((C.VkDevice)(unsafe.Pointer(d)), (C.VkSwapchainKHR)(unsafe.Pointer(swapchain)), (*C.uint32_t)(unsafe.Pointer(&count)), (*C.VkImage)(unsafe.Pointer(&images[0])))
+	if result != C.VK_SUCCESS {
+		panic("asd98")
+	}
+	for _, image := range images {
+		fmt.Printf("image: %#v\n", image)
+	}
+}
+
+func (d Device) CreateImage() (Image, error) {
+	var image Image
+	info := ImageCreateInfo{
+		//Type:      14,
+		//Next:      0,
+		//Flags:     C.VK_IMAGE_CREATE_,
+		//ImageType: nil,
+		//Format:    nil,
+		//Extent: struct {
+		//	Width  uint32
+		//	Height uint32
+		//	Depth  uint32
+		//}{},
+		//MipLevels:             0,
+		//ArrayLayers:           0,
+		//Samples:               nil,
+		//Tiling:                nil,
+		//Usage:                 nil,
+		//SharingMode:           nil,
+		//QueueFamilyIndexCount: 0,
+		//QueueFamilyIndices:    nil,
+		//InitialLayout:         nil,
+	}
+	result := C.vkCreateImage((C.VkDevice)(unsafe.Pointer(d)), (*C.VkImageCreateInfo)(unsafe.Pointer(&info)), nil, (*C.VkImage)(unsafe.Pointer(&image)))
+	if result != C.VK_SUCCESS {
+		return 0, fmt.Errorf("image error")
+	}
+	return image, nil
+}
+
+func (d Device) AcquireNextImage(swapchain Swapchain) (uint32, error) {
+	var image uint32
+	result := C.vkAcquireNextImageKHR((C.VkDevice)(unsafe.Pointer(d)), (C.VkSwapchainKHR)(unsafe.Pointer(swapchain)), C.uint64_t(^uint64(0)), (C.VkSemaphore)(unsafe.Pointer(nil)), (C.VkFence)(unsafe.Pointer(nil)), (*C.uint32_t)(unsafe.Pointer(&image)))
+	if result != C.VK_SUCCESS {
+		return 0, fmt.Errorf("image error")
+	}
+	return image, nil
 }

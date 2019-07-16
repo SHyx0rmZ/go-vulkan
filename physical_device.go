@@ -8,6 +8,13 @@ import (
 	"unsafe"
 )
 
+type QueueFamilyProperties struct {
+	QueueFlags                  C.VkQueueFlags
+	QueueCount                  uint32
+	TimestampValidBits          uint32
+	MinImageTransferGranularity C.VkExtent3D
+}
+
 func (d PhysicalDevice) CreateDevice(info DeviceCreateInfo) (Device, error) {
 	var device Device
 	_info := deviceCreateInfo{
@@ -37,8 +44,10 @@ func (d PhysicalDevice) CreateDevice(info DeviceCreateInfo) (Device, error) {
 				QueuePriorities:  uintptr(p) + o + sz,
 			}
 			o += sz
-			*(*float32)(unsafe.Pointer(uintptr(p) + o)) = 1.0
-			o += unsafe.Sizeof(float32(0))
+			for i := 0; i < int(info.QueueCount); i++ {
+				*(*float32)(unsafe.Pointer(uintptr(p) + o)) = 1.0
+				o += unsafe.Sizeof(float32(0))
+			}
 		}
 		_info.QueueCreateInfos = (*DeviceQueueCreateInfo)(p)
 		defer func() {
@@ -47,6 +56,16 @@ func (d PhysicalDevice) CreateDevice(info DeviceCreateInfo) (Device, error) {
 	}
 	defer fillNames(info.EnabledLayers, &_info.EnabledLayerCount, &_info.EnabledLayerNames).Free()
 	defer fillNames(info.EnabledExtensions, &_info.EnabledExtensionCount, &_info.EnabledExtensionNames).Free()
+
+	var count uint32
+	C.vkGetPhysicalDeviceQueueFamilyProperties((C.VkPhysicalDevice)(unsafe.Pointer(d)), (*C.uint32_t)(unsafe.Pointer(&count)), nil)
+	fmt.Println(count, "queue family properties")
+	queueFamilyProperties := make([]QueueFamilyProperties, count)
+	C.vkGetPhysicalDeviceQueueFamilyProperties((C.VkPhysicalDevice)(unsafe.Pointer(d)), (*C.uint32_t)(unsafe.Pointer(&count)), (*C.VkQueueFamilyProperties)(unsafe.Pointer(&queueFamilyProperties[0])))
+	for _, p := range queueFamilyProperties {
+		fmt.Println(p)
+	}
+
 	result := C.vkCreateDevice((C.VkPhysicalDevice)(unsafe.Pointer(d)), (*C.VkDeviceCreateInfo)(unsafe.Pointer(&_info)), nil, (*C.VkDevice)(unsafe.Pointer(&device)))
 	if result != C.VK_SUCCESS {
 		return 0, fmt.Errorf("device error")
