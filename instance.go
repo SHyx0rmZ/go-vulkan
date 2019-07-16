@@ -133,7 +133,7 @@ func (i Instance) CreateXlibSurface(info XlibSurfaceCreateInfo) (Surface, error)
 	defer C.free(unsafe.Pointer(str))
 	C._ptr_vkCreateXlibSurfaceKHR = C.vkGetInstanceProcAddr((C.VkInstance)(unsafe.Pointer(i)), str)
 	var surface Surface
-	result := C._vkCreateXlibSurfaceKHR((C.VkInstance)(unsafe.Pointer(i)), (*C.struct_VkXlibSurfaceCreateInfoKHR)(unsafe.Pointer(&info)), nil, (*C.VkSurfaceKHR)(unsafe.Pointer(&surface)))
+	result := C.vkCreateXlibSurfaceKHR((C.VkInstance)(unsafe.Pointer(i)), (*C.struct_VkXlibSurfaceCreateInfoKHR)(unsafe.Pointer(&info)), nil, (*C.VkSurfaceKHR)(unsafe.Pointer(&surface)))
 	if result != C.VK_SUCCESS {
 		return 0, fmt.Errorf("surface error")
 	}
@@ -208,7 +208,8 @@ func (d Device) CreateSwapchain(info SwapchainCreateInfo, surface Surface) (Swap
 		Clipped:               C.VK_TRUE,
 		OldSwapchain:          nil,
 	}
-	result := C._vkCreateSwapchainKHR((C.VkDevice)(unsafe.Pointer(d)), (*C.VkSwapchainCreateInfoKHR)(unsafe.Pointer(&info)), nil, (*C.VkSwapchainKHR)(unsafe.Pointer(&swapchain)))
+	fmt.Println("internal ", unsafe.Pointer(C.vkCreateSwapchainKHR))
+	result := C.vkCreateSwapchainKHR((C.VkDevice)(unsafe.Pointer(d)), (*C.VkSwapchainCreateInfoKHR)(unsafe.Pointer(&info)), nil, (*C.VkSwapchainKHR)(unsafe.Pointer(&swapchain)))
 	if result != C.VK_SUCCESS {
 		return 0, fmt.Errorf("swapchain error")
 	}
