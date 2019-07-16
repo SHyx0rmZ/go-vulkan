@@ -64,6 +64,34 @@ type ApplicationInfo struct {
 
 const ptrSize = 4 << (^uintptr(0) >> 63)
 
+type freeFunc func()
+
+func (f freeFunc) Free() {
+	if f == nil {
+		return
+	}
+	f()
+}
+
+func fillNames(slice []string, count *uint32, names **C.char) interface{ Free() } {
+	if len(slice) == 0 {
+		return freeFunc(nil)
+	}
+
+	p := C.malloc(C.size_t(len(slice)) * ptrSize)
+	for i, name := range slice {
+		*(**C.char)(unsafe.Pointer(uintptr(p) + uintptr(i*ptrSize))) = C.CString(name)
+	}
+	*count = uint32(len(slice))
+	*names = (*C.char)(p)
+	return freeFunc(func() {
+		for i := uint32(0); i < *count; i++ {
+			C.free(unsafe.Pointer(*(**C.char)(unsafe.Pointer(uintptr(p) + uintptr(i*ptrSize)))))
+		}
+		C.free(p)
+	})
+}
+
 func CreateInstance(info CreateInfo) (Instance, error) {
 	var instance Instance
 	_info := createInfo{
@@ -76,35 +104,8 @@ func CreateInstance(info CreateInfo) (Instance, error) {
 		EnabledExtensionCount: uint32(len(info.EnabledExtensions)),
 		EnabledExtensionNames: nil,
 	}
-	if _info.EnabledLayerCount > 0 {
-		p := C.malloc(C.size_t(len(info.EnabledLayers)) * ptrSize)
-		var o uintptr
-		for _, layer := range info.EnabledLayers {
-			*(**C.char)(unsafe.Pointer(uintptr(p) + o)) = C.CString(layer)
-			o += ptrSize
-		}
-		_info.EnabledLayerNames = (*C.char)(p)
-		defer func() {
-			for o := uintptr(0); o < uintptr(_info.EnabledLayerCount)*ptrSize; o += ptrSize {
-				C.free(unsafe.Pointer(*(**C.char)(unsafe.Pointer(uintptr(unsafe.Pointer(_info.EnabledLayerNames)) + o))))
-			}
-		}()
-	}
-	if _info.EnabledExtensionCount > 0 {
-		p := C.malloc(C.size_t(len(info.EnabledExtensions)) * ptrSize)
-		fmt.Println(p)
-		var o uintptr
-		for _, ext := range info.EnabledExtensions {
-			*(**C.char)(unsafe.Pointer(uintptr(p) + o)) = C.CString(ext)
-			o += ptrSize
-		}
-		_info.EnabledExtensionNames = (*C.char)(p)
-		defer func() {
-			for o := uintptr(0); o < uintptr(_info.EnabledExtensionCount)*ptrSize; o += ptrSize {
-				C.free(unsafe.Pointer(*(**C.char)(unsafe.Pointer(uintptr(unsafe.Pointer(_info.EnabledExtensionNames)) + o))))
-			}
-		}()
-	}
+	defer fillNames(info.EnabledLayers, &_info.EnabledLayerCount, &_info.EnabledLayerNames).Free()
+	defer fillNames(info.EnabledExtensions, &_info.EnabledExtensionCount, &_info.EnabledExtensionNames).Free()
 	result := C.vkCreateInstance((*C.struct_VkInstanceCreateInfo)(unsafe.Pointer(&_info)), nil, (*C.VkInstance)(unsafe.Pointer(&instance)))
 	if result != C.VK_SUCCESS {
 		return 0, fmt.Errorf("vulkan error")
@@ -323,21 +324,8 @@ func (d PhysicalDevice) CreateDevice(info DeviceCreateInfo) (Device, error) {
 			C.free(unsafe.Pointer(_info.QueueCreateInfos))
 		}()
 	}
-	if _info.EnabledExtensionCount > 0 {
-		p := C.malloc(C.size_t(len(info.EnabledExtensions) * ptrSize))
-		var o uintptr
-		for _, ext := range info.EnabledExtensions {
-			*(**C.char)(unsafe.Pointer(uintptr(p) + o)) = C.CString(ext)
-			o += ptrSize
-		}
-		_info.EnabledExtensionNames = (*C.char)(p)
-		defer func() {
-			for o := uintptr(0); o < uintptr(_info.EnabledExtensionCount)*ptrSize; o += ptrSize {
-				C.free(unsafe.Pointer(*(**C.char)(unsafe.Pointer(uintptr(p) + o))))
-			}
-			C.free(unsafe.Pointer(p))
-		}()
-	}
+	defer fillNames(info.EnabledLayers, &_info.EnabledLayerCount, &_info.EnabledLayerNames).Free()
+	defer fillNames(info.EnabledExtensions, &_info.EnabledExtensionCount, &_info.EnabledExtensionNames).Free()
 	result := C.vkCreateDevice((C.VkPhysicalDevice)(unsafe.Pointer(d)), (*C.VkDeviceCreateInfo)(unsafe.Pointer(&_info)), nil, (*C.VkDevice)(unsafe.Pointer(&device)))
 	if result != C.VK_SUCCESS {
 		return 0, fmt.Errorf("device error")
