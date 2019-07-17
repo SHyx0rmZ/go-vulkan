@@ -41,7 +41,7 @@ func (d Device) CreateSwapchain(info SwapchainCreateInfo, surface Surface) (Swap
 			Height: 800,
 		},
 		ImageArrayLayers:      1,
-		ImageUsage:            C.VK_IMAGE_USAGE_TRANSFER_SRC_BIT | C.VK_IMAGE_USAGE_TRANSFER_DST_BIT,
+		ImageUsage:            C.VK_IMAGE_USAGE_TRANSFER_SRC_BIT | C.VK_IMAGE_USAGE_TRANSFER_DST_BIT | C.VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
 		ImageSharingMode:      C.VK_SHARING_MODE_EXCLUSIVE,
 		QueueFamilyIndexCount: 0,
 		QueueFamilyIndices:    nil,
@@ -98,7 +98,7 @@ type ImageCreateInfo struct {
 	InitialLayout         C.VkImageLayout
 }
 
-func (d Device) GetSwapchainImages(swapchain Swapchain) {
+func (d Device) GetSwapchainImages(swapchain Swapchain) ([]Image, error) {
 	var count uint32
 	result := C.vkGetSwapchainImagesKHR((C.VkDevice)(unsafe.Pointer(d)), (C.VkSwapchainKHR)(unsafe.Pointer(swapchain)), (*C.uint32_t)(unsafe.Pointer(&count)), nil)
 	if result != C.VK_SUCCESS {
@@ -112,6 +112,7 @@ func (d Device) GetSwapchainImages(swapchain Swapchain) {
 	for _, image := range images {
 		fmt.Printf("image: %#v\n", image)
 	}
+	return images, nil
 }
 
 func (d Device) CreateImage() (Image, error) {
