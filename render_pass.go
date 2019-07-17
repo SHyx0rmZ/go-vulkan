@@ -20,6 +20,18 @@ type FramebufferCreateInfo struct {
 	Layers      uint32
 }
 
+type framebufferCreateInfo struct {
+	Type            StructureType
+	Next            uintptr
+	Flags           FramebufferCreateFlags
+	RenderPass      RenderPass
+	AttachmentCount uint32
+	Attachments     *ImageView
+	Width           uint32
+	Height          uint32
+	Layers          uint32
+}
+
 type Rect2D struct {
 	Offset Offset2D
 	Extent Extent2D
@@ -184,9 +196,27 @@ func DestroyRenderPass(device Device, renderPass RenderPass, allocator *Allocati
 
 func CreateFramebuffer(device Device, createInfo FramebufferCreateInfo, allocator *AllocationCallbacks) (Framebuffer, error) {
 	var framebuffer Framebuffer
+	_createInfo := framebufferCreateInfo{
+		Type:            createInfo.Type,
+		Next:            createInfo.Next,
+		Flags:           createInfo.Flags,
+		RenderPass:      createInfo.RenderPass,
+		AttachmentCount: uint32(len(createInfo.Attachments)),
+		Width:           createInfo.Width,
+		Height:          createInfo.Height,
+		Layers:          createInfo.Layers,
+	}
+	if _createInfo.AttachmentCount > 0 {
+		p := C.malloc(C.size_t(uintptr(_createInfo.AttachmentCount) * unsafe.Sizeof(ImageView(0))))
+		defer C.free(p)
+		for i, attachment := range createInfo.Attachments {
+			*(*ImageView)(unsafe.Pointer(uintptr(p) + uintptr(i)*unsafe.Sizeof(ImageView(0)))) = attachment
+		}
+		_createInfo.Attachments = (*ImageView)(p)
+	}
 	result := Result(C.vkCreateFramebuffer(
 		(C.VkDevice)(unsafe.Pointer(device)),
-		(*C.VkFramebufferCreateInfo)(unsafe.Pointer(&createInfo)),
+		(*C.VkFramebufferCreateInfo)(unsafe.Pointer(&_createInfo)),
 		(*C.VkAllocationCallbacks)(unsafe.Pointer(allocator)),
 		(*C.VkFramebuffer)(unsafe.Pointer(&framebuffer)),
 	))

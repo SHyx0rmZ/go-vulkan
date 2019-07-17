@@ -11,9 +11,52 @@ type PipelineCache uintptr
 
 type Pipeline uintptr
 
+type PipelineCreateFlags uint32
+
 type ComputePipelineCreateInfo struct{}
 
-type GraphicsPipelineCreateInfo struct{}
+type GraphicsPipelineCreateInfo struct {
+	Type               StructureType
+	Next               uintptr
+	Flags              PipelineCreateFlags
+	Stages             []PipelineShaderStageCreateInfo
+	VertexInputState   *PipelineVertexInputStateCreateInfo
+	InputAssemblyState *PipelineInputAssemblyStateCreateInfo
+	TessellationState  *PipelineTessellationStateCreateInfo
+	ViewportState      *PipelineViewportStateCreateInfo
+	RasterizationState *PipelineRasterizationStateCreateInfo
+	MultisampleState   *PipelineMultisampleStateCreateInfo
+	DepthStencilState  *PipelineDepthStencilStateCreateInfo
+	ColorBlendState    *PipelineColorBlendStateCreateInfo
+	DynamicState       *PipelineDynamicStateCreateInfo
+	Layout             *PipelineLayout
+	RenderPass         RenderPass
+	Subpass            uint32
+	BasePipelineHandle Pipeline
+	BasePipelineIndex  int32
+}
+
+type graphicsPipelineCreateInfo struct {
+	Type               StructureType
+	Next               uintptr
+	Flags              PipelineCreateFlags
+	StageCount         uint32
+	Stages             *PipelineShaderStageCreateInfo
+	VertexInputState   *PipelineVertexInputStateCreateInfo
+	InputAssemblyState *PipelineInputAssemblyStateCreateInfo
+	TessellationState  *PipelineTessellationStateCreateInfo
+	ViewportState      *PipelineViewportStateCreateInfo
+	RasterizationState *PipelineRasterizationStateCreateInfo
+	MultisampleState   *PipelineMultisampleStateCreateInfo
+	DepthStencilState  *PipelineDepthStencilStateCreateInfo
+	ColorBlendState    *PipelineColorBlendStateCreateInfo
+	DynamicState       *PipelineDynamicStateCreateInfo
+	Layout             *PipelineLayout
+	RenderPass         RenderPass
+	Subpass            uint32
+	BasePipelineHandle Pipeline
+	BasePipelineIndex  int32
+}
 
 type PipelineCacheCreateInfo struct{}
 
