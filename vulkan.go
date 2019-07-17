@@ -83,10 +83,66 @@ func (r Result) Error() string {
 	}
 }
 
+type StructureType uint32
+
+// cat s.txt | head -n 49 | sed 's/[A-Z]/\L&/g;s/_\([a-z]\)/\U\1/g;s/^\s\+vk//;s/\s=\s[0-9]\+,$//'
+
+const (
+	StructureTypeApplicationInfo StructureType = iota
+	StructureTypeInstanceCreateInfo
+	StructureTypeDeviceQueueCreateInfo
+	StructureTypeDeviceCreateInfo
+	StructureTypeSubmitInfo
+	StructureTypeMemoryAllocateInfo
+	StructureTypeMappedMemoryRange
+	StructureTypeBindSparseInfo
+	StructureTypeFenceCreateInfo
+	StructureTypeSemaphoreCreateInfo
+	StructureTypeEventCreateInfo
+	StructureTypeQueryPoolCreateInfo
+	StructureTypeBufferCreateInfo
+	StructureTypeBufferViewCreateInfo
+	StructureTypeImageCreateInfo
+	StructureTypeImageViewCreateInfo
+	StructureTypeShaderModuleCreateInfo
+	StructureTypePipelineCacheCreateInfo
+	StructureTypePipelineShaderStageCreateInfo
+	StructureTypePipelineVertexInputStateCreateInfo
+	StructureTypePipelineInputAssemblyStateCreateInfo
+	StructureTypePipelineTessellationStateCreateInfo
+	StructureTypePipelineViewportStateCreateInfo
+	StructureTypePipelineRasterizationStateCreateInfo
+	StructureTypePipelineMultisampleStateCreateInfo
+	StructureTypePipelineDepthStencilStateCreateInfo
+	StructureTypePipelineColorBlendStateCreateInfo
+	StructureTypePipelineDynamicStateCreateInfo
+	StructureTypeGraphicsPipelineCreateInfo
+	StructureTypeComputePipelineCreateInfo
+	StructureTypePipelineLayoutCreateInfo
+	StructureTypeSamplerCreateInfo
+	StructureTypeDescriptorSetLayoutCreateInfo
+	StructureTypeDescriptorPoolCreateInfo
+	StructureTypeDescriptorSetAllocateInfo
+	StructureTypeWriteDescriptorSet
+	StructureTypeCopyDescriptorSet
+	StructureTypeFramebufferCreateInfo
+	StructureTypeRenderPassCreateInfo
+	StructureTypeCommandPoolCreateInfo
+	StructureTypeCommandBufferAllocateInfo
+	StructureTypeCommandBufferInheritanceInfo
+	StructureTypeCommandBufferBeginInfo
+	StructureTypeRenderPassBeginInfo
+	StructureTypeBufferMemoryBarrier
+	StructureTypeImageMemoryBarrier
+	StructureTypeMemoryBarrier
+	StructureTypeLoaderInstanceCreateInfo
+	StructureTypeLoaderDeviceCreateInfo
+)
+
 type AllocationCallbacks C.VkAllocationCallbacks
 
 type ImageViewCreateInfo struct {
-	Type             C.VkStructureType
+	Type             StructureType
 	Next             uintptr
 	Flags            C.VkImageViewCreateFlags
 	Image            Image

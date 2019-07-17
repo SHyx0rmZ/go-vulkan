@@ -63,7 +63,7 @@ func (d PhysicalDevice) CreateDevice(info DeviceCreateInfo) (Device, error) {
 	queueFamilyProperties := make([]QueueFamilyProperties, count)
 	C.vkGetPhysicalDeviceQueueFamilyProperties((C.VkPhysicalDevice)(unsafe.Pointer(d)), (*C.uint32_t)(unsafe.Pointer(&count)), (*C.VkQueueFamilyProperties)(unsafe.Pointer(&queueFamilyProperties[0])))
 	for _, p := range queueFamilyProperties {
-		fmt.Println(p)
+		fmt.Printf("queue family properties: %+v\n", p)
 	}
 
 	result := C.vkCreateDevice((C.VkPhysicalDevice)(unsafe.Pointer(d)), (*C.VkDeviceCreateInfo)(unsafe.Pointer(&_info)), nil, (*C.VkDevice)(unsafe.Pointer(&device)))

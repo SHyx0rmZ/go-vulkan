@@ -215,7 +215,7 @@ type PresentInfo struct {
 }
 
 type DeviceCreateInfo struct {
-	Type              C.VkStructureType
+	Type              StructureType
 	Next              *DeviceCreateInfo
 	Flags             C.VkDeviceCreateFlags
 	QueueCreateInfos  []DeviceQueueCreateInfo
@@ -225,7 +225,7 @@ type DeviceCreateInfo struct {
 }
 
 type deviceCreateInfo struct {
-	Type                  C.VkStructureType
+	Type                  StructureType
 	Next                  uintptr
 	Flags                 C.VkDeviceCreateFlags
 	QueueCreateInfoCount  uint32
@@ -238,7 +238,7 @@ type deviceCreateInfo struct {
 }
 
 type DeviceQueueCreateInfo struct {
-	Type             C.VkStructureType
+	Type             StructureType
 	Next             uintptr
 	Flags            C.VkDeviceQueueCreateFlags
 	QueueFamilyIndex uint32
