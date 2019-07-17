@@ -8,7 +8,80 @@ import (
 	"unsafe"
 )
 
-type Result C.VkResult
+type Result int32
+
+const (
+	Success Result = iota
+	NotReady
+	Timeout
+	EventSet
+	EventReset
+	Incomplete
+)
+
+const (
+	ErrorOutOfHostMemory Result = -iota - 1
+	ErrorOutOfDeviceMemory
+	ErrorInitializationFailed
+	ErrorDeviceLost
+	ErrorMemoryMapFailed
+	ErrorLayerNotPresent
+	ErrorExtensionNotPresent
+	ErrorFeatureNotPresent
+	ErrorIncompatibleDriver
+	ErrorTooManyObjects
+	ErrorFormatNotSupported
+	ErrorFragmentedPool
+	ErrorOutOfPoolMemory
+	ErrorInvalidExternalHandle
+)
+
+func (r Result) Error() string {
+	switch r {
+	case Success:
+		return "success"
+	case NotReady:
+		return "not ready"
+	case Timeout:
+		return "timeout"
+	case EventSet:
+		return "event set"
+	case EventReset:
+		return "event reset"
+	case Incomplete:
+		return "incomplete"
+	case ErrorOutOfHostMemory:
+		return "out of host memory"
+	case ErrorOutOfDeviceMemory:
+		return "out of device memory"
+	case ErrorInitializationFailed:
+		return "initialization failed"
+	case ErrorDeviceLost:
+		return "device lost"
+	case ErrorMemoryMapFailed:
+		return "memory map failed"
+	case ErrorLayerNotPresent:
+		return "layer not present"
+	case ErrorExtensionNotPresent:
+		return "extension not present"
+	case ErrorFeatureNotPresent:
+		return "feature not present"
+	case ErrorIncompatibleDriver:
+		return "incompatible driver"
+	case ErrorTooManyObjects:
+		return "too many objects"
+	case ErrorFormatNotSupported:
+		return "format not supported"
+	case ErrorFragmentedPool:
+		return "fragmented pool"
+	//case ErrorOutOfPoolMemory:
+	//	return "out of pool memory"
+	//case ErrorInvalidExternalHandle:
+	//	return "invalid external handle"
+	default:
+		panic(fmt.Sprintf("unknown result: %#v", r))
+	}
+}
 
 type AllocationCallbacks C.VkAllocationCallbacks
 
