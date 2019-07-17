@@ -7,8 +7,6 @@ import (
 	"unsafe"
 )
 
-type CommandBuffer uintptr
-
 type PipelineCache uintptr
 
 type Pipeline uintptr
