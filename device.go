@@ -154,17 +154,9 @@ func (d Device) AcquireNextImage(swapchain Swapchain, semaphore Semaphore) (uint
 	return image, nil
 }
 
-type Semaphore uintptr
-
-type SemaphoreCreateInfo struct {
-	Type  C.VkStructureType
-	Next  uintptr
-	Flags C.VkSemaphoreCreateFlags
-}
-
 func (d Device) CreateSemaphore() (Semaphore, error) {
 	info := SemaphoreCreateInfo{
-		Type: 9,
+		Type: StructureTypeSemaphoreCreateInfo,
 	}
 	var semaphore Semaphore
 	result := C.vkCreateSemaphore((C.VkDevice)(unsafe.Pointer(d)), (*C.VkSemaphoreCreateInfo)(unsafe.Pointer(&info)), nil, (*C.VkSemaphore)(unsafe.Pointer(&semaphore)))
