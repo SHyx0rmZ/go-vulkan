@@ -4,9 +4,12 @@ package vulkan
 // #include <stdlib.h>
 import "C"
 import (
+	"errors"
 	"fmt"
 	"unsafe"
 )
+
+var _not_implemented = errors.New("not implemented")
 
 type Result int32
 

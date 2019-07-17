@@ -167,7 +167,7 @@ func GetEventStatus(device Device, event Event) error {
 }
 
 func SetEvent(device Device, event Event) error {
-	result := Result(C.vkSetEventStatus(
+	result := Result(C.vkSetEvent(
 		(C.VkDevice)(unsafe.Pointer(device)),
 		(C.VkEvent)(unsafe.Pointer(event)),
 	))
@@ -178,7 +178,7 @@ func SetEvent(device Device, event Event) error {
 }
 
 func ResetEvent(device Device, event Event) error {
-	result := Result(C.vkResetEventStatus(
+	result := Result(C.vkResetEvent(
 		(C.VkDevice)(unsafe.Pointer(device)),
 		(C.VkEvent)(unsafe.Pointer(event)),
 	))
@@ -188,28 +188,20 @@ func ResetEvent(device Device, event Event) error {
 	return nil
 }
 
-func CmdSetEvent(commandBuffer CommandBuffer, event Event, stageMask PipelineStageFlags) error {
-	result := Result(C.vkCmdSetEvent(
+func CmdSetEvent(commandBuffer CommandBuffer, event Event, stageMask PipelineStageFlags) {
+	C.vkCmdSetEvent(
 		(C.VkCommandBuffer)(unsafe.Pointer(commandBuffer)),
 		(C.VkEvent)(unsafe.Pointer(event)),
 		(C.VkPipelineStageFlags)(stageMask),
-	))
-	if result != Success {
-		return result
-	}
-	return nil
+	)
 }
 
-func CmdResetEvent(commandBuffer CommandBuffer, event Event, stageMask PipelineStageFlags) error {
-	result := Result(C.vkCmdResetEvent(
+func CmdResetEvent(commandBuffer CommandBuffer, event Event, stageMask PipelineStageFlags) {
+	C.vkCmdResetEvent(
 		(C.VkCommandBuffer)(unsafe.Pointer(commandBuffer)),
 		(C.VkEvent)(unsafe.Pointer(event)),
 		(C.VkPipelineStageFlags)(stageMask),
-	))
-	if result != Success {
-		return result
-	}
-	return nil
+	)
 }
 
 func CmdWaitEvents(commandBuffer CommandBuffer, events []Event, srcStageMask, dstStageMask PipelineStageFlags, memoryBarriers []MemoryBarrier, bufferMemoryBarriers []BufferMemoryBarrier, imageMemoryBarriers []ImageMemoryBarrier) {
@@ -254,7 +246,7 @@ func QueueWaitIdle(queue Queue) error {
 }
 
 func DeviceWaitIdle(device Device) error {
-	result := Result(C.vkQueueWaitIdle(
+	result := Result(C.vkDeviceWaitIdle(
 		(C.VkDevice)(unsafe.Pointer(device)),
 	))
 	if result != Success {

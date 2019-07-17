@@ -25,14 +25,14 @@ type CommandPoolResetFlags uint32
 type CommandBufferResetFlags uint32
 
 func CreateCommandPool(device Device, createInfo CommandPoolCreateInfo, allocator *AllocationCallbacks) (CommandPool, error) {
-	return 0, nil
+	return 0, _not_implemented
 }
 
 func TrimCommandPool(device Device, commandPool CommandPool, flags CommandPoolTrimFlags) {
 }
 
 func ResetCommandPool(device Device, commandPool CommandPool, flags CommandPoolResetFlags) error {
-	return nil
+	return _not_implemented
 }
 
 func DestroyCommandPool(device Device, commandPool CommandPool, allocator *AllocationCallbacks) {
@@ -40,11 +40,11 @@ func DestroyCommandPool(device Device, commandPool CommandPool, allocator *Alloc
 }
 
 func AllocateCommandBuffers(device Device, allocateInfo CommandBufferAllocateInfo) ([]CommandBuffer, error) {
-	return nil, nil
+	return nil, _not_implemented
 }
 
 func ResetCommandBuffer(commandBuffer CommandBuffer, flags CommandBufferResetFlags) error {
-	return nil
+	return _not_implemented
 }
 
 func FreeCommandBuffers(device Device, commandPool CommandPool, commandBuffers []CommandBuffer) {
@@ -52,15 +52,15 @@ func FreeCommandBuffers(device Device, commandPool CommandPool, commandBuffers [
 }
 
 func BeginCommandBuffer(commandBuffer CommandBuffer, beginInfo CommandBufferBeginInfo) error {
-	return nil
+	return _not_implemented
 }
 
 func EndCommandBuffer(commandBuffer CommandBuffer) error {
-	return nil
+	return _not_implemented
 }
 
 func QueueSubmit(queue Queue, submits []SubmitInfo, fence Fence) error {
-	return nil
+	return _not_implemented
 }
 
 func CmdExecuteCommands(commandBuffer CommandBuffer, commandBuffers []CommandBuffer) {
