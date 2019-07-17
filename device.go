@@ -31,7 +31,7 @@ func (d Device) CreateSwapchain(info SwapchainCreateInfo, surface Surface) (Swap
 		Type:            1000001000,
 		Surface:         (C.VkSurfaceKHR)(unsafe.Pointer(surface)),
 		MinImageCount:   2,
-		Format:          27,
+		Format:          44,
 		ImageColorSpace: 0,
 		ImageExtent: struct {
 			Width  uint32
@@ -45,9 +45,8 @@ func (d Device) CreateSwapchain(info SwapchainCreateInfo, surface Surface) (Swap
 		ImageSharingMode:      C.VK_SHARING_MODE_EXCLUSIVE,
 		QueueFamilyIndexCount: 0,
 		QueueFamilyIndices:    nil,
-		PreTransform:          0x100,
+		PreTransform:          1,
 		CompositeAlpha:        1,
-		PresentMode:           C.VK_PRESENT_MODE_IMMEDIATE_KHR,
 		Clipped:               C.VK_TRUE,
 		OldSwapchain:          nil,
 	}
@@ -145,11 +144,35 @@ func (d Device) CreateImage() (Image, error) {
 	return image, nil
 }
 
-func (d Device) AcquireNextImage(swapchain Swapchain) (uint32, error) {
+func (d Device) AcquireNextImage(swapchain Swapchain, semaphore Semaphore) (uint32, error) {
 	var image uint32
-	result := C.vkAcquireNextImageKHR((C.VkDevice)(unsafe.Pointer(d)), (C.VkSwapchainKHR)(unsafe.Pointer(swapchain)), C.uint64_t(^uint64(0)), (C.VkSemaphore)(unsafe.Pointer(nil)), (C.VkFence)(unsafe.Pointer(nil)), (*C.uint32_t)(unsafe.Pointer(&image)))
+	result := C.vkAcquireNextImageKHR((C.VkDevice)(unsafe.Pointer(d)), (C.VkSwapchainKHR)(unsafe.Pointer(swapchain)), C.uint64_t(^uint64(0)), (C.VkSemaphore)(unsafe.Pointer(semaphore)), (C.VkFence)(unsafe.Pointer(nil)), (*C.uint32_t)(unsafe.Pointer(&image)))
 	if result != C.VK_SUCCESS {
 		return 0, fmt.Errorf("image error")
 	}
 	return image, nil
+}
+
+type Semaphore uintptr
+
+type SemaphoreCreateInfo struct {
+	Type  C.VkStructureType
+	Next  uintptr
+	Flags C.VkSemaphoreCreateFlags
+}
+
+func (d Device) CreateSemaphore() (Semaphore, error) {
+	info := SemaphoreCreateInfo{
+		Type: 9,
+	}
+	var semaphore Semaphore
+	result := C.vkCreateSemaphore((C.VkDevice)(unsafe.Pointer(d)), (*C.VkSemaphoreCreateInfo)(unsafe.Pointer(&info)), nil, (*C.VkSemaphore)(unsafe.Pointer(&semaphore)))
+	if result != C.VK_SUCCESS {
+		return 0, fmt.Errorf("semaphore error")
+	}
+	return semaphore, nil
+}
+
+func (d Device) DestroySemaphore(semaphore Semaphore) {
+	C.vkDestroySemaphore((C.VkDevice)(unsafe.Pointer(d)), (C.VkSemaphore)(unsafe.Pointer(semaphore)), nil)
 }

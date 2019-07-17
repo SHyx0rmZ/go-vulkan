@@ -196,7 +196,7 @@ type SwapchainCreateInfo struct {
 	QueueFamilyIndices    *uint32
 	PreTransform          C.VkSurfaceTransformFlagBitsKHR
 	CompositeAlpha        C.VkCompositeAlphaFlagBitsKHR
-	PresentMode           C.VkPresentModeKHR
+	PresentMode           PresentMode
 	Clipped               C.VkBool32
 	OldSwapchain          C.VkSwapchainKHR
 }
