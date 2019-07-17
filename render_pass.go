@@ -4,17 +4,76 @@ package vulkan
 // #include <stdlib.h>
 import "C"
 import (
-	"fmt"
 	"unsafe"
 )
 
-type FramebufferCreateInfo struct{}
+type FramebufferCreateFlags uint32
+
+type FramebufferCreateInfo struct {
+	Type        StructureType
+	Next        uintptr
+	Flags       FramebufferCreateFlags
+	RenderPass  RenderPass
+	Attachments []ImageView
+	Width       uint32
+	Height      uint32
+	Layers      uint32
+}
+
+type Rect2D struct {
+	Offset Offset2D
+	Extent Extent2D
+}
+
+type Offset2D struct {
+	X int32
+	Y int32
+}
+
+type Extent2D struct {
+	Width  uint32
+	Height uint32
+}
+
+type ClearValue struct {
+	Color        ClearColorValue
+	DepthStencil ClearDepthStencilValue
+}
+
+type ClearColorValue interface {
+	clearColorValue()
+}
+
+type ClearColorValueFloat [4]float32
+type ClearColorValueInt [4]int32
+type ClearColorValueUint [4]uint32
+
+func (ClearColorValueFloat) clearColorValue() {}
+func (ClearColorValueInt) clearColorValue()   {}
+func (ClearColorValueUint) clearColorValue()  {}
+
+type ClearDepthStencilValue struct {
+	Depth   float32
+	Stencil uint32
+}
 
 type Framebuffer uintptr
 
-type RenderPassBeginInfo struct{}
+type RenderPassBeginInfo struct {
+	Type        StructureType
+	Next        uintptr
+	RenderPass  RenderPass
+	Framebuffer Framebuffer
+	RenderArea  Rect2D
+	ClearValues []ClearValue
+}
 
-type SubpassContents struct{}
+type SubpassContents uint32
+
+const (
+	SubpassContentsInline SubpassContents = iota
+	SubpassContentsSecondaryCommandBuffers
+)
 
 func CreateRenderPass(device Device, createInfo RenderPassCreateInfo, allocator *AllocationCallbacks) (RenderPass, error) {
 	var renderPass RenderPass
@@ -103,14 +162,14 @@ func CreateRenderPass(device Device, createInfo RenderPassCreateInfo, allocator 
 		}
 		_createInfo.Dependencies = (*SubpassDependency)(p)
 	}
-	result := C.vkCreateRenderPass(
+	result := Result(C.vkCreateRenderPass(
 		(C.VkDevice)(unsafe.Pointer(device)),
 		(*C.VkRenderPassCreateInfo)(unsafe.Pointer(&_createInfo)),
 		(*C.VkAllocationCallbacks)(unsafe.Pointer(allocator)),
 		(*C.VkRenderPass)(unsafe.Pointer(&renderPass)),
-	)
-	if result != C.VK_SUCCESS {
-		return 0, fmt.Errorf("CreateRenderPass")
+	))
+	if result != Success {
+		return 0, result
 	}
 	return renderPass, nil
 }
@@ -124,25 +183,54 @@ func DestroyRenderPass(device Device, renderPass RenderPass, allocator *Allocati
 }
 
 func CreateFramebuffer(device Device, createInfo FramebufferCreateInfo, allocator *AllocationCallbacks) (Framebuffer, error) {
-	return 0, nil
+	var framebuffer Framebuffer
+	result := Result(C.vkCreateFramebuffer(
+		(C.VkDevice)(unsafe.Pointer(device)),
+		(*C.VkFramebufferCreateInfo)(unsafe.Pointer(&createInfo)),
+		(*C.VkAllocationCallbacks)(unsafe.Pointer(allocator)),
+		(*C.VkFramebuffer)(unsafe.Pointer(&framebuffer)),
+	))
+	if result != Success {
+		return 0, result
+	}
+	return framebuffer, nil
 }
 
 func DestroyFramebuffer(device Device, framebuffer Framebuffer, allocator *AllocationCallbacks) {
-
+	C.vkDestroyFramebuffer(
+		(C.VkDevice)(unsafe.Pointer(device)),
+		(C.VkFramebuffer)(unsafe.Pointer(framebuffer)),
+		(*C.VkAllocationCallbacks)(unsafe.Pointer(allocator)),
+	)
 }
 
 func CmdBeginRenderPass(commandBuffer CommandBuffer, renderPassBegin RenderPassBeginInfo, contents SubpassContents) {
-
+	C.vkCmdBeginRenderPass(
+		(C.VkCommandBuffer)(unsafe.Pointer(commandBuffer)),
+		(*C.VkRenderPassBeginInfo)(unsafe.Pointer(&renderPassBegin)),
+		(C.VkSubpassContents)(contents),
+	)
 }
 
-func GetRenderAreaGranularity(device Device, renderPass RenderPass, granularity Extent2D) {
-
+func GetRenderAreaGranularity(device Device, renderPass RenderPass) Extent2D {
+	var granularity Extent2D
+	C.vkGetRenderAreaGranularity(
+		(C.VkDevice)(unsafe.Pointer(device)),
+		(C.VkRenderPass)(unsafe.Pointer(renderPass)),
+		(*C.VkExtent2D)(unsafe.Pointer(&granularity)),
+	)
+	return granularity
 }
 
 func CmdNextSubpass(commandBuffer CommandBuffer, contents SubpassContents) {
-
+	C.vkCmdNextSubpass(
+		(C.VkCommandBuffer)(unsafe.Pointer(commandBuffer)),
+		(C.VkSubpassContents)(contents),
+	)
 }
 
 func CmdEndRenderPass(commandBuffer CommandBuffer) {
-
+	C.vkCmdEndRenderPass(
+		(C.VkCommandBuffer)(unsafe.Pointer(commandBuffer)),
+	)
 }

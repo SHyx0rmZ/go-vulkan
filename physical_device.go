@@ -129,11 +129,6 @@ func (d PhysicalDevice) GetSurfacePresentModes(surface Surface) ([]PresentMode, 
 	return modes, nil
 }
 
-type Extent2D struct {
-	Width  uint32
-	Height uint32
-}
-
 type SurfaceCapabilities struct {
 	MinImageCount           uint32
 	MaxImageCOunt           uint32
