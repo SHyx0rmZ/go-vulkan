@@ -12,9 +12,71 @@ type PipelineCache uintptr
 type Pipeline uintptr
 
 type PipelineCreateFlags uint32
+type PipelineShaderStageCreateFlags uint32
+
+type ShaderStageFlagBits uint32
+
+const (
+	ShaderStageVertexBit ShaderStageFlagBits = 1 << iota
+	ShaderStageTessellationControlBit
+	ShaderStageTessellationEvaluationBit
+	ShaderStageGeometryBit
+	ShaderStageFragmentBit
+	ShaderStageComputeBit
+	ShaderStageAllGraphics = ShaderStageComputeBit - 1
+	ShaderStageAll         = ^ShaderStageFlagBits(0x80000000)
+)
 
 type ComputePipelineCreateInfo struct{}
 
+type PipelineShaderStageCreateInfo struct {
+	Type               StructureType
+	Next               uintptr
+	Flags              PipelineShaderStageCreateFlags
+	Stage              ShaderStageFlagBits
+	Module             ShaderModule
+	Name               string
+	SpecializationInfo SpecializationInfo
+}
+
+type pipelineShaderStageCreateInfo struct {
+	Type               StructureType
+	Next               uintptr
+	Flags              PipelineShaderStageCreateFlags
+	Stage              ShaderStageFlagBits
+	Module             ShaderModule
+	Name               *C.char
+	SpecializationInfo *specializationInfo
+}
+
+type SpecializationInfo struct {
+	MapEntries []SpecializationMapEntry
+	Data       []byte
+}
+
+type specializationInfo struct {
+	MapEntryCount uint32
+	MapEntries    *SpecializationMapEntry
+	DataSize      C.size_t
+	Data          *byte
+}
+
+type SpecializationMapEntry struct {
+	ConstantID uint32
+	Offset     uint32
+	Size       int
+}
+
+type PipelineVertexInputStateCreateInfo struct{}
+type PipelineInputAssemblyStateCreateInfo struct{}
+type PipelineTessellationStateCreateInfo struct{}
+type PipelineViewportStateCreateInfo struct{}
+type PipelineRasterizationStateCreateInfo struct{}
+type PipelineMultisampleStateCreateInfo struct{}
+type PipelineDepthStencilStateCreateInfo struct{}
+type PipelineColorBlendStateCreateInfo struct{}
+type PipelineDynamicStateCreateInfo struct{}
+type PipelineLayout struct{}
 type GraphicsPipelineCreateInfo struct {
 	Type               StructureType
 	Next               uintptr
