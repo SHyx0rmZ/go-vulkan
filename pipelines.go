@@ -15,6 +15,7 @@ type PipelineCreateFlags uint32
 type PipelineShaderStageCreateFlags uint32
 
 type ShaderStageFlagBits uint32
+type ShaderStageFlags ShaderStageFlagBits
 
 const (
 	ShaderStageVertexBit ShaderStageFlagBits = 1 << iota
@@ -37,6 +38,24 @@ type PipelineShaderStageCreateInfo struct {
 	Module             ShaderModule
 	Name               string
 	SpecializationInfo SpecializationInfo
+}
+
+func (info *PipelineShaderStageCreateInfo) C(_info *pipelineShaderStageCreateInfo) freeFunc {
+	*_info = pipelineShaderStageCreateInfo{
+		Type:   info.Type,
+		Next:   info.Next,
+		Flags:  info.Flags,
+		Stage:  info.Stage,
+		Module: info.Module,
+		Name:   C.CString(info.Name),
+	}
+	//info.SpecializationInfo
+	if len(info.SpecializationInfo.Data) > 0 || len(info.SpecializationInfo.MapEntries) > 0 {
+		panic("ikohasdoa ")
+	}
+	return freeFunc(func() {
+		C.free(unsafe.Pointer(_info.Name))
+	})
 }
 
 type pipelineShaderStageCreateInfo struct {
@@ -67,16 +86,104 @@ type SpecializationMapEntry struct {
 	Size       int
 }
 
+type PipelineRasterizationStateCreateFlagBits uint32
+type PipelineRasterizationStateCreateFlags PipelineRasterizationStateCreateFlagBits
+
+type PolygonMode uint32
+
+const (
+	PolygonModeFill PolygonMode = iota
+	PolygonModeLine
+	PolygonModePoint
+)
+
+type CullModeFlagBits uint32
+type CullModeFlags CullModeFlagBits
+
+const (
+	CullModeNoneBit         CullModeFlagBits = 0
+	CullModeFrontBit        CullModeFlagBits = 1
+	CullModeBackBit         CullModeFlagBits = 2
+	CullModeFrontAndBackBit                  = CullModeFrontBit | CullModeBackBit
+)
+
+type FrontFace uint32
+
+const (
+	FrontFaceCounterClockwise FrontFace = iota
+	FrontFaceClockwise
+)
+
 type PipelineVertexInputStateCreateInfo struct{}
 type PipelineInputAssemblyStateCreateInfo struct{}
 type PipelineTessellationStateCreateInfo struct{}
 type PipelineViewportStateCreateInfo struct{}
-type PipelineRasterizationStateCreateInfo struct{}
+type PipelineRasterizationStateCreateInfo struct {
+	Type                    StructureType
+	Next                    uintptr
+	Flags                   PipelineRasterizationStateCreateFlags
+	DepthClampEnable        bool
+	RasterizerDiscardEnable bool
+	PolygonMode             PolygonMode
+	CullMode                CullModeFlags
+	FrontFace               FrontFace
+	DepthBiasEnable         bool
+	DepthBiasConstantFactor float32
+	DepthBiasClamp          float32
+	DepthBiasSlopeFactor    float32
+	LineWidth               float32
+}
+
+func (info *PipelineRasterizationStateCreateInfo) C(_info *pipelineRasterizationStateCreateInfo) {
+	if info == nil {
+		return
+	}
+	*_info = pipelineRasterizationStateCreateInfo{
+		Type:                    info.Type,
+		Next:                    info.Next,
+		Flags:                   info.Flags,
+		DepthClampEnable:        C.VK_FALSE,
+		RasterizerDiscardEnable: C.VK_FALSE,
+		PolygonMode:             info.PolygonMode,
+		CullMode:                info.CullMode,
+		FrontFace:               info.FrontFace,
+		DepthBiasEnable:         C.VK_FALSE,
+		DepthBiasConstantFactor: info.DepthBiasConstantFactor,
+		DepthBiasClamp:          info.DepthBiasClamp,
+		DepthBiasSlopeFactor:    info.DepthBiasSlopeFactor,
+		LineWidth:               info.LineWidth,
+	}
+	if info.DepthClampEnable {
+		_info.DepthClampEnable = C.VK_TRUE
+	}
+	if info.RasterizerDiscardEnable {
+		_info.RasterizerDiscardEnable = C.VK_TRUE
+	}
+	if info.DepthBiasEnable {
+		_info.DepthBiasEnable = C.VK_TRUE
+	}
+}
+
+type pipelineRasterizationStateCreateInfo struct {
+	Type                    StructureType
+	Next                    uintptr
+	Flags                   PipelineRasterizationStateCreateFlags
+	DepthClampEnable        C.VkBool32
+	RasterizerDiscardEnable C.VkBool32
+	PolygonMode             PolygonMode
+	CullMode                CullModeFlags
+	FrontFace               FrontFace
+	DepthBiasEnable         C.VkBool32
+	DepthBiasConstantFactor float32
+	DepthBiasClamp          float32
+	DepthBiasSlopeFactor    float32
+	LineWidth               float32
+}
 type PipelineMultisampleStateCreateInfo struct{}
 type PipelineDepthStencilStateCreateInfo struct{}
 type PipelineColorBlendStateCreateInfo struct{}
 type PipelineDynamicStateCreateInfo struct{}
-type PipelineLayout struct{}
+type PipelineLayout uintptr
 type GraphicsPipelineCreateInfo struct {
 	Type               StructureType
 	Next               uintptr
@@ -91,11 +198,62 @@ type GraphicsPipelineCreateInfo struct {
 	DepthStencilState  *PipelineDepthStencilStateCreateInfo
 	ColorBlendState    *PipelineColorBlendStateCreateInfo
 	DynamicState       *PipelineDynamicStateCreateInfo
-	Layout             *PipelineLayout
+	Layout             PipelineLayout
 	RenderPass         RenderPass
 	Subpass            uint32
 	BasePipelineHandle Pipeline
 	BasePipelineIndex  int32
+}
+
+func (info *GraphicsPipelineCreateInfo) C(_info *graphicsPipelineCreateInfo) freeFunc {
+	if info == nil {
+		return freeFunc(nil)
+	}
+	*_info = graphicsPipelineCreateInfo{
+		Type:               info.Type,
+		Next:               info.Next,
+		Flags:              info.Flags,
+		StageCount:         uint32(len(info.Stages)),
+		Stages:             nil,
+		VertexInputState:   info.VertexInputState,
+		InputAssemblyState: info.InputAssemblyState,
+		TessellationState:  info.TessellationState,
+		ViewportState:      info.ViewportState,
+		MultisampleState:   info.MultisampleState,
+		DepthStencilState:  info.DepthStencilState,
+		ColorBlendState:    info.ColorBlendState,
+		DynamicState:       info.DynamicState,
+		Layout:             info.Layout,
+		RenderPass:         info.RenderPass,
+		Subpass:            info.Subpass,
+		BasePipelineHandle: info.BasePipelineHandle,
+		BasePipelineIndex:  info.BasePipelineIndex,
+	}
+	var fs []freeFunc
+	if info.RasterizationState != nil {
+		p := C.malloc(C.size_t(unsafe.Sizeof(pipelineRasterizationStateCreateInfo{})))
+		fs = append(fs, freeFunc(func() {
+			C.free(p)
+		}))
+		_info.RasterizationState = (*pipelineRasterizationStateCreateInfo)(p)
+		info.RasterizationState.C(_info.RasterizationState)
+	}
+	if len(info.Stages) > 0 {
+		p := C.malloc(C.size_t(uintptr(_info.StageCount) * unsafe.Sizeof(pipelineShaderStageCreateInfo{})))
+		fs = append(fs, freeFunc(func() {
+			C.free(p)
+		}))
+		for i, stage := range info.Stages {
+			//*(*pipelineShaderStageCreateInfo)(unsafe.Pointer(uintptr(p) + uintptr(i)*unsafe.Sizeof(pipelineShaderStageCreateInfo{}))) =
+			fs = append(fs, stage.C((*pipelineShaderStageCreateInfo)(unsafe.Pointer(uintptr(p)+uintptr(i)*unsafe.Sizeof(pipelineShaderStageCreateInfo{})))))
+		}
+		_info.Stages = (*pipelineShaderStageCreateInfo)(p)
+	}
+	return freeFunc(func() {
+		for _, f := range fs {
+			f()
+		}
+	})
 }
 
 type graphicsPipelineCreateInfo struct {
@@ -103,17 +261,17 @@ type graphicsPipelineCreateInfo struct {
 	Next               uintptr
 	Flags              PipelineCreateFlags
 	StageCount         uint32
-	Stages             *PipelineShaderStageCreateInfo
+	Stages             *pipelineShaderStageCreateInfo
 	VertexInputState   *PipelineVertexInputStateCreateInfo
 	InputAssemblyState *PipelineInputAssemblyStateCreateInfo
 	TessellationState  *PipelineTessellationStateCreateInfo
 	ViewportState      *PipelineViewportStateCreateInfo
-	RasterizationState *PipelineRasterizationStateCreateInfo
+	RasterizationState *pipelineRasterizationStateCreateInfo
 	MultisampleState   *PipelineMultisampleStateCreateInfo
 	DepthStencilState  *PipelineDepthStencilStateCreateInfo
 	ColorBlendState    *PipelineColorBlendStateCreateInfo
 	DynamicState       *PipelineDynamicStateCreateInfo
-	Layout             *PipelineLayout
+	Layout             PipelineLayout
 	RenderPass         RenderPass
 	Subpass            uint32
 	BasePipelineHandle Pipeline
@@ -140,11 +298,21 @@ func CreateComputePipelines(device Device, pipelineCache PipelineCache, createIn
 
 func CreateGraphicsPipelines(device Device, pipelineCache PipelineCache, createInfos []GraphicsPipelineCreateInfo, allocator *AllocationCallbacks) ([]Pipeline, error) {
 	pipelines := make([]Pipeline, len(createInfos))
+	_createInfos := make([]graphicsPipelineCreateInfo, len(createInfos))
+	var ps []freeFunc
+	for i, createInfo := range createInfos {
+		ps = append(ps, createInfo.C((*graphicsPipelineCreateInfo)(unsafe.Pointer(&_createInfos[i]))))
+	}
+	defer func() {
+		for _, p := range ps {
+			p.Free()
+		}
+	}()
 	result := Result(C.vkCreateGraphicsPipelines(
 		(C.VkDevice)(unsafe.Pointer(device)),
 		(C.VkPipelineCache)(unsafe.Pointer(pipelineCache)),
-		(C.uint32_t)(len(createInfos)),
-		(*C.VkGraphicsPipelineCreateInfo)(unsafe.Pointer(&createInfos[0])),
+		(C.uint32_t)(len(_createInfos)),
+		(*C.VkGraphicsPipelineCreateInfo)(unsafe.Pointer(&_createInfos[0])),
 		(*C.VkAllocationCallbacks)(unsafe.Pointer(allocator)),
 		(*C.VkPipeline)(unsafe.Pointer(&pipelines[0])),
 	))

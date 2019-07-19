@@ -1,6 +1,7 @@
 package vulkan
 
 // #include <vulkan/vulkan.h>
+// #include <stdlib.h>
 import "C"
 import (
 	"unsafe"
@@ -17,6 +18,20 @@ type ShaderModuleCreateInfo struct {
 	Code  []byte
 }
 
+func (info *ShaderModuleCreateInfo) C(_info *shaderModuleCreateInfo) freeFunc {
+	*_info = shaderModuleCreateInfo{
+		Type:     info.Type,
+		Next:     info.Next,
+		Flags:    info.Flags,
+		CodeSize: (C.size_t)(len(info.Code)),
+	}
+	p := C.CBytes(info.Code)
+	_info.Code = (*byte)(p)
+	return freeFunc(func() {
+		C.free(p)
+	})
+}
+
 type shaderModuleCreateInfo struct {
 	Type     StructureType
 	Next     uintptr
@@ -27,13 +42,8 @@ type shaderModuleCreateInfo struct {
 
 func CreateShaderModule(device Device, createInfo ShaderModuleCreateInfo, allocator *AllocationCallbacks) (ShaderModule, error) {
 	var shaderModule ShaderModule
-	_createInfo := shaderModuleCreateInfo{
-		Type:     createInfo.Type,
-		Next:     createInfo.Next,
-		Flags:    createInfo.Flags,
-		CodeSize: C.size_t(len(createInfo.Code)),
-		Code:     (*byte)(unsafe.Pointer(&createInfo.Code[0])),
-	}
+	var _createInfo shaderModuleCreateInfo
+	defer createInfo.C(&_createInfo).Free()
 	result := Result(C.vkCreateShaderModule(
 		(C.VkDevice)(unsafe.Pointer(device)),
 		(*C.VkShaderModuleCreateInfo)(unsafe.Pointer(&_createInfo)),
