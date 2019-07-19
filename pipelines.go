@@ -49,7 +49,6 @@ func (info *PipelineShaderStageCreateInfo) C(_info *pipelineShaderStageCreateInf
 		Module: info.Module,
 		Name:   C.CString(info.Name),
 	}
-	//info.SpecializationInfo
 	if len(info.SpecializationInfo.Data) > 0 || len(info.SpecializationInfo.MapEntries) > 0 {
 		panic("ikohasdoa ")
 	}
@@ -114,8 +113,128 @@ const (
 	FrontFaceClockwise
 )
 
-type PipelineVertexInputStateCreateInfo struct{}
-type PipelineInputAssemblyStateCreateInfo struct{}
+type PipelineVertexInputStateCreateFlags uint32
+
+type PipelineVertexInputStateCreateInfo struct {
+	Type                        StructureType
+	Next                        uintptr
+	Flags                       PipelineVertexInputStateCreateFlags
+	VertexBindingDescriptions   []VertexInputBindingDescription
+	VertexAttributeDescriptions []VertexInputAttributeDescription
+}
+
+func (info *PipelineVertexInputStateCreateInfo) C(_info *pipelineVertexInputStateCreateInfo) freeFunc {
+	*_info = pipelineVertexInputStateCreateInfo{
+		Type:                            info.Type,
+		Next:                            info.Next,
+		Flags:                           info.Flags,
+		VertexBindingDescriptionCount:   uint32(len(info.VertexBindingDescriptions)),
+		VertexAttributeDescriptionCount: uint32(len(info.VertexAttributeDescriptions)),
+	}
+	var ps []unsafe.Pointer
+	if _info.VertexBindingDescriptionCount > 0 {
+		p := C.malloc(C.size_t(uintptr(_info.VertexBindingDescriptionCount) * unsafe.Sizeof(VertexInputBindingDescription{})))
+		ps = append(ps, p)
+		for i, description := range info.VertexBindingDescriptions {
+			*(*VertexInputBindingDescription)(unsafe.Pointer(uintptr(p) + uintptr(i)*unsafe.Sizeof(VertexInputBindingDescription{}))) = description
+		}
+		_info.VertexBindingDescriptions = (*VertexInputBindingDescription)(p)
+	}
+	if _info.VertexAttributeDescriptionCount > 0 {
+		p := C.malloc(C.size_t(uintptr(_info.VertexAttributeDescriptionCount) * unsafe.Sizeof(VertexInputAttributeDescription{})))
+		ps = append(ps, p)
+		for i, description := range info.VertexAttributeDescriptions {
+			*(*VertexInputAttributeDescription)(unsafe.Pointer(uintptr(p) + uintptr(i)*unsafe.Sizeof(VertexInputAttributeDescription{}))) = description
+		}
+		_info.VertexAttributeDescriptions = (*VertexInputAttributeDescription)(p)
+	}
+	return freeFunc(func() {
+		for _, p := range ps {
+			C.free(p)
+		}
+	})
+}
+
+type pipelineVertexInputStateCreateInfo struct {
+	Type                            StructureType
+	Next                            uintptr
+	Flags                           PipelineVertexInputStateCreateFlags
+	VertexBindingDescriptionCount   uint32
+	VertexBindingDescriptions       *VertexInputBindingDescription
+	VertexAttributeDescriptionCount uint32
+	VertexAttributeDescriptions     *VertexInputAttributeDescription
+}
+
+type VertexInputBindingDescription struct {
+	Binding   uint32
+	Stride    uint32
+	InputRate VertexInputRate
+}
+
+type VertexInputRate uint32
+
+const (
+	VertexInputRateVertex VertexInputRate = iota
+	VertexInputRateInstance
+)
+
+type VertexInputAttributeDescription struct {
+	Location uint32
+	Binding  uint32
+	Format   Format
+	Offset   uint32
+}
+
+// todo
+type Format uint32
+
+type PipelineInputAssemblyStateCreateFlags uint32
+
+type PipelineInputAssemblyStateCreateInfo struct {
+	Type                   StructureType
+	Next                   uintptr
+	Flags                  PipelineInputAssemblyStateCreateFlags
+	Topology               PrimitiveTopology
+	PrimitiveRestartEnable bool
+}
+
+func (info *PipelineInputAssemblyStateCreateInfo) C(_info *pipelineInputAssemblyStateCreateInfo) {
+	*_info = pipelineInputAssemblyStateCreateInfo{
+		Type:                   info.Type,
+		Next:                   info.Next,
+		Flags:                  info.Flags,
+		Topology:               info.Topology,
+		PrimitiveRestartEnable: C.VK_FALSE,
+	}
+	if info.PrimitiveRestartEnable {
+		_info.PrimitiveRestartEnable = C.VK_TRUE
+	}
+}
+
+type pipelineInputAssemblyStateCreateInfo struct {
+	Type                   StructureType
+	Next                   uintptr
+	Flags                  PipelineInputAssemblyStateCreateFlags
+	Topology               PrimitiveTopology
+	PrimitiveRestartEnable C.VkBool32
+}
+
+type PrimitiveTopology uint32
+
+const (
+	PrimitiveTopologyPointList PrimitiveTopology = iota
+	PrimitiveTopologyLineList
+	PrimitiveTopologyLineStrip
+	PrimitiveTopologyTriangleList
+	PrimitiveTopologyTriangleStrip
+	PrimitiveTopologyTriangleFan
+	PrimitiveTopologyLineListWithAdjacency
+	PrimitiveTopologyLineStripWithAdjacency
+	PrimitiveTopologyTriangleListWithAdjacency
+	PrimitiveTopologyTriangleStripWithAdjacency
+	PrimitiveTopologyPatchList
+)
+
 type PipelineTessellationStateCreateInfo struct{}
 type PipelineViewportStateCreateInfo struct{}
 type PipelineRasterizationStateCreateInfo struct {
@@ -215,10 +334,11 @@ func (info *GraphicsPipelineCreateInfo) C(_info *graphicsPipelineCreateInfo) fre
 		Flags:              info.Flags,
 		StageCount:         uint32(len(info.Stages)),
 		Stages:             nil,
-		VertexInputState:   info.VertexInputState,
-		InputAssemblyState: info.InputAssemblyState,
+		VertexInputState:   nil,
+		InputAssemblyState: nil,
 		TessellationState:  info.TessellationState,
 		ViewportState:      info.ViewportState,
+		RasterizationState: nil,
 		MultisampleState:   info.MultisampleState,
 		DepthStencilState:  info.DepthStencilState,
 		ColorBlendState:    info.ColorBlendState,
@@ -230,6 +350,22 @@ func (info *GraphicsPipelineCreateInfo) C(_info *graphicsPipelineCreateInfo) fre
 		BasePipelineIndex:  info.BasePipelineIndex,
 	}
 	var fs []freeFunc
+	if info.VertexInputState != nil {
+		p := C.malloc(C.size_t(unsafe.Sizeof(pipelineVertexInputStateCreateInfo{})))
+		fs = append(fs, freeFunc(func() {
+			C.free(p)
+		}))
+		_info.VertexInputState = (*pipelineVertexInputStateCreateInfo)(p)
+		info.VertexInputState.C(_info.VertexInputState)
+	}
+	if info.InputAssemblyState != nil {
+		p := C.malloc(C.size_t(unsafe.Sizeof(pipelineInputAssemblyStateCreateInfo{})))
+		fs = append(fs, freeFunc(func() {
+			C.free(p)
+		}))
+		_info.InputAssemblyState = (*pipelineInputAssemblyStateCreateInfo)(p)
+		info.InputAssemblyState.C(_info.InputAssemblyState)
+	}
 	if info.RasterizationState != nil {
 		p := C.malloc(C.size_t(unsafe.Sizeof(pipelineRasterizationStateCreateInfo{})))
 		fs = append(fs, freeFunc(func() {
@@ -244,7 +380,6 @@ func (info *GraphicsPipelineCreateInfo) C(_info *graphicsPipelineCreateInfo) fre
 			C.free(p)
 		}))
 		for i, stage := range info.Stages {
-			//*(*pipelineShaderStageCreateInfo)(unsafe.Pointer(uintptr(p) + uintptr(i)*unsafe.Sizeof(pipelineShaderStageCreateInfo{}))) =
 			fs = append(fs, stage.C((*pipelineShaderStageCreateInfo)(unsafe.Pointer(uintptr(p)+uintptr(i)*unsafe.Sizeof(pipelineShaderStageCreateInfo{})))))
 		}
 		_info.Stages = (*pipelineShaderStageCreateInfo)(p)
@@ -262,8 +397,8 @@ type graphicsPipelineCreateInfo struct {
 	Flags              PipelineCreateFlags
 	StageCount         uint32
 	Stages             *pipelineShaderStageCreateInfo
-	VertexInputState   *PipelineVertexInputStateCreateInfo
-	InputAssemblyState *PipelineInputAssemblyStateCreateInfo
+	VertexInputState   *pipelineVertexInputStateCreateInfo
+	InputAssemblyState *pipelineInputAssemblyStateCreateInfo
 	TessellationState  *PipelineTessellationStateCreateInfo
 	ViewportState      *PipelineViewportStateCreateInfo
 	RasterizationState *pipelineRasterizationStateCreateInfo
