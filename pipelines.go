@@ -97,7 +97,7 @@ const (
 )
 
 type CullModeFlagBits uint32
-type CullModeFlags CullModeFlagBits
+type CullModeFlags = CullModeFlagBits
 
 const (
 	CullModeNoneBit         CullModeFlagBits = 0

@@ -52,6 +52,11 @@ type ClearValue struct {
 	DepthStencil ClearDepthStencilValue
 }
 
+type clearValue struct {
+	Color        ClearColorValueUint
+	DepthStencil ClearDepthStencilValue
+}
+
 type ClearColorValue interface {
 	clearColorValue()
 }
@@ -78,6 +83,59 @@ type RenderPassBeginInfo struct {
 	Framebuffer Framebuffer
 	RenderArea  Rect2D
 	ClearValues []ClearValue
+}
+
+func (info *RenderPassBeginInfo) C(_info *renderPassBeginInfo) freeFunc {
+	*_info = renderPassBeginInfo{
+		Type:            info.Type,
+		Next:            info.Next,
+		RenderPass:      info.RenderPass,
+		Framebuffer:     info.Framebuffer,
+		RenderArea:      info.RenderArea,
+		ClearValueCount: uint32(len(info.ClearValues)),
+		ClearValues:     nil,
+	}
+	if _info.ClearValueCount > 0 {
+		p := C.malloc(C.size_t(uintptr(_info.ClearValueCount) * unsafe.Sizeof(renderPassBeginInfo{})))
+		for i, cv := range info.ClearValues {
+			_clearValue := clearValue{
+				DepthStencil: cv.DepthStencil,
+			}
+			switch color := cv.Color.(type) {
+			case ClearColorValueFloat:
+				_clearValue.Color[0] = uint32(color[0])
+				_clearValue.Color[1] = uint32(color[1])
+				_clearValue.Color[2] = uint32(color[2])
+				_clearValue.Color[3] = uint32(color[3])
+			case ClearColorValueInt:
+				_clearValue.Color[0] = uint32(color[0])
+				_clearValue.Color[1] = uint32(color[1])
+				_clearValue.Color[2] = uint32(color[2])
+				_clearValue.Color[3] = uint32(color[3])
+			case ClearColorValueUint:
+				_clearValue.Color[0] = color[0]
+				_clearValue.Color[1] = color[1]
+				_clearValue.Color[2] = color[2]
+				_clearValue.Color[3] = color[3]
+			}
+			*(*clearValue)(unsafe.Pointer(uintptr(p) + uintptr(i)*unsafe.Sizeof(renderPassBeginInfo{}))) = _clearValue
+		}
+		_info.ClearValues = (*clearValue)(p)
+		return freeFunc(func() {
+			C.free(p)
+		})
+	}
+	return freeFunc(nil)
+}
+
+type renderPassBeginInfo struct {
+	Type            StructureType
+	Next            uintptr
+	RenderPass      RenderPass
+	Framebuffer     Framebuffer
+	RenderArea      Rect2D
+	ClearValueCount uint32
+	ClearValues     *clearValue
 }
 
 type SubpassContents uint32
@@ -234,10 +292,12 @@ func DestroyFramebuffer(device Device, framebuffer Framebuffer, allocator *Alloc
 	)
 }
 
-func CmdBeginRenderPass(commandBuffer CommandBuffer, renderPassBegin RenderPassBeginInfo, contents SubpassContents) {
+func CmdBeginRenderPass(commandBuffer CommandBuffer, beginInfo RenderPassBeginInfo, contents SubpassContents) {
+	var _beginInfo renderPassBeginInfo
+	defer beginInfo.C(&_beginInfo).Free()
 	C.vkCmdBeginRenderPass(
 		(C.VkCommandBuffer)(unsafe.Pointer(commandBuffer)),
-		(*C.VkRenderPassBeginInfo)(unsafe.Pointer(&renderPassBegin)),
+		(*C.VkRenderPassBeginInfo)(unsafe.Pointer(&_beginInfo)),
 		(C.VkSubpassContents)(contents),
 	)
 }

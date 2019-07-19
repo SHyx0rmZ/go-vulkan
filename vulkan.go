@@ -334,7 +334,7 @@ const (
 )
 
 type PipelineStageFlagBits uint32
-type PipelineStageFlags PipelineStageFlagBits
+type PipelineStageFlags = PipelineStageFlagBits
 
 const (
 	PipelineStageTopOfPipeBit PipelineStageFlagBits = 1 << iota
