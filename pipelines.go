@@ -236,7 +236,68 @@ const (
 )
 
 type PipelineTessellationStateCreateInfo struct{}
-type PipelineViewportStateCreateInfo struct{}
+type PipelineViewportStateCreateFlags uint32
+type PipelineViewportStateCreateInfo struct {
+	Type      StructureType
+	Next      uintptr
+	Flags     PipelineViewportStateCreateFlags
+	Viewports []Viewport
+	Scissors  []Rect2D
+}
+
+func (info *PipelineViewportStateCreateInfo) C(_info *pipelineViewportStateCreateInfo) freeFunc {
+	*_info = pipelineViewportStateCreateInfo{
+		Type:          info.Type,
+		Next:          info.Next,
+		Flags:         info.Flags,
+		ViewportCount: uint32(len(info.Viewports)),
+		Viewports:     nil,
+		ScissorCount:  uint32(len(info.Scissors)),
+		Scissors:      nil,
+	}
+	var ps []unsafe.Pointer
+	if _info.ViewportCount > 0 {
+		p := C.malloc(C.size_t(uintptr(_info.ViewportCount) * unsafe.Sizeof(Viewport{})))
+		ps = append(ps, p)
+		for i, viewport := range info.Viewports {
+			*(*Viewport)(unsafe.Pointer(uintptr(p) + uintptr(i)*unsafe.Sizeof(Viewport{}))) = viewport
+		}
+		_info.Viewports = (*Viewport)(p)
+	}
+	if _info.ScissorCount > 0 {
+		p := C.malloc(C.size_t(uintptr(_info.ScissorCount) * unsafe.Sizeof(Rect2D{})))
+		ps = append(ps, p)
+		for i, scissor := range info.Scissors {
+			*(*Rect2D)(unsafe.Pointer(uintptr(p) + uintptr(i)*unsafe.Sizeof(Rect2D{}))) = scissor
+		}
+		_info.Scissors = (*Rect2D)(p)
+	}
+	return freeFunc(func() {
+		for _, p := range ps {
+			C.free(p)
+		}
+	})
+}
+
+type pipelineViewportStateCreateInfo struct {
+	Type          StructureType
+	Next          uintptr
+	Flags         PipelineViewportStateCreateFlags
+	ViewportCount uint32
+	Viewports     *Viewport
+	ScissorCount  uint32
+	Scissors      *Rect2D
+}
+
+type Viewport struct {
+	X        float32
+	Y        float32
+	Width    float32
+	Height   float32
+	MinDepth float32
+	MaxDepth float32
+}
+
 type PipelineRasterizationStateCreateInfo struct {
 	Type                    StructureType
 	Next                    uintptr
@@ -298,7 +359,47 @@ type pipelineRasterizationStateCreateInfo struct {
 	DepthBiasSlopeFactor    float32
 	LineWidth               float32
 }
-type PipelineMultisampleStateCreateInfo struct{}
+type PipelineMultisampleStateCreateFlags uint32
+type PipelineMultisampleStateCreateInfo struct {
+	Type                  StructureType
+	Next                  uintptr
+	Flags                 PipelineMultisampleStateCreateFlags
+	RasterizationSamples  SampleCountFlagBits
+	SampleShadingEnable   bool
+	MinSampleShading      float32
+	SampleMask            *SampleMask
+	AlphaToCoverageEnable bool
+	AlphaToOneEnable      bool
+}
+
+func (info *PipelineMultisampleStateCreateInfo) C(_info *pipelineMultisampleStateCreateInfo) {
+	*_info = pipelineMultisampleStateCreateInfo{
+		Type:                  info.Type,
+		Next:                  info.Next,
+		Flags:                 info.Flags,
+		RasterizationSamples:  info.RasterizationSamples,
+		SampleShadingEnable:   C.VK_FALSE,
+		MinSampleShading:      info.MinSampleShading,
+		SampleMask:            info.SampleMask,
+		AlphaToCoverageEnable: C.VK_FALSE,
+		AlphaToOneEnable:      C.VK_FALSE,
+	}
+}
+
+type pipelineMultisampleStateCreateInfo struct {
+	Type                  StructureType
+	Next                  uintptr
+	Flags                 PipelineMultisampleStateCreateFlags
+	RasterizationSamples  SampleCountFlagBits
+	SampleShadingEnable   C.VkBool32
+	MinSampleShading      float32
+	SampleMask            *SampleMask
+	AlphaToCoverageEnable C.VkBool32
+	AlphaToOneEnable      C.VkBool32
+}
+
+type SampleMask uint32
+
 type PipelineDepthStencilStateCreateInfo struct{}
 type PipelineColorBlendStateCreateInfo struct{}
 type PipelineDynamicStateCreateInfo struct{}
@@ -337,9 +438,9 @@ func (info *GraphicsPipelineCreateInfo) C(_info *graphicsPipelineCreateInfo) fre
 		VertexInputState:   nil,
 		InputAssemblyState: nil,
 		TessellationState:  info.TessellationState,
-		ViewportState:      info.ViewportState,
+		ViewportState:      nil,
 		RasterizationState: nil,
-		MultisampleState:   info.MultisampleState,
+		MultisampleState:   nil,
 		DepthStencilState:  info.DepthStencilState,
 		ColorBlendState:    info.ColorBlendState,
 		DynamicState:       info.DynamicState,
@@ -356,7 +457,7 @@ func (info *GraphicsPipelineCreateInfo) C(_info *graphicsPipelineCreateInfo) fre
 			C.free(p)
 		}))
 		_info.VertexInputState = (*pipelineVertexInputStateCreateInfo)(p)
-		info.VertexInputState.C(_info.VertexInputState)
+		fs = append(fs, info.VertexInputState.C(_info.VertexInputState))
 	}
 	if info.InputAssemblyState != nil {
 		p := C.malloc(C.size_t(unsafe.Sizeof(pipelineInputAssemblyStateCreateInfo{})))
@@ -366,6 +467,14 @@ func (info *GraphicsPipelineCreateInfo) C(_info *graphicsPipelineCreateInfo) fre
 		_info.InputAssemblyState = (*pipelineInputAssemblyStateCreateInfo)(p)
 		info.InputAssemblyState.C(_info.InputAssemblyState)
 	}
+	if info.ViewportState != nil {
+		p := C.malloc(C.size_t(unsafe.Sizeof(pipelineViewportStateCreateInfo{})))
+		fs = append(fs, freeFunc(func() {
+			C.free(p)
+		}))
+		_info.ViewportState = (*pipelineViewportStateCreateInfo)(p)
+		fs = append(fs, info.ViewportState.C(_info.ViewportState))
+	}
 	if info.RasterizationState != nil {
 		p := C.malloc(C.size_t(unsafe.Sizeof(pipelineRasterizationStateCreateInfo{})))
 		fs = append(fs, freeFunc(func() {
@@ -373,6 +482,14 @@ func (info *GraphicsPipelineCreateInfo) C(_info *graphicsPipelineCreateInfo) fre
 		}))
 		_info.RasterizationState = (*pipelineRasterizationStateCreateInfo)(p)
 		info.RasterizationState.C(_info.RasterizationState)
+	}
+	if info.MultisampleState != nil {
+		p := C.malloc(C.size_t(unsafe.Sizeof(pipelineMultisampleStateCreateInfo{})))
+		fs = append(fs, freeFunc(func() {
+			C.free(p)
+		}))
+		_info.MultisampleState = (*pipelineMultisampleStateCreateInfo)(p)
+		info.MultisampleState.C(_info.MultisampleState)
 	}
 	if len(info.Stages) > 0 {
 		p := C.malloc(C.size_t(uintptr(_info.StageCount) * unsafe.Sizeof(pipelineShaderStageCreateInfo{})))
@@ -400,9 +517,9 @@ type graphicsPipelineCreateInfo struct {
 	VertexInputState   *pipelineVertexInputStateCreateInfo
 	InputAssemblyState *pipelineInputAssemblyStateCreateInfo
 	TessellationState  *PipelineTessellationStateCreateInfo
-	ViewportState      *PipelineViewportStateCreateInfo
+	ViewportState      *pipelineViewportStateCreateInfo
 	RasterizationState *pipelineRasterizationStateCreateInfo
-	MultisampleState   *PipelineMultisampleStateCreateInfo
+	MultisampleState   *pipelineMultisampleStateCreateInfo
 	DepthStencilState  *PipelineDepthStencilStateCreateInfo
 	ColorBlendState    *PipelineColorBlendStateCreateInfo
 	DynamicState       *PipelineDynamicStateCreateInfo
