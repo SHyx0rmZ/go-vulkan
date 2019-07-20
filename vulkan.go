@@ -357,7 +357,7 @@ const (
 )
 
 type AccessFlagBits uint32
-type AccessFlags AccessFlagBits
+type AccessFlags = AccessFlagBits
 
 const (
 	AccessIndirectCommandReadBit AccessFlagBits = 1 << iota
@@ -380,7 +380,7 @@ const (
 )
 
 type DependencyFlagBits uint32
-type DependencyFlags DependencyFlagBits
+type DependencyFlags = DependencyFlagBits
 
 const (
 	DependencyByRegionBit DependencyFlagBits = 1 << iota

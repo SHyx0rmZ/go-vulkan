@@ -105,7 +105,6 @@ func CreateInstance(info CreateInfo) (Instance, error) {
 	if result != C.VK_SUCCESS {
 		panic("enum2")
 	}
-	layers = layers[:0]
 	for _, layer := range layers {
 		name := string(layer.LayerName[:])
 		if off := bytes.IndexByte(layer.LayerName[:], 0); off != -1 {
@@ -204,14 +203,71 @@ type SwapchainCreateInfo struct {
 type Swapchain uintptr
 
 type PresentInfo struct {
-	Type               C.VkStructureType
+	Type           StructureType
+	Next           uintptr
+	WaitSemaphores []Semaphore
+	Swapchains     []Swapchain
+	ImageIndices   []uint32
+	Results        []Result
+}
+
+func (info *PresentInfo) C(_info *presentInfo) freeFunc {
+	*_info = presentInfo{
+		Type:               info.Type,
+		Next:               info.Next,
+		WaitSemaphoreCount: uint32(len(info.WaitSemaphores)),
+		WaitSemaphores:     nil,
+		SwapchainCount:     uint32(len(info.Swapchains)),
+		Swapchains:         nil,
+		ImageIndices:       nil,
+		Results:            nil,
+	}
+	var ps []unsafe.Pointer
+	if _info.WaitSemaphoreCount > 0 {
+		p := C.malloc(C.size_t(uintptr(_info.WaitSemaphoreCount) * unsafe.Sizeof(Semaphore(0))))
+		ps = append(ps, p)
+		for i, semaphore := range info.WaitSemaphores {
+			*(*Semaphore)(unsafe.Pointer(uintptr(p) + uintptr(i)*unsafe.Sizeof(Semaphore(0)))) = semaphore
+		}
+		_info.WaitSemaphores = (*Semaphore)(p)
+	}
+	if _info.SwapchainCount > 0 {
+		p := C.malloc(C.size_t(uintptr(_info.SwapchainCount) * unsafe.Sizeof(Swapchain(0))))
+		ps = append(ps, p)
+		for i, swapchain := range info.Swapchains {
+			*(*Swapchain)(unsafe.Pointer(uintptr(p) + uintptr(i)*unsafe.Sizeof(Swapchain(0)))) = swapchain
+		}
+		_info.Swapchains = (*Swapchain)(p)
+	}
+	if _info.SwapchainCount > 0 {
+		p := C.malloc(C.size_t(uintptr(_info.SwapchainCount) * unsafe.Sizeof(uint32(0))))
+		ps = append(ps, p)
+		for i, imageIndex := range info.ImageIndices {
+			*(*uint32)(unsafe.Pointer(uintptr(p) + uintptr(i)*unsafe.Sizeof(uint32(0)))) = imageIndex
+		}
+		_info.ImageIndices = (*uint32)(p)
+	}
+	if info.Results != nil {
+		p := C.malloc(C.size_t(uintptr(_info.SwapchainCount) * unsafe.Sizeof(Result(0))))
+		ps = append(ps, p)
+		_info.Results = (*Result)(p)
+	}
+	return freeFunc(func() {
+		for _, p := range ps {
+			C.free(p)
+		}
+	})
+}
+
+type presentInfo struct {
+	Type               StructureType
 	Next               uintptr
 	WaitSemaphoreCount uint32
-	WaitSemaphores     uintptr
+	WaitSemaphores     *Semaphore
 	SwapchainCount     uint32
-	Swapchains         uintptr
+	Swapchains         *Swapchain
 	ImageIndices       *uint32
-	Results            *uint32
+	Results            *Result
 }
 
 type DeviceCreateInfo struct {

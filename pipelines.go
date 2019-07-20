@@ -604,6 +604,16 @@ func (info *GraphicsPipelineCreateInfo) C(_info *graphicsPipelineCreateInfo) fre
 		BasePipelineIndex:  info.BasePipelineIndex,
 	}
 	var fs []freeFunc
+	if len(info.Stages) > 0 {
+		p := C.malloc(C.size_t(uintptr(_info.StageCount) * unsafe.Sizeof(pipelineShaderStageCreateInfo{})))
+		fs = append(fs, freeFunc(func() {
+			C.free(p)
+		}))
+		for i, stage := range info.Stages {
+			fs = append(fs, stage.C((*pipelineShaderStageCreateInfo)(unsafe.Pointer(uintptr(p)+uintptr(i)*unsafe.Sizeof(pipelineShaderStageCreateInfo{})))))
+		}
+		_info.Stages = (*pipelineShaderStageCreateInfo)(p)
+	}
 	if info.VertexInputState != nil {
 		p := C.malloc(C.size_t(unsafe.Sizeof(pipelineVertexInputStateCreateInfo{})))
 		fs = append(fs, freeFunc(func() {
@@ -651,16 +661,6 @@ func (info *GraphicsPipelineCreateInfo) C(_info *graphicsPipelineCreateInfo) fre
 		}))
 		_info.ColorBlendState = (*pipelineColorBlendStateCreateInfo)(p)
 		fs = append(fs, info.ColorBlendState.C(_info.ColorBlendState))
-	}
-	if len(info.Stages) > 0 {
-		p := C.malloc(C.size_t(uintptr(_info.StageCount) * unsafe.Sizeof(pipelineShaderStageCreateInfo{})))
-		fs = append(fs, freeFunc(func() {
-			C.free(p)
-		}))
-		for i, stage := range info.Stages {
-			fs = append(fs, stage.C((*pipelineShaderStageCreateInfo)(unsafe.Pointer(uintptr(p)+uintptr(i)*unsafe.Sizeof(pipelineShaderStageCreateInfo{})))))
-		}
-		_info.Stages = (*pipelineShaderStageCreateInfo)(p)
 	}
 	return freeFunc(func() {
 		for _, f := range fs {

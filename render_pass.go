@@ -48,13 +48,13 @@ type Extent2D struct {
 }
 
 type ClearValue struct {
-	Color        ClearColorValue
-	DepthStencil ClearDepthStencilValue
+	Color ClearColorValue
+	//DepthStencil ClearDepthStencilValue
 }
 
 type clearValue struct {
-	Color        ClearColorValueUint
-	DepthStencil ClearDepthStencilValue
+	Color ClearColorValueFloat
+	//DepthStencil ClearDepthStencilValue
 }
 
 type ClearColorValue interface {
@@ -99,7 +99,7 @@ func (info *RenderPassBeginInfo) C(_info *renderPassBeginInfo) freeFunc {
 		p := C.malloc(C.size_t(uintptr(_info.ClearValueCount) * unsafe.Sizeof(renderPassBeginInfo{})))
 		for i, cv := range info.ClearValues {
 			_clearValue := clearValue{
-				DepthStencil: cv.DepthStencil,
+				//DepthStencil: cv.DepthStencil,
 			}
 			switch color := cv.Color.(type) {
 			case ClearColorValueFloat:
@@ -113,10 +113,10 @@ func (info *RenderPassBeginInfo) C(_info *renderPassBeginInfo) freeFunc {
 				*(*int32)(unsafe.Pointer(&_clearValue.Color[2])) = color[2]
 				*(*int32)(unsafe.Pointer(&_clearValue.Color[3])) = color[3]
 			case ClearColorValueUint:
-				_clearValue.Color[0] = color[0]
-				_clearValue.Color[1] = color[1]
-				_clearValue.Color[2] = color[2]
-				_clearValue.Color[3] = color[3]
+				*(*uint32)(unsafe.Pointer(&_clearValue.Color[0])) = color[0]
+				*(*uint32)(unsafe.Pointer(&_clearValue.Color[1])) = color[1]
+				*(*uint32)(unsafe.Pointer(&_clearValue.Color[2])) = color[2]
+				*(*uint32)(unsafe.Pointer(&_clearValue.Color[3])) = color[3]
 			}
 			*(*clearValue)(unsafe.Pointer(uintptr(p) + uintptr(i)*unsafe.Sizeof(renderPassBeginInfo{}))) = _clearValue
 		}
@@ -294,7 +294,8 @@ func DestroyFramebuffer(device Device, framebuffer Framebuffer, allocator *Alloc
 
 func CmdBeginRenderPass(commandBuffer CommandBuffer, beginInfo RenderPassBeginInfo, contents SubpassContents) {
 	var _beginInfo renderPassBeginInfo
-	defer beginInfo.C(&_beginInfo).Free()
+	beginInfo.C(&_beginInfo)
+	//defer beginInfo.C(&_beginInfo).Free()
 	C.vkCmdBeginRenderPass(
 		(C.VkCommandBuffer)(unsafe.Pointer(commandBuffer)),
 		(*C.VkRenderPassBeginInfo)(unsafe.Pointer(&_beginInfo)),

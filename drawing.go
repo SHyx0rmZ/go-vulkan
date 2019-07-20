@@ -41,8 +41,9 @@ func CmdClearAttachments(commandBuffer CommandBuffer, clearAttachments []ClearAt
 			AspectMask:      ca.AspectMask,
 			ColorAttachment: ca.ColorAttachment,
 			ClearValue: clearValue{
-				Color:        ClearColorValueUint{0, 0, 0, 255},
-				DepthStencil: ClearDepthStencilValue{},
+				//Color: ClearColorValueUint{255, 0, 0, 255},
+				Color: ClearColorValueFloat{1, 0, 0, 1},
+				//DepthStencil: ClearDepthStencilValue{},
 			},
 		}
 	}

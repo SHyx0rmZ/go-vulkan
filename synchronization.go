@@ -10,7 +10,7 @@ import (
 type Fence uintptr
 
 type FenceCreateFlagBits uint32
-type FenceCreateFlags FenceCreateFlagBits
+type FenceCreateFlags = FenceCreateFlagBits
 
 const (
 	FenceCreateSignaledBit FenceCreateFlagBits = 1 << iota
