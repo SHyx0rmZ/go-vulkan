@@ -43,7 +43,7 @@ func (d Device) CreateSwapchain(info SwapchainCreateInfo, surface Surface) (Swap
 		},
 		ImageArrayLayers:      1,
 		ImageUsage:            C.VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
-		ImageSharingMode:      C.VK_SHARING_MODE_EXCLUSIVE,
+		ImageSharingMode:      SharingModeExclusive,
 		QueueFamilyIndexCount: 0,
 		QueueFamilyIndices:    nil,
 		PreTransform:          1,
@@ -93,7 +93,7 @@ type ImageCreateInfo struct {
 	Samples               C.VkSampleCountFlagBits
 	Tiling                C.VkImageTiling
 	Usage                 C.VkImageUsageFlags
-	SharingMode           C.VkSharingMode
+	SharingMode           SharingMode
 	QueueFamilyIndexCount uint32
 	QueueFamilyIndices    *uint32
 	InitialLayout         C.VkImageLayout

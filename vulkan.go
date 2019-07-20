@@ -11,6 +11,8 @@ import (
 
 var _not_implemented = errors.New("not implemented")
 
+type DeviceSize uint64
+
 type Result int32
 
 const (

@@ -190,7 +190,7 @@ type SwapchainCreateInfo struct {
 	}
 	ImageArrayLayers      uint32
 	ImageUsage            C.VkImageUsageFlags
-	ImageSharingMode      C.VkSharingMode
+	ImageSharingMode      SharingMode
 	QueueFamilyIndexCount uint32
 	QueueFamilyIndices    *uint32
 	PreTransform          C.VkSurfaceTransformFlagBitsKHR
