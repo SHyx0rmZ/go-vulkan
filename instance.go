@@ -24,7 +24,7 @@ import (
 import "C"
 
 type CreateInfo struct {
-	Type              C.VkStructureType
+	Type              StructureType
 	Next              *CreateInfo
 	Flags             C.VkInstanceCreateFlags
 	ApplicationInfo   *ApplicationInfo
@@ -33,7 +33,7 @@ type CreateInfo struct {
 }
 
 type createInfo struct {
-	Type                  C.VkStructureType
+	Type                  StructureType
 	Next                  *createInfo
 	Flags                 C.VkInstanceCreateFlags
 	ApplicationInfo       *ApplicationInfo
@@ -137,7 +137,7 @@ func CreateInstance(info CreateInfo) (Instance, error) {
 	_info.Next = (*createInfo)(unsafe.Pointer(uintptr(0)))
 	result = C.vkCreateInstance((*C.VkInstanceCreateInfo)(unsafe.Pointer(&_info)), nil, (*C.VkInstance)(unsafe.Pointer(&instance)))
 	if result != C.VK_SUCCESS {
-		return 0, fmt.Errorf("vulkan error")
+		return 0, Result(result)
 	}
 	return instance, nil
 }

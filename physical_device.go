@@ -68,7 +68,7 @@ func (d PhysicalDevice) CreateDevice(info DeviceCreateInfo) (Device, error) {
 
 	result := C.vkCreateDevice((C.VkPhysicalDevice)(unsafe.Pointer(d)), (*C.VkDeviceCreateInfo)(unsafe.Pointer(&_info)), nil, (*C.VkDevice)(unsafe.Pointer(&device)))
 	if result != C.VK_SUCCESS {
-		return 0, fmt.Errorf("device error")
+		return 0, Result(result)
 	}
 	return device, nil
 }

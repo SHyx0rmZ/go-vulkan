@@ -30,8 +30,9 @@ func (d Device) CreateSwapchain(info SwapchainCreateInfo, surface Surface) (Swap
 	info = SwapchainCreateInfo{
 		Type:            1000001000,
 		Surface:         (C.VkSurfaceKHR)(unsafe.Pointer(surface)),
-		MinImageCount:   2,
-		Format:          44,
+		MinImageCount:   3,
+		Format:          info.Format,
+		PresentMode:     info.PresentMode,
 		ImageColorSpace: 0,
 		ImageExtent: struct {
 			Width  uint32
@@ -41,7 +42,7 @@ func (d Device) CreateSwapchain(info SwapchainCreateInfo, surface Surface) (Swap
 			Height: 800,
 		},
 		ImageArrayLayers:      1,
-		ImageUsage:            C.VK_IMAGE_USAGE_TRANSFER_SRC_BIT | C.VK_IMAGE_USAGE_TRANSFER_DST_BIT | C.VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
+		ImageUsage:            C.VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
 		ImageSharingMode:      C.VK_SHARING_MODE_EXCLUSIVE,
 		QueueFamilyIndexCount: 0,
 		QueueFamilyIndices:    nil,

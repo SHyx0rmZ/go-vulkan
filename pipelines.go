@@ -401,7 +401,160 @@ type pipelineMultisampleStateCreateInfo struct {
 type SampleMask uint32
 
 type PipelineDepthStencilStateCreateInfo struct{}
-type PipelineColorBlendStateCreateInfo struct{}
+
+type PipelineColorBlendStateCreateFlags uint32
+
+type PipelineColorBlendAttachmentState struct {
+	BlendEnable         bool
+	SrcColorBlendFactor BlendFactor
+	DstColorBlendFactor BlendFactor
+	ColorBlendOp        BlendOp
+	SrcAlphaBlendFactor BlendFactor
+	DstAlphaBlendFactor BlendFactor
+	AlphaBlendOp        BlendOp
+	ColorWriteMask      ColorComponentFlags
+}
+
+func (state *PipelineColorBlendAttachmentState) C(_state *pipelineColorBlendAttachmentState) {
+	*_state = pipelineColorBlendAttachmentState{
+		BlendEnable:         C.VK_FALSE,
+		SrcColorBlendFactor: state.SrcColorBlendFactor,
+		DstColorBlendFactor: state.DstColorBlendFactor,
+		ColorBlendOp:        state.ColorBlendOp,
+		SrcAlphaBlendFactor: state.SrcAlphaBlendFactor,
+		DstAlphaBlendFactor: state.DstAlphaBlendFactor,
+		AlphaBlendOp:        state.AlphaBlendOp,
+		ColorWriteMask:      state.ColorWriteMask,
+	}
+	if state.BlendEnable {
+		_state.BlendEnable = C.VK_TRUE
+	}
+}
+
+type pipelineColorBlendAttachmentState struct {
+	BlendEnable         C.VkBool32
+	SrcColorBlendFactor BlendFactor
+	DstColorBlendFactor BlendFactor
+	ColorBlendOp        BlendOp
+	SrcAlphaBlendFactor BlendFactor
+	DstAlphaBlendFactor BlendFactor
+	AlphaBlendOp        BlendOp
+	ColorWriteMask      ColorComponentFlags
+}
+
+type BlendFactor uint32
+
+const (
+	BlendFactorZero BlendFactor = iota
+	BlendFactorOne
+	BlendFactorSrcAlphaSaturate
+	BlendFactorSrcColor
+	BlendFactorOneMinusSrcColor
+	BlendFactorDstColor
+	BlendFactorOneMinusDstColor
+	BlendFactorSrcAlpha
+	BlendFactorOneMinusSrcAlpha
+	BlendFactorDstAlpha
+	BlendFactorOneMinusDstAlpha
+	BlendFactorConstantColor
+	BlendFactorOneMinusConstantColor
+	BlendFactorConstantAlpha
+	BlendFactorOneMinusConstantAlpha
+	BlendFactorSrc1Color
+	BlendFactorOneMinusSrc1Color
+	BlendFactorSrc1Alpha
+	BlendFactorOneMinusSrc1Alpha
+)
+
+type PipelineColorBlendStateCreateInfo struct {
+	Type           StructureType
+	Next           uintptr
+	Flags          PipelineColorBlendStateCreateFlags
+	LogicOpEnable  bool
+	LogicOp        LogicOp
+	Attachments    []PipelineColorBlendAttachmentState
+	BlendConstants [4]float32
+}
+
+func (info *PipelineColorBlendStateCreateInfo) C(_info *pipelineColorBlendStateCreateInfo) freeFunc {
+	*_info = pipelineColorBlendStateCreateInfo{
+		Type:            info.Type,
+		Next:            info.Next,
+		Flags:           info.Flags,
+		LogicOpEnable:   C.VK_FALSE,
+		LogicOp:         info.LogicOp,
+		AttachmentCount: uint32(len(info.Attachments)),
+		Attachments:     nil,
+		BlendConstants:  info.BlendConstants,
+	}
+	if info.LogicOpEnable {
+		_info.LogicOpEnable = C.VK_TRUE
+	}
+	if _info.AttachmentCount > 0 {
+		p := C.malloc(C.size_t(uintptr(_info.AttachmentCount) * unsafe.Sizeof(PipelineColorBlendAttachmentState{})))
+		for i, attachment := range info.Attachments {
+			*(*PipelineColorBlendAttachmentState)(unsafe.Pointer(uintptr(p) + uintptr(i)*unsafe.Sizeof(PipelineColorBlendAttachmentState{}))) = attachment
+		}
+		_info.Attachments = (*PipelineColorBlendAttachmentState)(p)
+		return freeFunc(func() {
+			C.free(p)
+		})
+	}
+	return freeFunc(nil)
+}
+
+type pipelineColorBlendStateCreateInfo struct {
+	Type            StructureType
+	Next            uintptr
+	Flags           PipelineColorBlendStateCreateFlags
+	LogicOpEnable   C.VkBool32
+	LogicOp         LogicOp
+	AttachmentCount uint32
+	Attachments     *PipelineColorBlendAttachmentState
+	BlendConstants  [4]float32
+}
+
+type LogicOp uint32
+
+const (
+	LogicOpClear LogicOp = iota
+	LogicOpAnd
+	LogicOpAndReverse
+	LogicOpCopy
+	LogicOpAndInverted
+	LogicOpNoOp
+	LogicOpXor
+	LogicOpOr
+	LogicOpNor
+	LogicOpEquivalent
+	LogicOpInvert
+	LogicOpOrReverse
+	LogicOpCopyInverted
+	LogicOpOrInverted
+	LogicOpNand
+	LogicOpSet
+)
+
+type BlendOp uint32
+
+const (
+	BlendOpAdd BlendOp = iota
+	BlendOpSubtract
+	BlendOpReverseSubtract
+	BlendOpMin
+	BlendOpMax
+)
+
+type ColorComponentFlagBits uint32
+type ColorComponentFlags = ColorComponentFlagBits
+
+const (
+	ColorComponentRBit ColorComponentFlagBits = 1 << iota
+	ColorComponentGBit
+	ColorComponentBBit
+	ColorComponentABit
+)
+
 type PipelineDynamicStateCreateInfo struct{}
 type PipelineLayout uintptr
 type GraphicsPipelineCreateInfo struct {
@@ -442,7 +595,7 @@ func (info *GraphicsPipelineCreateInfo) C(_info *graphicsPipelineCreateInfo) fre
 		RasterizationState: nil,
 		MultisampleState:   nil,
 		DepthStencilState:  info.DepthStencilState,
-		ColorBlendState:    info.ColorBlendState,
+		ColorBlendState:    nil,
 		DynamicState:       info.DynamicState,
 		Layout:             info.Layout,
 		RenderPass:         info.RenderPass,
@@ -491,6 +644,14 @@ func (info *GraphicsPipelineCreateInfo) C(_info *graphicsPipelineCreateInfo) fre
 		_info.MultisampleState = (*pipelineMultisampleStateCreateInfo)(p)
 		info.MultisampleState.C(_info.MultisampleState)
 	}
+	if info.ColorBlendState != nil {
+		p := C.malloc(C.size_t(unsafe.Sizeof(pipelineColorBlendStateCreateInfo{})))
+		fs = append(fs, freeFunc(func() {
+			C.free(p)
+		}))
+		_info.ColorBlendState = (*pipelineColorBlendStateCreateInfo)(p)
+		fs = append(fs, info.ColorBlendState.C(_info.ColorBlendState))
+	}
 	if len(info.Stages) > 0 {
 		p := C.malloc(C.size_t(uintptr(_info.StageCount) * unsafe.Sizeof(pipelineShaderStageCreateInfo{})))
 		fs = append(fs, freeFunc(func() {
@@ -521,7 +682,7 @@ type graphicsPipelineCreateInfo struct {
 	RasterizationState *pipelineRasterizationStateCreateInfo
 	MultisampleState   *pipelineMultisampleStateCreateInfo
 	DepthStencilState  *PipelineDepthStencilStateCreateInfo
-	ColorBlendState    *PipelineColorBlendStateCreateInfo
+	ColorBlendState    *pipelineColorBlendStateCreateInfo
 	DynamicState       *PipelineDynamicStateCreateInfo
 	Layout             PipelineLayout
 	RenderPass         RenderPass
