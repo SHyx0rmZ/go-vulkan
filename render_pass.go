@@ -103,15 +103,15 @@ func (info *RenderPassBeginInfo) C(_info *renderPassBeginInfo) freeFunc {
 			}
 			switch color := cv.Color.(type) {
 			case ClearColorValueFloat:
-				_clearValue.Color[0] = uint32(color[0])
-				_clearValue.Color[1] = uint32(color[1])
-				_clearValue.Color[2] = uint32(color[2])
-				_clearValue.Color[3] = uint32(color[3])
+				*(*float32)(unsafe.Pointer(&_clearValue.Color[0])) = color[0]
+				*(*float32)(unsafe.Pointer(&_clearValue.Color[1])) = color[1]
+				*(*float32)(unsafe.Pointer(&_clearValue.Color[2])) = color[2]
+				*(*float32)(unsafe.Pointer(&_clearValue.Color[3])) = color[3]
 			case ClearColorValueInt:
-				_clearValue.Color[0] = uint32(color[0])
-				_clearValue.Color[1] = uint32(color[1])
-				_clearValue.Color[2] = uint32(color[2])
-				_clearValue.Color[3] = uint32(color[3])
+				*(*int32)(unsafe.Pointer(&_clearValue.Color[0])) = color[0]
+				*(*int32)(unsafe.Pointer(&_clearValue.Color[1])) = color[1]
+				*(*int32)(unsafe.Pointer(&_clearValue.Color[2])) = color[2]
+				*(*int32)(unsafe.Pointer(&_clearValue.Color[3])) = color[3]
 			case ClearColorValueUint:
 				_clearValue.Color[0] = color[0]
 				_clearValue.Color[1] = color[1]
