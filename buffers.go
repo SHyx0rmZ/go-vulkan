@@ -2,6 +2,7 @@ package vulkan
 
 // #include <vulkan/vulkan.h>
 // #include <stdlib.h>
+// #include <string.h>
 import "C"
 import (
 	"unsafe"
@@ -109,6 +110,145 @@ func CmdBindVertexBuffers(commandBuffer CommandBuffer, firstBinding uint32, buff
 		(C.uint32_t)(len(buffers)),
 		(*C.VkBuffer)(unsafe.Pointer(&buffers[0])),
 		(*C.VkDeviceSize)(unsafe.Pointer(&offsets[0])),
+	)
+}
+
+type MemoryAllocateInfo struct {
+	Type            StructureType
+	Next            uintptr
+	AllocationSize  DeviceSize
+	MemoryTypeIndex uint32
+}
+
+type DeviceMemory uintptr
+
+func AllocateMemory(device Device, allocateInfo MemoryAllocateInfo, allocator *AllocationCallbacks) (DeviceMemory, error) {
+	var deviceMemory DeviceMemory
+	result := Result(C.vkAllocateMemory(
+		(C.VkDevice)(unsafe.Pointer(device)),
+		(*C.VkMemoryAllocateInfo)(unsafe.Pointer(&allocateInfo)),
+		(*C.VkAllocationCallbacks)(unsafe.Pointer(allocator)),
+		(*C.VkDeviceMemory)(unsafe.Pointer(&deviceMemory)),
+	))
+	if result != Success {
+		return 0, result
+	}
+	return deviceMemory, nil
+}
+
+func FreeMemory(device Device, memory DeviceMemory, allocator *AllocationCallbacks) {
+	C.vkFreeMemory(
+		(C.VkDevice)(unsafe.Pointer(device)),
+		(C.VkDeviceMemory)(unsafe.Pointer(memory)),
+		(*C.VkAllocationCallbacks)(unsafe.Pointer(allocator)),
+	)
+}
+
+type MemoryMapFlags uint32
+
+func MapMemory(device Device, memory DeviceMemory, offset, size DeviceSize, flags MemoryMapFlags) (uintptr, error) {
+	var data uintptr
+	result := Result(C.vkMapMemory(
+		(C.VkDevice)(unsafe.Pointer(device)),
+		(C.VkDeviceMemory)(unsafe.Pointer(memory)),
+		(C.VkDeviceSize)(offset),
+		(C.VkDeviceSize)(size),
+		(C.VkMemoryMapFlags)(flags),
+		(*unsafe.Pointer)(unsafe.Pointer(&data)),
+	))
+	if result != Success {
+		return 0, result
+	}
+	return data, nil
+}
+
+func UnmapMemory(device Device, memory DeviceMemory) {
+	C.vkUnmapMemory(
+		(C.VkDevice)(unsafe.Pointer(device)),
+		(C.VkDeviceMemory)(unsafe.Pointer(memory)),
+	)
+}
+
+type MemoryRequirements struct {
+	Size           DeviceSize
+	Alignment      DeviceSize
+	MemoryTypeBits uint32
+}
+
+func GetBufferMemoryRequirements(device Device, buffer Buffer) MemoryRequirements {
+	var memoryRequirements MemoryRequirements
+	C.vkGetBufferMemoryRequirements(
+		(C.VkDevice)(unsafe.Pointer(device)),
+		(C.VkBuffer)(unsafe.Pointer(buffer)),
+		(*C.VkMemoryRequirements)(unsafe.Pointer(&memoryRequirements)),
+	)
+	return memoryRequirements
+}
+
+func GetPhysicalDeviceMemoryProperties(device PhysicalDevice) PhysicalDeviceMemoryProperties {
+	var properties PhysicalDeviceMemoryProperties
+	C.vkGetPhysicalDeviceMemoryProperties(
+		(C.VkPhysicalDevice)(unsafe.Pointer(device)),
+		(*C.VkPhysicalDeviceMemoryProperties)(unsafe.Pointer(&properties)),
+	)
+	return properties
+}
+
+type PhysicalDeviceMemoryProperties struct {
+	MemoryTypeCount uint32
+	MemoryTypes     [32]MemoryType
+	MemoryHeapCount uint32
+	MemoryHeaps     [16]MemoryHeap
+}
+
+type MemoryHeapFlagBits uint32
+type MemoryHeapFlags = MemoryHeapFlagBits
+
+const (
+	MemoryHeapDeviceLocalBit MemoryHeapFlagBits = 1 << iota
+	MemoryHeapMultiInstanceBit
+)
+
+type MemoryHeap struct {
+	Size  DeviceSize
+	Flags MemoryHeapFlags
+}
+
+type MemoryPropertyFlagBits uint32
+type MemoryPropertyFlags = MemoryPropertyFlagBits
+
+const (
+	MemoryPropertyDeviceLocalBit MemoryPropertyFlagBits = 1 << iota
+	MemoryPropertyHostVisibleBit
+	MemoryPropertyHostCoherentBit
+	MemoryPropertyHostCachedBit
+	MemoryPropertyLazilyAllocatedBit
+	MemoryPropertyProtectedBit
+)
+
+type MemoryType struct {
+	PropertyFlags MemoryPropertyFlags
+	HeapIndex     uint32
+}
+
+func BindBufferMemory(device Device, buffer Buffer, memory DeviceMemory, offset DeviceSize) error {
+	result := Result(C.vkBindBufferMemory(
+		(C.VkDevice)(unsafe.Pointer(device)),
+		(C.VkBuffer)(unsafe.Pointer(buffer)),
+		(C.VkDeviceMemory)(unsafe.Pointer(memory)),
+		(C.VkDeviceSize)(offset),
+	))
+	if result != Success {
+		return result
+	}
+	return nil
+}
+
+func Memcpy(dst unsafe.Pointer, src unsafe.Pointer, size uintptr) {
+	C.memcpy(
+		dst,
+		src,
+		C.size_t(size),
 	)
 }
 
