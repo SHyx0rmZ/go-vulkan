@@ -4,6 +4,7 @@ package vulkan
 // #include <stdlib.h>
 import "C"
 import (
+	"fmt"
 	"unsafe"
 )
 
@@ -49,6 +50,7 @@ func (info *PipelineShaderStageCreateInfo) C(_info *pipelineShaderStageCreateInf
 		Module: info.Module,
 		Name:   C.CString(info.Name),
 	}
+	fmt.Printf("%q @ %#v\n", info.Name, _info.Name)
 	if len(info.SpecializationInfo.Data) > 0 || len(info.SpecializationInfo.MapEntries) > 0 {
 		panic("ikohasdoa ")
 	}
@@ -149,8 +151,8 @@ func (info *PipelineVertexInputStateCreateInfo) C(_info *pipelineVertexInputStat
 		_info.VertexAttributeDescriptions = (*VertexInputAttributeDescription)(p)
 	}
 	return freeFunc(func() {
-		for _, p := range ps {
-			C.free(p)
+		for i := len(ps); i > 0; i-- {
+			C.free(ps[i-1])
 		}
 	})
 }
@@ -273,8 +275,8 @@ func (info *PipelineViewportStateCreateInfo) C(_info *pipelineViewportStateCreat
 		_info.Scissors = (*Rect2D)(p)
 	}
 	return freeFunc(func() {
-		for _, p := range ps {
-			C.free(p)
+		for i := len(ps); i > 0; i-- {
+			C.free(ps[i-1])
 		}
 	})
 }
@@ -663,8 +665,8 @@ func (info *GraphicsPipelineCreateInfo) C(_info *graphicsPipelineCreateInfo) fre
 		fs = append(fs, info.ColorBlendState.C(_info.ColorBlendState))
 	}
 	return freeFunc(func() {
-		for _, f := range fs {
-			f()
+		for i := len(fs); i > 0; i-- {
+			fs[i-1]()
 		}
 	})
 }
@@ -717,8 +719,8 @@ func CreateGraphicsPipelines(device Device, pipelineCache PipelineCache, createI
 		ps = append(ps, createInfo.C((*graphicsPipelineCreateInfo)(unsafe.Pointer(&_createInfos[i]))))
 	}
 	defer func() {
-		for _, p := range ps {
-			p.Free()
+		for i := len(ps); i > 0; i-- {
+			ps[i-1].Free()
 		}
 	}()
 	result := Result(C.vkCreateGraphicsPipelines(

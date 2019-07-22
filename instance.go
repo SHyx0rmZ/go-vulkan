@@ -253,8 +253,8 @@ func (info *PresentInfo) C(_info *presentInfo) freeFunc {
 		_info.Results = (*Result)(p)
 	}
 	return freeFunc(func() {
-		for _, p := range ps {
-			C.free(p)
+		for i := len(ps); i > 0; i-- {
+			C.free(ps[i-1])
 		}
 	})
 }

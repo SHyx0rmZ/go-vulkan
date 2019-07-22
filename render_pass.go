@@ -168,8 +168,8 @@ func CreateRenderPass(device Device, createInfo RenderPassCreateInfo, allocator 
 		defer C.free(p)
 		var ps []unsafe.Pointer
 		defer func() {
-			for _, p := range ps {
-				C.free(p)
+			for i := len(ps); i > 0; i-- {
+				C.free(ps[i-1])
 			}
 		}()
 		for i, subpass := range createInfo.Subpasses {

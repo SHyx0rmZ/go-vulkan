@@ -95,8 +95,8 @@ func (info *SubmitInfo) C(_info *submitInfo) freeFunc {
 		_info.SignalSemaphores = (*Semaphore)(p)
 	}
 	return freeFunc(func() {
-		for _, p := range ps {
-			C.free(p)
+		for i := len(ps); i > 0; i-- {
+			C.free(ps[i-1])
 		}
 	})
 }
@@ -222,8 +222,8 @@ func QueueSubmit(queue Queue, submits []SubmitInfo, fence Fence) error {
 		fs = append(fs, submit.C(&_submits[i]))
 	}
 	defer func() {
-		for _, f := range fs {
-			f()
+		for i := len(fs); i > 0; i-- {
+			fs[i-1]()
 		}
 	}()
 	result := Result(C.vkQueueSubmit(

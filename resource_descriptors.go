@@ -45,8 +45,8 @@ func (info *PipelineLayoutCreateInfo) C(_info *pipelineLayoutCreateInfo) freeFun
 		_info.PushConstantRanges = (*PushConstantRange)(p)
 	}
 	return freeFunc(func() {
-		for _, p := range ps {
-			C.free(p)
+		for i := len(ps); i > 0; i-- {
+			C.free(ps[i-1])
 		}
 	})
 }
