@@ -16,6 +16,17 @@ func CmdDraw(commandBuffer CommandBuffer, vertexCount, instanceCount, firstVerte
 	)
 }
 
+func CmdDrawIndexed(commandBuffer CommandBuffer, indexCount, instanceCount, firstIndex uint32, vertexOffset int32, firstInstance uint32) {
+	C.vkCmdDrawIndexed(
+		(C.VkCommandBuffer)(unsafe.Pointer(commandBuffer)),
+		(C.uint32_t)(indexCount),
+		(C.uint32_t)(instanceCount),
+		(C.uint32_t)(firstIndex),
+		(C.int32_t)(vertexOffset),
+		(C.uint32_t)(firstInstance),
+	)
+}
+
 type ClearAttachment struct {
 	AspectMask      ImageAspectFlags
 	ColorAttachment uint32

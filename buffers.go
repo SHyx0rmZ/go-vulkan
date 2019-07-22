@@ -113,6 +113,15 @@ func CmdBindVertexBuffers(commandBuffer CommandBuffer, firstBinding uint32, buff
 	)
 }
 
+func CmdBindIndexBuffer(commandBuffer CommandBuffer, buffer Buffer, offset DeviceSize, indexType uint32) {
+	C.vkCmdBindIndexBuffer(
+		(C.VkCommandBuffer)(unsafe.Pointer(commandBuffer)),
+		(C.VkBuffer)(unsafe.Pointer(buffer)),
+		(C.VkDeviceSize)(offset),
+		(C.VkIndexType)(indexType),
+	)
+}
+
 type MemoryAllocateInfo struct {
 	Type            StructureType
 	Next            uintptr
