@@ -95,7 +95,7 @@ type PhysicalDeviceProperties struct {
 }
 
 type SurfaceFormat struct {
-	Format     C.VkFormat
+	Format     Format
 	ColorSpace C.VkColorSpaceKHR
 }
 

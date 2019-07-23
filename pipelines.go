@@ -402,7 +402,102 @@ type pipelineMultisampleStateCreateInfo struct {
 
 type SampleMask uint32
 
-type PipelineDepthStencilStateCreateInfo struct{}
+type PipelineDepthStencilStateCreateInfo struct {
+	Type                  StructureType
+	Next                  uintptr
+	Flags                 PipelineDepthStencilStateCreateFlags
+	DepthTestEnable       bool
+	DepthWriteEnable      bool
+	DepthCompareOp        CompareOp
+	DepthBoundsTestEnable bool
+	StencilTestEnable     bool
+	Front                 StencilOpState
+	Back                  StencilOpState
+	MinDepthBounds        float32
+	MaxDeptBounds         float32
+}
+
+func (info *PipelineDepthStencilStateCreateInfo) C(_info *pipelineDepthStencilStateCreateInfo) {
+	*_info = pipelineDepthStencilStateCreateInfo{
+		Type:                  info.Type,
+		Next:                  info.Next,
+		Flags:                 info.Flags,
+		DepthTestEnable:       C.VK_FALSE,
+		DepthWriteEnable:      C.VK_FALSE,
+		DepthCompareOp:        info.DepthCompareOp,
+		DepthBoundsTestEnable: C.VK_FALSE,
+		StencilTestEnable:     C.VK_FALSE,
+		Front:                 info.Front,
+		Back:                  info.Back,
+		MinDepthBounds:        info.MinDepthBounds,
+		MaxDepthBounds:        info.MaxDeptBounds,
+	}
+	if info.DepthTestEnable {
+		_info.DepthTestEnable = C.VK_TRUE
+	}
+	if info.DepthWriteEnable {
+		_info.DepthWriteEnable = C.VK_TRUE
+	}
+	if info.DepthBoundsTestEnable {
+		_info.DepthBoundsTestEnable = C.VK_TRUE
+	}
+	if info.StencilTestEnable {
+		_info.StencilTestEnable = C.VK_TRUE
+	}
+}
+
+type PipelineDepthStencilStateCreateFlags uint32
+
+type pipelineDepthStencilStateCreateInfo struct {
+	Type                  StructureType
+	Next                  uintptr
+	Flags                 PipelineDepthStencilStateCreateFlags
+	DepthTestEnable       C.VkBool32
+	DepthWriteEnable      C.VkBool32
+	DepthCompareOp        CompareOp
+	DepthBoundsTestEnable C.VkBool32
+	StencilTestEnable     C.VkBool32
+	Front                 StencilOpState
+	Back                  StencilOpState
+	MinDepthBounds        float32
+	MaxDepthBounds        float32
+}
+
+type StencilOpState struct {
+	FailOp      StencilOp
+	PassOp      StencilOp
+	DepthFailOp StencilOp
+	CompareOp   CompareOp
+	CompareMask uint32
+	WriteMask   uint32
+	Reference   uint32
+}
+
+type StencilOp uint32
+
+const (
+	StencilOpKeep StencilOp = iota
+	StencilOpZero
+	StencilOpReplace
+	StencilOpIncrementAndClamp
+	StencilOpIncrementAndWrap
+	StencilOpInvert
+	StencilOpDecrementAndClamp
+	StencilOpDecrementAndWrap
+)
+
+type CompareOp uint32
+
+const (
+	CompareOpNever CompareOp = iota
+	CompareOpLess
+	CompareOpEqual
+	CompareOpLessOrEqual
+	CompareOpGreater
+	CompareOpNotEqual
+	CompareOpGreaterOrEqual
+	CompareOpAlways
+)
 
 type PipelineColorBlendStateCreateFlags uint32
 
@@ -596,7 +691,7 @@ func (info *GraphicsPipelineCreateInfo) C(_info *graphicsPipelineCreateInfo) fre
 		ViewportState:      nil,
 		RasterizationState: nil,
 		MultisampleState:   nil,
-		DepthStencilState:  info.DepthStencilState,
+		DepthStencilState:  nil,
 		ColorBlendState:    nil,
 		DynamicState:       info.DynamicState,
 		Layout:             info.Layout,
@@ -656,6 +751,14 @@ func (info *GraphicsPipelineCreateInfo) C(_info *graphicsPipelineCreateInfo) fre
 		_info.MultisampleState = (*pipelineMultisampleStateCreateInfo)(p)
 		info.MultisampleState.C(_info.MultisampleState)
 	}
+	if info.DepthStencilState != nil {
+		p := C.malloc(C.size_t(unsafe.Sizeof(pipelineDepthStencilStateCreateInfo{})))
+		fs = append(fs, freeFunc(func() {
+			C.free(p)
+		}))
+		_info.DepthStencilState = (*pipelineDepthStencilStateCreateInfo)(p)
+		info.DepthStencilState.C(_info.DepthStencilState)
+	}
 	if info.ColorBlendState != nil {
 		p := C.malloc(C.size_t(unsafe.Sizeof(pipelineColorBlendStateCreateInfo{})))
 		fs = append(fs, freeFunc(func() {
@@ -683,7 +786,7 @@ type graphicsPipelineCreateInfo struct {
 	ViewportState      *pipelineViewportStateCreateInfo
 	RasterizationState *pipelineRasterizationStateCreateInfo
 	MultisampleState   *pipelineMultisampleStateCreateInfo
-	DepthStencilState  *PipelineDepthStencilStateCreateInfo
+	DepthStencilState  *pipelineDepthStencilStateCreateInfo
 	ColorBlendState    *pipelineColorBlendStateCreateInfo
 	DynamicState       *PipelineDynamicStateCreateInfo
 	Layout             PipelineLayout

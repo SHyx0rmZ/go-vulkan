@@ -182,7 +182,7 @@ type SwapchainCreateInfo struct {
 	Flags           C.VkSwapchainCreateFlagsKHR
 	Surface         C.VkSurfaceKHR
 	MinImageCount   uint32
-	Format          C.VkFormat
+	Format          Format
 	ImageColorSpace C.VkColorSpaceKHR
 	ImageExtent     struct {
 		Width  uint32

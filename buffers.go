@@ -267,3 +267,129 @@ const (
 	SharingModeExclusive SharingMode = iota
 	SharingModeConcurrent
 )
+
+type ImageCreateFlags uint32
+
+type ImageCreateInfo struct {
+	Type               StructureType
+	Next               uintptr
+	Flags              ImageCreateFlags
+	ImageType          ImageType
+	Format             Format
+	Extent             Extent3D
+	MipLevels          uint32
+	ArrayLayers        uint32
+	Samples            SampleCountFlagBits
+	Tiling             ImageTiling
+	Usage              ImageUsageFlags
+	SharingMode        SharingMode
+	QueueFamilyIndices []uint32
+	InitialLayout      ImageLayout
+}
+
+func (info *ImageCreateInfo) C(_info *imageCreateInfo) freeFunc {
+	*_info = imageCreateInfo{
+		Type:                  info.Type,
+		Next:                  info.Next,
+		Flags:                 info.Flags,
+		ImageType:             info.ImageType,
+		Format:                info.Format,
+		Extend:                info.Extent,
+		MipLevels:             info.MipLevels,
+		ArrayLayers:           info.ArrayLayers,
+		Samples:               info.Samples,
+		Tiling:                info.Tiling,
+		Usage:                 info.Usage,
+		SharingMode:           info.SharingMode,
+		QueueFamilyIndexCount: uint32(len(info.QueueFamilyIndices)),
+		QueueFamilyIndices:    nil,
+		InitialLayout:         info.InitialLayout,
+	}
+	if _info.QueueFamilyIndexCount > 0 {
+		p := C.malloc(C.size_t(uintptr(_info.QueueFamilyIndexCount) * unsafe.Sizeof(uint32(0))))
+		for i, index := range info.QueueFamilyIndices {
+			*(*uint32)(unsafe.Pointer(uintptr(p) + uintptr(i)*unsafe.Sizeof(uint32(0)))) = index
+		}
+		return freeFunc(func() {
+			C.free(p)
+		})
+	}
+	return freeFunc(nil)
+}
+
+type imageCreateInfo struct {
+	Type                  StructureType
+	Next                  uintptr
+	Flags                 ImageCreateFlags
+	ImageType             ImageType
+	Format                Format
+	Extend                Extent3D
+	MipLevels             uint32
+	ArrayLayers           uint32
+	Samples               SampleCountFlagBits
+	Tiling                ImageTiling
+	Usage                 ImageUsageFlags
+	SharingMode           SharingMode
+	QueueFamilyIndexCount uint32
+	QueueFamilyIndices    *uint32
+	InitialLayout         ImageLayout
+}
+
+type ImageType uint32
+
+const (
+	ImageType1D ImageType = iota
+	ImageType2D
+	ImageType3D
+)
+
+type Extent3D struct {
+	Width  uint32
+	Height uint32
+	Depth  uint32
+}
+
+type ImageTiling uint32
+
+const (
+	ImageTilingOptimal ImageTiling = iota
+	ImageTilingLinear
+)
+
+type ImageUsageFlagBits uint32
+type ImageUsageFlags = ImageUsageFlagBits
+
+const (
+	ImageUsageTransferSrcBit ImageUsageFlagBits = 1 << iota
+	ImageUsageTransferDstBit
+	ImageUsageSampledBit
+	ImageUsageStorageBit
+	ImageUsageColorAttachmentBit
+	ImageUsageDepthStencilAttachmentBit
+	ImageUsageTransientAttachmentBit
+	ImageUsageInputAttachmentBit
+)
+
+func CreateImage(device Device, createInfo ImageCreateInfo, allocator *AllocationCallbacks) (Image, error) {
+	var image Image
+	var _createInfo imageCreateInfo
+	defer createInfo.C(&_createInfo).Free()
+	result := Result(C.vkCreateImage(
+		(C.VkDevice)(unsafe.Pointer(device)),
+		(*C.VkImageCreateInfo)(unsafe.Pointer(&_createInfo)),
+		(*C.VkAllocationCallbacks)(allocator),
+		(*C.VkImage)(unsafe.Pointer(&image)),
+	))
+	if result != Success {
+		return 0, result
+	}
+	return image, nil
+}
+
+func DestroyImage(device Device, image Image, allocator *AllocationCallbacks) {
+	C.vkDestroyImage(
+		(C.VkDevice)(unsafe.Pointer(device)),
+		(C.VkImage)(unsafe.Pointer(image)),
+		(*C.VkAllocationCallbacks)(allocator),
+	)
+}

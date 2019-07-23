@@ -152,7 +152,7 @@ type ImageViewCreateInfo struct {
 	Flags            C.VkImageViewCreateFlags
 	Image            Image
 	ViewType         ImageViewType
-	Format           C.VkFormat
+	Format           Format
 	Components       ComponentMapping
 	SubresourceRange ImageSubresourceRange
 }
@@ -257,7 +257,7 @@ type renderPassCreateInfo struct {
 
 type AttachmentDescription struct {
 	Flags          AttachmentDescriptionFlags
-	Format         C.VkFormat
+	Format         Format
 	Samples        SampleCountFlagBits
 	LoadOp         AttachmentLoadOp
 	StoreOp        AttachmentStoreOp

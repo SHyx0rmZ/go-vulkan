@@ -77,27 +77,27 @@ func (d Device) GetQueue(queueFamilyIndex, queueIndex uint32) Queue {
 
 type Image uintptr
 
-type ImageCreateInfo struct {
-	Type      C.VkStructureType
-	Next      uintptr
-	Flags     C.VkImageCreateFlags
-	ImageType C.VkImageType
-	Format    C.VkFormat
-	Extent    struct {
-		Width  uint32
-		Height uint32
-		Depth  uint32
-	}
-	MipLevels             uint32
-	ArrayLayers           uint32
-	Samples               C.VkSampleCountFlagBits
-	Tiling                C.VkImageTiling
-	Usage                 C.VkImageUsageFlags
-	SharingMode           SharingMode
-	QueueFamilyIndexCount uint32
-	QueueFamilyIndices    *uint32
-	InitialLayout         C.VkImageLayout
-}
+// type ImageCreateInfo struct {
+// 	Type      C.VkStructureType
+// 	Next      uintptr
+// 	Flags     C.VkImageCreateFlags
+// 	ImageType C.VkImageType
+// 	Format    C.VkFormat
+// 	Extent    struct {
+// 		Width  uint32
+// 		Height uint32
+// 		Depth  uint32
+// 	}
+// 	MipLevels             uint32
+// 	ArrayLayers           uint32
+// 	Samples               C.VkSampleCountFlagBits
+// 	Tiling                C.VkImageTiling
+// 	Usage                 C.VkImageUsageFlags
+// 	SharingMode           SharingMode
+// 	QueueFamilyIndexCount uint32
+// 	QueueFamilyIndices    *uint32
+// 	InitialLayout         C.VkImageLayout
+// }
 
 func (d Device) GetSwapchainImages(swapchain Swapchain) ([]Image, error) {
 	var count uint32
