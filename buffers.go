@@ -393,3 +393,26 @@ func DestroyImage(device Device, image Image, allocator *AllocationCallbacks) {
 		(*C.VkAllocationCallbacks)(allocator),
 	)
 }
+
+func GetImageMemoryRequirements(device Device, image Image) MemoryRequirements {
+	var memoryRequirements MemoryRequirements
+	C.vkGetImageMemoryRequirements(
+		(C.VkDevice)(unsafe.Pointer(device)),
+		(C.VkImage)(unsafe.Pointer(image)),
+		(*C.VkMemoryRequirements)(unsafe.Pointer(&memoryRequirements)),
+	)
+	return memoryRequirements
+}
+
+func BindImageMemory(device Device, image Image, memory DeviceMemory, memoryOffset DeviceSize) error {
+	result := Result(C.vkBindImageMemory(
+		(C.VkDevice)(unsafe.Pointer(device)),
+		(C.VkImage)(unsafe.Pointer(image)),
+		(C.VkDeviceMemory)(unsafe.Pointer(memory)),
+		(C.VkDeviceSize)(memoryOffset),
+	))
+	if result != Success {
+		return result
+	}
+	return nil
+}
