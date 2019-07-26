@@ -315,7 +315,7 @@ func (i Instance) EnumeratePhysicalDevices() ([]PhysicalDevice, error) {
 	fmt.Println(unsafe.Sizeof(PhysicalDeviceProperties2KHR{}))
 	result := C.vkEnumeratePhysicalDevices((C.VkInstance)(unsafe.Pointer(i)), &count, nil)
 	if result != C.VK_SUCCESS {
-		return nil, fmt.Errorf("vulkan error")
+		return nil, Result(result)
 	}
 	devices := make([]PhysicalDevice, count)
 	result = C.vkEnumeratePhysicalDevices((C.VkInstance)(unsafe.Pointer(i)), &count, (*C.VkPhysicalDevice)(unsafe.Pointer(&devices[0])))
