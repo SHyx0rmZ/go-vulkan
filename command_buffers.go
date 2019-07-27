@@ -215,17 +215,17 @@ func EndCommandBuffer(commandBuffer CommandBuffer) error {
 	return nil
 }
 
-func QueueSubmit(queue Queue, submits []SubmitInfo, fence Fence) error {
+func QueueSubmit(queue Queue, submits []SubmitInfo, fence Fence) (freeFunc, error) {
 	_submits := make([]submitInfo, len(submits))
 	var fs []freeFunc
 	for i, submit := range submits {
 		fs = append(fs, submit.C(&_submits[i]))
 	}
-	defer func() {
+	ff := freeFunc(func() {
 		for i := len(fs); i > 0; i-- {
 			fs[i-1]()
 		}
-	}()
+	})
 	result := Result(C.vkQueueSubmit(
 		(C.VkQueue)(unsafe.Pointer(queue)),
 		(C.uint32_t)(len(submits)),
@@ -233,9 +233,9 @@ func QueueSubmit(queue Queue, submits []SubmitInfo, fence Fence) error {
 		(C.VkFence)(unsafe.Pointer(fence)),
 	))
 	if result != Success {
-		return result
+		return ff, result
 	}
-	return nil
+	return ff, nil
 }
 
 func CmdExecuteCommands(commandBuffer CommandBuffer, commandBuffers []CommandBuffer) {

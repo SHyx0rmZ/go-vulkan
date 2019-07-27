@@ -16,7 +16,7 @@ type PipelineCreateFlags uint32
 type PipelineShaderStageCreateFlags uint32
 
 type ShaderStageFlagBits uint32
-type ShaderStageFlags ShaderStageFlagBits
+type ShaderStageFlags = ShaderStageFlagBits
 
 const (
 	ShaderStageVertexBit ShaderStageFlagBits = 1 << iota
