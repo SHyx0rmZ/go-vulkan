@@ -198,27 +198,7 @@ type PipelineInputAssemblyStateCreateInfo struct {
 	Flags                  PipelineInputAssemblyStateCreateFlags
 	Topology               PrimitiveTopology
 	PrimitiveRestartEnable bool
-}
-
-func (info *PipelineInputAssemblyStateCreateInfo) C(_info *pipelineInputAssemblyStateCreateInfo) {
-	*_info = pipelineInputAssemblyStateCreateInfo{
-		Type:                   info.Type,
-		Next:                   info.Next,
-		Flags:                  info.Flags,
-		Topology:               info.Topology,
-		PrimitiveRestartEnable: C.VK_FALSE,
-	}
-	if info.PrimitiveRestartEnable {
-		_info.PrimitiveRestartEnable = C.VK_TRUE
-	}
-}
-
-type pipelineInputAssemblyStateCreateInfo struct {
-	Type                   StructureType
-	Next                   uintptr
-	Flags                  PipelineInputAssemblyStateCreateFlags
-	Topology               PrimitiveTopology
-	PrimitiveRestartEnable C.VkBool32
+	_                      [3]byte
 }
 
 type PrimitiveTopology uint32
@@ -305,62 +285,20 @@ type PipelineRasterizationStateCreateInfo struct {
 	Next                    uintptr
 	Flags                   PipelineRasterizationStateCreateFlags
 	DepthClampEnable        bool
+	_                       [3]byte
 	RasterizerDiscardEnable bool
+	_                       [3]byte
 	PolygonMode             PolygonMode
 	CullMode                CullModeFlags
 	FrontFace               FrontFace
 	DepthBiasEnable         bool
+	_                       [3]byte
 	DepthBiasConstantFactor float32
 	DepthBiasClamp          float32
 	DepthBiasSlopeFactor    float32
 	LineWidth               float32
 }
 
-func (info *PipelineRasterizationStateCreateInfo) C(_info *pipelineRasterizationStateCreateInfo) {
-	if info == nil {
-		return
-	}
-	*_info = pipelineRasterizationStateCreateInfo{
-		Type:                    info.Type,
-		Next:                    info.Next,
-		Flags:                   info.Flags,
-		DepthClampEnable:        C.VK_FALSE,
-		RasterizerDiscardEnable: C.VK_FALSE,
-		PolygonMode:             info.PolygonMode,
-		CullMode:                info.CullMode,
-		FrontFace:               info.FrontFace,
-		DepthBiasEnable:         C.VK_FALSE,
-		DepthBiasConstantFactor: info.DepthBiasConstantFactor,
-		DepthBiasClamp:          info.DepthBiasClamp,
-		DepthBiasSlopeFactor:    info.DepthBiasSlopeFactor,
-		LineWidth:               info.LineWidth,
-	}
-	if info.DepthClampEnable {
-		_info.DepthClampEnable = C.VK_TRUE
-	}
-	if info.RasterizerDiscardEnable {
-		_info.RasterizerDiscardEnable = C.VK_TRUE
-	}
-	if info.DepthBiasEnable {
-		_info.DepthBiasEnable = C.VK_TRUE
-	}
-}
-
-type pipelineRasterizationStateCreateInfo struct {
-	Type                    StructureType
-	Next                    uintptr
-	Flags                   PipelineRasterizationStateCreateFlags
-	DepthClampEnable        C.VkBool32
-	RasterizerDiscardEnable C.VkBool32
-	PolygonMode             PolygonMode
-	CullMode                CullModeFlags
-	FrontFace               FrontFace
-	DepthBiasEnable         C.VkBool32
-	DepthBiasConstantFactor float32
-	DepthBiasClamp          float32
-	DepthBiasSlopeFactor    float32
-	LineWidth               float32
-}
 type PipelineMultisampleStateCreateFlags uint32
 type PipelineMultisampleStateCreateInfo struct {
 	Type                  StructureType
@@ -368,36 +306,13 @@ type PipelineMultisampleStateCreateInfo struct {
 	Flags                 PipelineMultisampleStateCreateFlags
 	RasterizationSamples  SampleCountFlagBits
 	SampleShadingEnable   bool
+	_                     [3]byte
 	MinSampleShading      float32
 	SampleMask            *SampleMask
 	AlphaToCoverageEnable bool
+	_                     [3]byte
 	AlphaToOneEnable      bool
-}
-
-func (info *PipelineMultisampleStateCreateInfo) C(_info *pipelineMultisampleStateCreateInfo) {
-	*_info = pipelineMultisampleStateCreateInfo{
-		Type:                  info.Type,
-		Next:                  info.Next,
-		Flags:                 info.Flags,
-		RasterizationSamples:  info.RasterizationSamples,
-		SampleShadingEnable:   C.VK_FALSE,
-		MinSampleShading:      info.MinSampleShading,
-		SampleMask:            info.SampleMask,
-		AlphaToCoverageEnable: C.VK_FALSE,
-		AlphaToOneEnable:      C.VK_FALSE,
-	}
-}
-
-type pipelineMultisampleStateCreateInfo struct {
-	Type                  StructureType
-	Next                  uintptr
-	Flags                 PipelineMultisampleStateCreateFlags
-	RasterizationSamples  SampleCountFlagBits
-	SampleShadingEnable   C.VkBool32
-	MinSampleShading      float32
-	SampleMask            *SampleMask
-	AlphaToCoverageEnable C.VkBool32
-	AlphaToOneEnable      C.VkBool32
+	_                     [3]byte
 }
 
 type SampleMask uint32
@@ -407,61 +322,21 @@ type PipelineDepthStencilStateCreateInfo struct {
 	Next                  uintptr
 	Flags                 PipelineDepthStencilStateCreateFlags
 	DepthTestEnable       bool
+	_                     [3]byte
 	DepthWriteEnable      bool
+	_                     [3]byte
 	DepthCompareOp        CompareOp
 	DepthBoundsTestEnable bool
+	_                     [3]byte
 	StencilTestEnable     bool
+	_                     [3]byte
 	Front                 StencilOpState
 	Back                  StencilOpState
 	MinDepthBounds        float32
 	MaxDeptBounds         float32
 }
 
-func (info *PipelineDepthStencilStateCreateInfo) C(_info *pipelineDepthStencilStateCreateInfo) {
-	*_info = pipelineDepthStencilStateCreateInfo{
-		Type:                  info.Type,
-		Next:                  info.Next,
-		Flags:                 info.Flags,
-		DepthTestEnable:       C.VK_FALSE,
-		DepthWriteEnable:      C.VK_FALSE,
-		DepthCompareOp:        info.DepthCompareOp,
-		DepthBoundsTestEnable: C.VK_FALSE,
-		StencilTestEnable:     C.VK_FALSE,
-		Front:                 info.Front,
-		Back:                  info.Back,
-		MinDepthBounds:        info.MinDepthBounds,
-		MaxDepthBounds:        info.MaxDeptBounds,
-	}
-	if info.DepthTestEnable {
-		_info.DepthTestEnable = C.VK_TRUE
-	}
-	if info.DepthWriteEnable {
-		_info.DepthWriteEnable = C.VK_TRUE
-	}
-	if info.DepthBoundsTestEnable {
-		_info.DepthBoundsTestEnable = C.VK_TRUE
-	}
-	if info.StencilTestEnable {
-		_info.StencilTestEnable = C.VK_TRUE
-	}
-}
-
 type PipelineDepthStencilStateCreateFlags uint32
-
-type pipelineDepthStencilStateCreateInfo struct {
-	Type                  StructureType
-	Next                  uintptr
-	Flags                 PipelineDepthStencilStateCreateFlags
-	DepthTestEnable       C.VkBool32
-	DepthWriteEnable      C.VkBool32
-	DepthCompareOp        CompareOp
-	DepthBoundsTestEnable C.VkBool32
-	StencilTestEnable     C.VkBool32
-	Front                 StencilOpState
-	Back                  StencilOpState
-	MinDepthBounds        float32
-	MaxDepthBounds        float32
-}
 
 type StencilOpState struct {
 	FailOp      StencilOp
@@ -503,33 +378,7 @@ type PipelineColorBlendStateCreateFlags uint32
 
 type PipelineColorBlendAttachmentState struct {
 	BlendEnable         bool
-	SrcColorBlendFactor BlendFactor
-	DstColorBlendFactor BlendFactor
-	ColorBlendOp        BlendOp
-	SrcAlphaBlendFactor BlendFactor
-	DstAlphaBlendFactor BlendFactor
-	AlphaBlendOp        BlendOp
-	ColorWriteMask      ColorComponentFlags
-}
-
-func (state *PipelineColorBlendAttachmentState) C(_state *pipelineColorBlendAttachmentState) {
-	*_state = pipelineColorBlendAttachmentState{
-		BlendEnable:         C.VK_FALSE,
-		SrcColorBlendFactor: state.SrcColorBlendFactor,
-		DstColorBlendFactor: state.DstColorBlendFactor,
-		ColorBlendOp:        state.ColorBlendOp,
-		SrcAlphaBlendFactor: state.SrcAlphaBlendFactor,
-		DstAlphaBlendFactor: state.DstAlphaBlendFactor,
-		AlphaBlendOp:        state.AlphaBlendOp,
-		ColorWriteMask:      state.ColorWriteMask,
-	}
-	if state.BlendEnable {
-		_state.BlendEnable = C.VK_TRUE
-	}
-}
-
-type pipelineColorBlendAttachmentState struct {
-	BlendEnable         C.VkBool32
+	_                   [3]byte
 	SrcColorBlendFactor BlendFactor
 	DstColorBlendFactor BlendFactor
 	ColorBlendOp        BlendOp
@@ -720,12 +569,12 @@ func (info *GraphicsPipelineCreateInfo) C(_info *graphicsPipelineCreateInfo) fre
 		fs = append(fs, info.VertexInputState.C(_info.VertexInputState))
 	}
 	if info.InputAssemblyState != nil {
-		p := C.malloc(C.size_t(unsafe.Sizeof(pipelineInputAssemblyStateCreateInfo{})))
+		p := C.malloc(C.size_t(unsafe.Sizeof(PipelineInputAssemblyStateCreateInfo{})))
 		fs = append(fs, freeFunc(func() {
 			C.free(p)
 		}))
-		_info.InputAssemblyState = (*pipelineInputAssemblyStateCreateInfo)(p)
-		info.InputAssemblyState.C(_info.InputAssemblyState)
+		_info.InputAssemblyState = (*PipelineInputAssemblyStateCreateInfo)(p)
+		*_info.InputAssemblyState = *info.InputAssemblyState
 	}
 	if info.ViewportState != nil {
 		p := C.malloc(C.size_t(unsafe.Sizeof(pipelineViewportStateCreateInfo{})))
@@ -736,28 +585,28 @@ func (info *GraphicsPipelineCreateInfo) C(_info *graphicsPipelineCreateInfo) fre
 		fs = append(fs, info.ViewportState.C(_info.ViewportState))
 	}
 	if info.RasterizationState != nil {
-		p := C.malloc(C.size_t(unsafe.Sizeof(pipelineRasterizationStateCreateInfo{})))
+		p := C.malloc(C.size_t(unsafe.Sizeof(PipelineRasterizationStateCreateInfo{})))
 		fs = append(fs, freeFunc(func() {
 			C.free(p)
 		}))
-		_info.RasterizationState = (*pipelineRasterizationStateCreateInfo)(p)
-		info.RasterizationState.C(_info.RasterizationState)
+		_info.RasterizationState = (*PipelineRasterizationStateCreateInfo)(p)
+		*_info.RasterizationState = *info.RasterizationState
 	}
 	if info.MultisampleState != nil {
-		p := C.malloc(C.size_t(unsafe.Sizeof(pipelineMultisampleStateCreateInfo{})))
+		p := C.malloc(C.size_t(unsafe.Sizeof(PipelineMultisampleStateCreateInfo{})))
 		fs = append(fs, freeFunc(func() {
 			C.free(p)
 		}))
-		_info.MultisampleState = (*pipelineMultisampleStateCreateInfo)(p)
-		info.MultisampleState.C(_info.MultisampleState)
+		_info.MultisampleState = (*PipelineMultisampleStateCreateInfo)(p)
+		*_info.MultisampleState = *info.MultisampleState
 	}
 	if info.DepthStencilState != nil {
-		p := C.malloc(C.size_t(unsafe.Sizeof(pipelineDepthStencilStateCreateInfo{})))
+		p := C.malloc(C.size_t(unsafe.Sizeof(PipelineDepthStencilStateCreateInfo{})))
 		fs = append(fs, freeFunc(func() {
 			C.free(p)
 		}))
-		_info.DepthStencilState = (*pipelineDepthStencilStateCreateInfo)(p)
-		info.DepthStencilState.C(_info.DepthStencilState)
+		_info.DepthStencilState = (*PipelineDepthStencilStateCreateInfo)(p)
+		*_info.DepthStencilState = *info.DepthStencilState
 	}
 	if info.ColorBlendState != nil {
 		p := C.malloc(C.size_t(unsafe.Sizeof(pipelineColorBlendStateCreateInfo{})))
@@ -781,12 +630,12 @@ type graphicsPipelineCreateInfo struct {
 	StageCount         uint32
 	Stages             *pipelineShaderStageCreateInfo
 	VertexInputState   *pipelineVertexInputStateCreateInfo
-	InputAssemblyState *pipelineInputAssemblyStateCreateInfo
+	InputAssemblyState *PipelineInputAssemblyStateCreateInfo
 	TessellationState  *PipelineTessellationStateCreateInfo
 	ViewportState      *pipelineViewportStateCreateInfo
-	RasterizationState *pipelineRasterizationStateCreateInfo
-	MultisampleState   *pipelineMultisampleStateCreateInfo
-	DepthStencilState  *pipelineDepthStencilStateCreateInfo
+	RasterizationState *PipelineRasterizationStateCreateInfo
+	MultisampleState   *PipelineMultisampleStateCreateInfo
+	DepthStencilState  *PipelineDepthStencilStateCreateInfo
 	ColorBlendState    *pipelineColorBlendStateCreateInfo
 	DynamicState       *PipelineDynamicStateCreateInfo
 	Layout             PipelineLayout
