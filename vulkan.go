@@ -13,6 +13,25 @@ var _not_implemented = errors.New("not implemented")
 
 type DeviceSize uint64
 
+const (
+	NullHandle                = 0
+	LodClampNone              = 1000.0
+	RemainingMipLevels        = ^uint32(0)
+	RemainingArrayLayers      = ^uint32(0)
+	WholeSize                 = ^DeviceSize(0)
+	AttachmentUnused          = ^uint32(0)
+	True                      = uint32(1)
+	False                     = uint32(0)
+	QueueFamilyIgnored        = ^uint32(0)
+	SubpassExternal           = ^uint32(0)
+	MaxPhysicalDeviceNameSize = 256
+	UUIDSize                  = 16
+	MaxMemoryTypes            = 32
+	MaxMemoryHeaps            = 16
+	MaxExtensionNameSize      = 256
+	MaxDescriptionSize        = 256
+)
+
 type Result int32
 
 const (

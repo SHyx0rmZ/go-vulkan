@@ -19,9 +19,9 @@ type MemoryRequirements struct {
 
 type PhysicalDeviceMemoryProperties struct {
 	MemoryTypeCount uint32
-	MemoryTypes     [32]MemoryType
+	MemoryTypes     [MaxMemoryTypes]MemoryType
 	MemoryHeapCount uint32
-	MemoryHeaps     [16]MemoryHeap
+	MemoryHeaps     [MaxMemoryHeaps]MemoryHeap
 }
 
 type MemoryHeapFlagBits uint32

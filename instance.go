@@ -83,9 +83,6 @@ func fillNames(slice []string, count *uint32, names **C.char) interface{ Free() 
 	})
 }
 
-const MaxExtensionNameSize int = C.VK_MAX_EXTENSION_NAME_SIZE
-const MaxDescriptionSize int = C.VK_MAX_DESCRIPTION_SIZE
-
 type Layer struct {
 	LayerName             [MaxExtensionNameSize]uint8
 	SpecVersion           uint32

@@ -73,9 +73,6 @@ func (d PhysicalDevice) CreateDevice(info DeviceCreateInfo) (Device, error) {
 	return device, nil
 }
 
-const MaxPhysicalDeviceNameSize int = C.VK_MAX_PHYSICAL_DEVICE_NAME_SIZE
-const UUIDSize int = C.VK_UUID_SIZE
-
 type PhysicalDeviceProperties2KHR struct {
 	Type C.VkStructureType
 	Next *PhysicalDeviceProperties2KHR
