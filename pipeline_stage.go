@@ -1,0 +1,24 @@
+package vulkan
+
+type PipelineStageFlagBits uint32
+type PipelineStageFlags = PipelineStageFlagBits
+
+const (
+	PipelineStageTopOfPipeBit PipelineStageFlagBits = 1 << iota
+	PipelineStageDrawIndirectBit
+	PipelineStageVertexInputBit
+	PipelineStageVertexShaderBit
+	PipelineStageTessellationControlShaderBit
+	PipelineStageTessellationEvaluationShaderBit
+	PipelineStageGeometryShaderBit
+	PipelineStageFragmentShaderBit
+	PipelineStageEarlyFragmentTestsBit
+	PipelineStageLateFragmentTestsBit
+	PipelineStageColorAttachmentOutputBit
+	PipelienStageComputeShaderBit
+	PipelineStageTransferBit
+	PipelineStageBottomOfPipeBit
+	PipelineStageHostBit
+	PipelineStageAllGraphicsBit
+	PipelineStageAllCommandsBit
+)

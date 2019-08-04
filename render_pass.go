@@ -37,49 +37,6 @@ type Rect2D struct {
 	Extent Extent2D
 }
 
-type Offset2D struct {
-	X int32
-	Y int32
-}
-
-type Offset3D struct {
-	X int32
-	Y int32
-	Z int32
-}
-
-type Extent2D struct {
-	Width  uint32
-	Height uint32
-}
-
-type ClearValue struct {
-	Color ClearColorValue
-	//DepthStencil ClearDepthStencilValue
-}
-
-type clearValue struct {
-	Color ClearColorValueFloat
-	//DepthStencil ClearDepthStencilValue
-}
-
-type ClearColorValue interface {
-	clearColorValue()
-}
-
-type ClearColorValueFloat [4]float32
-type ClearColorValueInt [4]int32
-type ClearColorValueUint [4]uint32
-
-func (ClearColorValueFloat) clearColorValue() {}
-func (ClearColorValueInt) clearColorValue()   {}
-func (ClearColorValueUint) clearColorValue()  {}
-
-type ClearDepthStencilValue struct {
-	Depth   float32
-	Stencil uint32
-}
-
 type Framebuffer uintptr
 
 type RenderPassBeginInfo struct {

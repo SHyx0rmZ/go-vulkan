@@ -88,88 +88,7 @@ func (r Result) Error() string {
 	}
 }
 
-type StructureType uint32
-
-// cat s.txt | head -n 49 | sed 's/[A-Z]/\L&/g;s/_\([a-z]\)/\U\1/g;s/^\s\+vk//;s/\s=\s[0-9]\+,$//'
-
-const (
-	StructureTypeApplicationInfo StructureType = iota
-	StructureTypeInstanceCreateInfo
-	StructureTypeDeviceQueueCreateInfo
-	StructureTypeDeviceCreateInfo
-	StructureTypeSubmitInfo
-	StructureTypeMemoryAllocateInfo
-	StructureTypeMappedMemoryRange
-	StructureTypeBindSparseInfo
-	StructureTypeFenceCreateInfo
-	StructureTypeSemaphoreCreateInfo
-	StructureTypeEventCreateInfo
-	StructureTypeQueryPoolCreateInfo
-	StructureTypeBufferCreateInfo
-	StructureTypeBufferViewCreateInfo
-	StructureTypeImageCreateInfo
-	StructureTypeImageViewCreateInfo
-	StructureTypeShaderModuleCreateInfo
-	StructureTypePipelineCacheCreateInfo
-	StructureTypePipelineShaderStageCreateInfo
-	StructureTypePipelineVertexInputStateCreateInfo
-	StructureTypePipelineInputAssemblyStateCreateInfo
-	StructureTypePipelineTessellationStateCreateInfo
-	StructureTypePipelineViewportStateCreateInfo
-	StructureTypePipelineRasterizationStateCreateInfo
-	StructureTypePipelineMultisampleStateCreateInfo
-	StructureTypePipelineDepthStencilStateCreateInfo
-	StructureTypePipelineColorBlendStateCreateInfo
-	StructureTypePipelineDynamicStateCreateInfo
-	StructureTypeGraphicsPipelineCreateInfo
-	StructureTypeComputePipelineCreateInfo
-	StructureTypePipelineLayoutCreateInfo
-	StructureTypeSamplerCreateInfo
-	StructureTypeDescriptorSetLayoutCreateInfo
-	StructureTypeDescriptorPoolCreateInfo
-	StructureTypeDescriptorSetAllocateInfo
-	StructureTypeWriteDescriptorSet
-	StructureTypeCopyDescriptorSet
-	StructureTypeFramebufferCreateInfo
-	StructureTypeRenderPassCreateInfo
-	StructureTypeCommandPoolCreateInfo
-	StructureTypeCommandBufferAllocateInfo
-	StructureTypeCommandBufferInheritanceInfo
-	StructureTypeCommandBufferBeginInfo
-	StructureTypeRenderPassBeginInfo
-	StructureTypeBufferMemoryBarrier
-	StructureTypeImageMemoryBarrier
-	StructureTypeMemoryBarrier
-	StructureTypeLoaderInstanceCreateInfo
-	StructureTypeLoaderDeviceCreateInfo
-)
-
 type AllocationCallbacks C.VkAllocationCallbacks
-
-type ImageViewCreateInfo struct {
-	Type             StructureType
-	Next             uintptr
-	Flags            C.VkImageViewCreateFlags
-	Image            Image
-	ViewType         ImageViewType
-	Format           Format
-	Components       ComponentMapping
-	SubresourceRange ImageSubresourceRange
-}
-
-type ImageView uintptr
-
-type ImageViewType uint32
-
-const (
-	ImageViewType1D ImageViewType = iota
-	ImageViewType2D
-	ImageViewType3D
-	ImageViewTypeCube
-	ImageViewType1DArray
-	ImageViewType2DArray
-	ImageViewTypeCubeArray
-)
 
 type ComponentMapping struct {
 	R ComponentSwizzle
@@ -255,24 +174,6 @@ type renderPassCreateInfo struct {
 	Dependencies    *SubpassDependency
 }
 
-type AttachmentDescription struct {
-	Flags          AttachmentDescriptionFlags
-	Format         Format
-	Samples        SampleCountFlagBits
-	LoadOp         AttachmentLoadOp
-	StoreOp        AttachmentStoreOp
-	StencilLoadOp  AttachmentLoadOp
-	StencilStoreOp AttachmentStoreOp
-	InitialLayout  ImageLayout
-	FinalLayout    ImageLayout
-}
-
-type AttachmentDescriptionFlags uint32
-
-const (
-	AttachmentDescriptionMayAliasBit AttachmentDescriptionFlags = 1 << iota
-)
-
 type AttachmentLoadOp uint32
 
 const (
@@ -287,16 +188,6 @@ const (
 	AttachmentStoreOpStore AttachmentStoreOp = iota
 	AttachmentStoreOpDontCare
 )
-
-type SubpassDescription struct {
-	Flags                  SubpassDescriptionFlags
-	PipelineBindPoint      PipelineBindPoint
-	InputAttachments       []AttachmentReference
-	ColorAttachments       []AttachmentReference
-	ResolveAttachments     []AttachmentReference
-	DepthStencilAttachment AttachmentReference
-	PreserveAttachments    []uint32
-}
 
 type subpassDescription struct {
 	Flags                   SubpassDescriptionFlags
@@ -316,16 +207,6 @@ type AttachmentReference struct {
 	Layout     ImageLayout
 }
 
-type SubpassDependency struct {
-	SrcSubpass      uint32
-	DstSubpass      uint32
-	SrcStageMask    PipelineStageFlags
-	DstStageMask    PipelineStageFlags
-	SrcAccessMask   AccessFlags
-	DstAccessMask   AccessFlags
-	DependencyFlags DependencyFlags
-}
-
 type SubpassDescriptionFlags uint32
 
 type PipelineBindPoint uint32
@@ -335,94 +216,48 @@ const (
 	PipelineBindPointCompute
 )
 
-type PipelineStageFlagBits uint32
-type PipelineStageFlags = PipelineStageFlagBits
+func (info *ShaderModuleCreateInfo) C(_info *shaderModuleCreateInfo) freeFunc {
+	*_info = shaderModuleCreateInfo{
+		Type:     info.Type,
+		Next:     info.Next,
+		Flags:    info.Flags,
+		CodeSize: (C.size_t)(len(info.Code)),
+	}
+	p := C.CBytes(info.Code)
+	_info.Code = (*byte)(p)
+	return freeFunc(func() {
+		C.free(p)
+	})
+}
 
-const (
-	PipelineStageTopOfPipeBit PipelineStageFlagBits = 1 << iota
-	PipelineStageDrawIndirectBit
-	PipelineStageVertexInputBit
-	PipelineStageVertexShaderBit
-	PipelineStageTessellationControlShaderBit
-	PipelineStageTessellationEvaluationShaderBit
-	PipelineStageGeometryShaderBit
-	PipelineStageFragmentShaderBit
-	PipelineStageEarlyFragmentTestsBit
-	PipelineStageLateFragmentTestsBit
-	PipelineStageColorAttachmentOutputBit
-	PipelienStageComputeShaderBit
-	PipelineStageTransferBit
-	PipelineStageBottomOfPipeBit
-	PipelineStageHostBit
-	PipelineStageAllGraphicsBit
-	PipelineStageAllCommandsBit
-)
+type shaderModuleCreateInfo struct {
+	Type     StructureType
+	Next     uintptr
+	Flags    ShaderModuleCreateFlags
+	CodeSize C.size_t
+	Code     *byte
+}
 
-type AccessFlagBits uint32
-type AccessFlags = AccessFlagBits
+func CreateShaderModule(device Device, createInfo ShaderModuleCreateInfo, allocator *AllocationCallbacks) (ShaderModule, error) {
+	var shaderModule ShaderModule
+	var _createInfo shaderModuleCreateInfo
+	defer createInfo.C(&_createInfo).Free()
+	result := Result(C.vkCreateShaderModule(
+		(C.VkDevice)(unsafe.Pointer(device)),
+		(*C.VkShaderModuleCreateInfo)(unsafe.Pointer(&_createInfo)),
+		(*C.VkAllocationCallbacks)(unsafe.Pointer(allocator)),
+		(*C.VkShaderModule)(unsafe.Pointer(&shaderModule)),
+	))
+	if result != Success {
+		return 0, result
+	}
+	return shaderModule, nil
+}
 
-const (
-	AccessIndirectCommandReadBit AccessFlagBits = 1 << iota
-	AccessIndexReadBit
-	AccessVertexAttributeReadBit
-	AccessUniformReadBit
-	AccessInputAttachmentReadBit
-	AccessShaderReadBit
-	AccessShaderWriteBit
-	AccessColorAttachmentReadBit
-	AccessColorAttachmentWriteBit
-	AccessDepthStencilAttachmentReadBit
-	AccessDepthStencilAttachmentWriteBit
-	AccessTransferReadBit
-	AccessTransferWriteBit
-	AccessHostReadBit
-	AccessHostWriteBit
-	AccessMemoryReadBit
-	AccessMemoryWriteBit
-)
-
-type DependencyFlagBits uint32
-type DependencyFlags = DependencyFlagBits
-
-const (
-	DependencyByRegionBit DependencyFlagBits = 1 << iota
-	DependencyDeviceGroupBit
-	DependencyViewLocalBit
-)
-
-type ImageLayout uint32
-
-const (
-	ImageLayoutUndefined ImageLayout = iota
-	ImageLayoutGeneral
-	ImageLayoutColorAttachmentOptimal
-	ImageLayoutDepthStencilAttachmentOptimal
-	ImageLayoutDepthStencilReadOnlyOptimal
-	ImageLayoutShaderReadOnlyOptimal
-	ImageLayoutTranserSrcOptimal
-	ImageLayoutTransferDstOptimal
-	ImageLayoutPreinitialized
-)
-
-const (
-	ImageLayoutDepthReadOnlyStencilAttachmentOptimal ImageLayout = 1000117000 + iota
-	ImageLayoutDepthAttachmentStencilReadOnlyOptimal
-)
-
-const (
-	ImageLayoutPresentSrcKHR    ImageLayout = 1000001002
-	ImageLayoutSharedPresentKHR ImageLayout = 1000111000
-)
-
-type SampleCountFlagBits uint32
-type SampleCountFlags SampleCountFlagBits
-
-const (
-	SampleCount1Bit SampleCountFlagBits = 1 << iota
-	SampleCount2Bit
-	SampleCount4Bit
-	SampleCount8Bit
-	SampleCount16Bit
-	SampleCount32Bit
-	SampleCount64Bit
-)
+func DestroyShaderModule(device Device, shaderModule ShaderModule, allocator *AllocationCallbacks) {
+	C.vkDestroyShaderModule(
+		(C.VkDevice)(unsafe.Pointer(device)),
+		(C.VkShaderModule)(unsafe.Pointer(shaderModule)),
+		(*C.VkAllocationCallbacks)(unsafe.Pointer(allocator)),
+	)
+}
