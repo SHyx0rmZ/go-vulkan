@@ -416,3 +416,126 @@ func BindImageMemory(device Device, image Image, memory DeviceMemory, memoryOffs
 	}
 	return nil
 }
+
+type ImageSubresourceLayers struct {
+	AspectMask     ImageAspectFlags
+	MipLevel       uint32
+	BaseArrayLayer uint32
+	LayerCount     uint32
+}
+
+type BufferImageCopy struct {
+	BufferOffset      DeviceSize
+	BufferRowLength   uint32
+	BufferImageHeight uint32
+	ImageSubresource  ImageSubresourceLayers
+	ImageOffset       Offset3D
+	ImageExtent       Extent3D
+}
+
+// todo
+func CmdCopyBufferToImage(commandBuffer CommandBuffer, srcBuffer Buffer, dstImage Image, dstImageLayout ImageLayout, regions []BufferImageCopy) {
+	C.vkCmdCopyBufferToImage(
+		(C.VkCommandBuffer)(unsafe.Pointer(commandBuffer)),
+		(C.VkBuffer)(unsafe.Pointer(srcBuffer)),
+		(C.VkImage)(unsafe.Pointer(dstImage)),
+		(C.VkImageLayout)(dstImageLayout),
+		(C.uint32_t)(len(regions)),
+		(*C.VkBufferImageCopy)(unsafe.Pointer(&regions[0])),
+	)
+}
+
+// todo
+func CmdCopyImageToBuffer(commandBuffer CommandBuffer, srcImage Image, srcImageLayout ImageLayout, dstBuffer Buffer, regions []BufferImageCopy) {
+	C.vkCmdCopyImageToBuffer(
+		(C.VkCommandBuffer)(unsafe.Pointer(commandBuffer)),
+		(C.VkImage)(unsafe.Pointer(srcImage)),
+		(C.VkImageLayout)(srcImageLayout),
+		(C.VkBuffer)(unsafe.Pointer(dstBuffer)),
+		(C.uint32_t)(len(regions)),
+		(*C.VkBufferImageCopy)(unsafe.Pointer(&regions[0])),
+	)
+}
+
+type SamplerCreateFlags uint32
+
+type Filter uint32
+
+const (
+	FilterNearest Filter = iota
+	FilterLinear
+)
+
+type SamplerMipMapMode uint32
+
+const (
+	SamplerMipMapModeNearest SamplerMipMapMode = iota
+	SamplerMipMapModeLinear
+)
+
+type SamplerAddressMode uint32
+
+const (
+	SamplerAddressModeRepeat SamplerAddressMode = iota
+	SamplerAddressModeMirroredRepeat
+	SamplerAddressModeClampToEdge
+	SamplerAddressModeClampToBorder
+	SamplerAddressModeMirrorClampToEdge
+)
+
+type BorderColor uint32
+
+const (
+	BorderColorFloatTransparentBlack BorderColor = iota
+	BorderColorIntTransparentBlack
+	BorderColorFloatOpaqueBlack
+	BorderColorIntOpaqueBlack
+	BorderColorFloatOpaqueWhite
+	BorderColorIntOpaqueWhite
+)
+
+type SamplerCreateInfo struct {
+	Type                    StructureType
+	Next                    uintptr
+	Flags                   SamplerCreateFlags
+	MagFilter               Filter
+	MinFilter               Filter
+	MipMapMode              SamplerMipMapMode
+	AddressModeU            SamplerAddressMode
+	AddressModeV            SamplerAddressMode
+	AddressModeW            SamplerAddressMode
+	MipLodBias              float32
+	AnisotropyEnable        bool
+	_                       [3]byte
+	MaxAnisotropy           float32
+	CompareEnable           bool
+	_                       [3]byte
+	CompareOp               CompareOp
+	MinLod                  float32
+	MaxLod                  float32
+	BorderColor             BorderColor
+	UnnormalizedCoordinates bool
+	_                       [3]byte
+}
+
+func CreateSampler(device Device, createInfo SamplerCreateInfo, allocator *AllocationCallbacks) (Sampler, error) {
+	var sampler Sampler
+	result := Result(C.vkCreateSampler(
+		(C.VkDevice)(unsafe.Pointer(device)),
+		(*C.VkSamplerCreateInfo)(unsafe.Pointer(&createInfo)),
+		(*C.VkAllocationCallbacks)(unsafe.Pointer(allocator)),
+		(*C.VkSampler)(unsafe.Pointer(&sampler)),
+	))
+	if result != Success {
+		return 0, result
+	}
+	return sampler, nil
+}
+
+func DestroySampler(device Device, sampler Sampler, allocator *AllocationCallbacks) {
+	C.vkDestroySampler(
+		(C.VkDevice)(unsafe.Pointer(device)),
+		(C.VkSampler)(unsafe.Pointer(sampler)),
+		(*C.VkAllocationCallbacks)(unsafe.Pointer(allocator)),
+	)
+}

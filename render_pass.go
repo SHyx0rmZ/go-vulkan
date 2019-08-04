@@ -42,6 +42,12 @@ type Offset2D struct {
 	Y int32
 }
 
+type Offset3D struct {
+	X int32
+	Y int32
+	Z int32
+}
+
 type Extent2D struct {
 	Width  uint32
 	Height uint32

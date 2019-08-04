@@ -46,7 +46,18 @@ type MemoryBarrier uintptr
 
 type BufferMemoryBarrier uintptr
 
-type ImageMemoryBarrier uintptr
+type ImageMemoryBarrier struct {
+	Type                StructureType
+	Next                uintptr
+	SrcAccessMask       AccessFlags
+	DstAccessMask       AccessFlags
+	OldLayout           ImageLayout
+	NewLayout           ImageLayout
+	SrcFamilyQueueIndex uint32
+	DstFamilyQueueIndex uint32
+	Image               Image
+	SubresourceRange    ImageSubresourceRange
+}
 
 func CreateFence(device Device, createInfo FenceCreateInfo, allocator *AllocationCallbacks) (Fence, error) {
 	var fence Fence
@@ -221,17 +232,29 @@ func CmdWaitEvents(commandBuffer CommandBuffer, events []Event, srcStageMask, ds
 }
 
 func CmdPipelineBarrier(commandBuffer CommandBuffer, srcStageMask, dstStageMask PipelineStageFlags, dependencyFlags DependencyFlags, memoryBarriers []MemoryBarrier, bufferMemoryBarriers []BufferMemoryBarrier, imageMemoryBarriers []ImageMemoryBarrier) {
+	var memoryBarrierPtr unsafe.Pointer
+	var bufferMemoryBarrierPtr unsafe.Pointer
+	var imageMemoryBarrierPtr unsafe.Pointer
+	if len(memoryBarriers) > 0 {
+		memoryBarrierPtr = unsafe.Pointer(&memoryBarriers[0])
+	}
+	if len(bufferMemoryBarriers) > 0 {
+		bufferMemoryBarrierPtr = unsafe.Pointer(&bufferMemoryBarriers[0])
+	}
+	if len(imageMemoryBarriers) > 0 {
+		imageMemoryBarrierPtr = unsafe.Pointer(&imageMemoryBarriers[0])
+	}
 	C.vkCmdPipelineBarrier(
 		(C.VkCommandBuffer)(unsafe.Pointer(commandBuffer)),
 		(C.VkPipelineStageFlags)(srcStageMask),
 		(C.VkPipelineStageFlags)(dstStageMask),
 		(C.VkDependencyFlags)(dependencyFlags),
 		(C.uint32_t)(len(memoryBarriers)),
-		(*C.VkMemoryBarrier)(unsafe.Pointer(&memoryBarriers[0])),
+		(*C.VkMemoryBarrier)(memoryBarrierPtr),
 		(C.uint32_t)(len(bufferMemoryBarriers)),
-		(*C.VkBufferMemoryBarrier)(unsafe.Pointer(&bufferMemoryBarriers[0])),
+		(*C.VkBufferMemoryBarrier)(bufferMemoryBarrierPtr),
 		(C.uint32_t)(len(imageMemoryBarriers)),
-		(*C.VkImageMemoryBarrier)(unsafe.Pointer(&imageMemoryBarriers[0])),
+		(*C.VkImageMemoryBarrier)(imageMemoryBarrierPtr),
 	)
 }
 
