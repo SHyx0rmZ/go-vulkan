@@ -5,7 +5,6 @@ package vulkan
 // #include <string.h>
 import "C"
 import (
-	"fmt"
 	"unsafe"
 )
 
@@ -289,7 +288,7 @@ func MapMemory(device Device, memory DeviceMemory, offset, size DeviceSize, flag
 		(C.VkMemoryMapFlags)(flags),
 		(*unsafe.Pointer)(unsafe.Pointer(&data)),
 	))
-	fmt.Println("MapMemory(", device, memory, offset, size, flags, ") = ", data, result)
+	//fmt.Println("MapMemory(", device, memory, offset, size, flags, ") = ", data, result)
 	if result != Success {
 		return 0, result
 	}
