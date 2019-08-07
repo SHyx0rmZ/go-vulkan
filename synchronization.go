@@ -42,7 +42,12 @@ type SemaphoreCreateInfo struct {
 
 type Event uintptr
 
-type MemoryBarrier uintptr
+type MemoryBarrier struct {
+	Type          StructureType
+	Next          uintptr
+	SrcAccessMask AccessFlags
+	DstAccessMask AccessFlags
+}
 
 type BufferMemoryBarrier uintptr
 

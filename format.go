@@ -1,5 +1,9 @@
 package vulkan
 
+import (
+	"unsafe"
+)
+
 type Format uint32
 
 const (
@@ -194,3 +198,21 @@ const (
 	FormatG8B8G8R8422UNorm Format = iota + 1000156000
 	FormatB8G8R8G8422UNorm
 )
+
+type ColorR16G16B16A16UInt uint64
+
+func (c *ColorR16G16B16A16UInt) RGBA() (r, g, b, a uint32) {
+	if c == nil {
+		return
+	}
+	const m = (1 << 16) - 1
+	pr := (*uint16)(unsafe.Pointer(uintptr(unsafe.Pointer(c)) + 0))
+	pg := (*uint16)(unsafe.Pointer(uintptr(unsafe.Pointer(c)) + 2))
+	pb := (*uint16)(unsafe.Pointer(uintptr(unsafe.Pointer(c)) + 4))
+	pa := (*uint16)(unsafe.Pointer(uintptr(unsafe.Pointer(c)) + 8))
+	r = uint32(*pr) * uint32(*pa) / m
+	g = uint32(*pg) * uint32(*pa) / m
+	b = uint32(*pb) * uint32(*pa) / m
+	a = uint32(*pa)
+	return r, g, b, a
+}
