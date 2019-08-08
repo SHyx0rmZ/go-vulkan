@@ -59,7 +59,7 @@ func (info *RenderPassBeginInfo) C(_info *renderPassBeginInfo) freeFunc {
 		ClearValues:     nil,
 	}
 	if _info.ClearValueCount > 0 {
-		p := C.malloc(C.size_t(uintptr(_info.ClearValueCount) * unsafe.Sizeof(renderPassBeginInfo{})))
+		p := C.malloc(C.size_t(uintptr(_info.ClearValueCount) * unsafe.Sizeof(clearValue{})))
 		for i, cv := range info.ClearValues {
 			_clearValue := clearValue{
 				//DepthStencil: cv.DepthStencil,
@@ -81,7 +81,7 @@ func (info *RenderPassBeginInfo) C(_info *renderPassBeginInfo) freeFunc {
 				*(*uint32)(unsafe.Pointer(&_clearValue.Color[2])) = color[2]
 				*(*uint32)(unsafe.Pointer(&_clearValue.Color[3])) = color[3]
 			}
-			*(*clearValue)(unsafe.Pointer(uintptr(p) + uintptr(i)*unsafe.Sizeof(renderPassBeginInfo{}))) = _clearValue
+			*(*clearValue)(unsafe.Pointer(uintptr(p) + uintptr(i)*unsafe.Sizeof(clearValue{}))) = _clearValue
 		}
 		_info.ClearValues = (*clearValue)(p)
 		return freeFunc(func() {
