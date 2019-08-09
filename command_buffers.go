@@ -283,6 +283,67 @@ func FreeMemory(device Device, memory DeviceMemory, allocator *AllocationCallbac
 	)
 }
 
+// MapMemory - Map a memory object into application address space.
+//
+// Parameters
+// - device is the logical device that owns the memory.
+// - memory is the DeviceMemory object to be mapped.
+// - offset is a zero-based byte offset from the beginning of the memory object.
+// - size is the size of the memory range to map, or WholeSize to map from offset to the end of the allocation.
+//   flags is reserved for future use.
+//
+// - ppData points to a pointer in which is returned a host-accessible pointer to the beginning of the mapped range.
+//   This pointer minus offset must be aligned to at least VkPhysicalDeviceLimits::minMemoryMapAlignment. (TODO)
+//
+// After a successful call to MapMemory the memory object memory is considered to be currently host mapped. It is an
+// application error to call MapMemory on a memory object that is already host mapped.
+//
+// Note: MapMemory will fail if the implementation is unable to allocate an appropriately sized contiguous virtual
+//       address range, e.g. due to virtual address space fragmentation or platform limits. In such cases, MapMemory
+//       must return ErrorMemoryMapFailed. The application can improve the likelihood of success by reducing the size
+//       of the mapped range and/or removing unneeded mappings using UnmapMemory.
+//
+// MapMemory does not check whether the device memory is currently in use before returning the host-accessible pointer.
+// The application must guarantee that any previously submitted command that writes to this range has completed before
+// the host reads from or writes to that range, and that any previously submitted command that reads from that range
+// has completed before the host writes to that region (see here for details on fulfilling such a guarantee). If the
+// device memory was allocated without the MemoryPropertyHostCoherentBit set, these guarantees must be made for an
+// extended range: the application must round down the start of the range to the nearest multiple of
+// PhysicalDeviceLimits.NonCoherentAtomSize, and round the end of the range up to the nearest multiple of
+// PhysicalDeviceLimits.NonCoherentAtomSize.
+//
+// While a range of device memory is host mapped, the application is responsible for synchronizing both device and host
+// access to that memory range.
+//
+// Note: It is important for the application developer to become meticulously familiar with all of the mechanisms
+//       described in the chapter on Synchronization and Cache Control as they are crucial to maintaining memory access
+//       ordering.
+//
+// Valid Usage
+// - memory must not be currently host mapped
+// - offset must be less than the size of memory
+// - If size is not equal to WholeSize, size must be greater than 0
+// - If size is not equal to WholeSize, size must be less than or equal to the size of the memory minus offset
+// - memory must have been created with a memory type that reports MemoryPropertyHostVisibleBit
+// - memory must not have been allocated with multiple instances.
+//
+// Valid Usage (Implicit)
+// - device must be a valid Device handle
+// - memory must be a valid DeviceMemory handle
+// - flags must be 0
+// - ppData must be a valid pointer to a pointer value (TODO)
+// - memory must have been created, allocated, or retrieved from device
+//
+// Host Synchronization
+// - Host access to memory must be externally synchronized
+//
+// Return Codes
+// - On success, this command returns
+//   - Success
+// - On failure, this command returns
+//   - ErrorOutOfHostMemory
+//   - ErrorOutOfDeviceMemory
+//   - ErrorMemoryMapFailed
 func MapMemory(device Device, memory DeviceMemory, offset, size DeviceSize, flags MemoryMapFlags) (uintptr, error) {
 	var data uintptr
 	fmt.Println(data)
@@ -301,6 +362,22 @@ func MapMemory(device Device, memory DeviceMemory, offset, size DeviceSize, flag
 	return data, nil
 }
 
+// UnmapMemory - Unmap a previously mapped memory object.
+//
+// Parameters:
+// - device is the logical device that owns the memory.
+// - memory is the memory object to be unmapped.
+//
+// Valid Usage
+// - memory must be currently host mapped
+//
+// Valid Usage (Implicit)
+// - device must be a valid Device handle
+// - memory must be a valid DeviceMemory handle
+// - memory must have been created, allocated, or retrieved from device
+//
+// Host Synchronization
+// - Host access to memory must be externally synchronized
 func UnmapMemory(device Device, memory DeviceMemory) {
 	C.vkUnmapMemory(
 		(C.VkDevice)(unsafe.Pointer(device)),

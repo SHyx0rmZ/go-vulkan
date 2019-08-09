@@ -1,6 +1,5 @@
 package vulkan
 
-import "C"
 import (
 	"bytes"
 	"fmt"
