@@ -308,6 +308,26 @@ func UnmapMemory(device Device, memory DeviceMemory) {
 	)
 }
 
+type MappedMemoryRange struct {
+	Type   StructureType
+	Next   uintptr
+	Memory DeviceMemory
+	Offset DeviceSize
+	Size   DeviceSize
+}
+
+func FlushMappedMemoryRanges(device Device, memoryRanges []MappedMemoryRange) error {
+	result := Result(C.vkFlushMappedMemoryRanges(
+		(C.VkDevice)(unsafe.Pointer(device)),
+		(C.uint32_t)(len(memoryRanges)),
+		(*C.VkMappedMemoryRange)(unsafe.Pointer(&memoryRanges[0])),
+	))
+	if result != Success {
+		return result
+	}
+	return nil
+}
+
 func GetBufferMemoryRequirements(device Device, buffer Buffer) MemoryRequirements {
 	var memoryRequirements MemoryRequirements
 	C.vkGetBufferMemoryRequirements(
