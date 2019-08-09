@@ -1,6 +1,6 @@
 package vulkan
 
-type ShaderModule uintptr
+type ShaderModule uint64
 
 type ShaderModuleCreateFlags uint32
 

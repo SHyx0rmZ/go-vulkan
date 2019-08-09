@@ -62,7 +62,7 @@ type pipelineLayoutCreateInfo struct {
 	PushConstantRanges     *PushConstantRange
 }
 
-type DescriptorSetLayout uintptr
+type DescriptorSetLayout uint64
 
 type PushConstantRange struct {
 	StageFlags ShaderStageFlags
@@ -89,7 +89,7 @@ func CreatePipelineLayout(device Device, createInfo PipelineLayoutCreateInfo, al
 func DestroyPipelineLayout(device Device, pipelineLayout PipelineLayout, allocator *AllocationCallbacks) {
 	C.vkDestroyPipelineLayout(
 		(C.VkDevice)(unsafe.Pointer(device)),
-		(C.VkPipelineLayout)(unsafe.Pointer(pipelineLayout)),
+		*(*C.VkPipelineLayout)(unsafe.Pointer(&pipelineLayout)),
 		(*C.VkAllocationCallbacks)(unsafe.Pointer(allocator)),
 	)
 }
@@ -157,7 +157,7 @@ const (
 	DescriptorTypeImageAttachment
 )
 
-type Sampler uintptr
+type Sampler uint64
 
 func CreateDescriptorSetLayout(device Device, createInfo DescriptorSetLayoutCreateInfo, allocator *AllocationCallbacks) (DescriptorSetLayout, error) {
 	var layout DescriptorSetLayout
@@ -178,12 +178,12 @@ func CreateDescriptorSetLayout(device Device, createInfo DescriptorSetLayoutCrea
 func DestroyDescriptorSetLayout(device Device, layout DescriptorSetLayout, allocator *AllocationCallbacks) {
 	C.vkDestroyDescriptorSetLayout(
 		(C.VkDevice)(unsafe.Pointer(device)),
-		(C.VkDescriptorSetLayout)(unsafe.Pointer(layout)),
+		*(*C.VkDescriptorSetLayout)(unsafe.Pointer(&layout)),
 		(*C.VkAllocationCallbacks)(unsafe.Pointer(allocator)),
 	)
 }
 
-type DescriptorPool uintptr
+type DescriptorPool uint64
 
 type DescriptorPoolCreateFlagBits uint32
 type DescriptorPoolCreateFlags = DescriptorPoolCreateFlagBits
@@ -255,7 +255,7 @@ func CreateDescriptorPool(device Device, createInfo DescriptorPoolCreateInfo, al
 func DestroyDescriptorPool(device Device, pool DescriptorPool, allocator *AllocationCallbacks) {
 	C.vkDestroyDescriptorPool(
 		(C.VkDevice)(unsafe.Pointer(device)),
-		(C.VkDescriptorPool)(unsafe.Pointer(pool)),
+		*(*C.VkDescriptorPool)(unsafe.Pointer(&pool)),
 		(*C.VkAllocationCallbacks)(unsafe.Pointer(allocator)),
 	)
 }
@@ -316,7 +316,7 @@ func AllocateDescriptorSets(device Device, allocateInfo DescriptorSetAllocateInf
 func FreeDescriptorSets(device Device, pool DescriptorPool, sets []DescriptorSet) {
 	C.vkFreeDescriptorSets(
 		(C.VkDevice)(unsafe.Pointer(device)),
-		(C.VkDescriptorPool)(unsafe.Pointer(pool)),
+		*(*C.VkDescriptorPool)(unsafe.Pointer(&pool)),
 		(C.uint32_t)(len(sets)),
 		(*C.VkDescriptorSet)(unsafe.Pointer(&sets[0])),
 	)
@@ -466,9 +466,9 @@ func CmdBindDescriptorSets(commandBuffer CommandBuffer, pipelineBindPoint Pipeli
 		offsets = unsafe.Pointer(&dynamicOffsets[0])
 	}
 	C.vkCmdBindDescriptorSets(
-		(C.VkCommandBuffer)(unsafe.Pointer(commandBuffer)),
+		*(*C.VkCommandBuffer)(unsafe.Pointer(&commandBuffer)),
 		(C.VkPipelineBindPoint)(pipelineBindPoint),
-		(C.VkPipelineLayout)(unsafe.Pointer(layout)),
+		*(*C.VkPipelineLayout)(unsafe.Pointer(&layout)),
 		(C.uint32_t)(firstSet),
 		(C.uint32_t)(len(descriptorSets)),
 		(*C.VkDescriptorSet)(sets),

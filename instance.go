@@ -144,7 +144,7 @@ func (i Instance) Destroy() {
 	C.vkDestroyInstance((C.VkInstance)(unsafe.Pointer(i)), nil)
 }
 
-type Surface uintptr
+type Surface uint64
 
 type XlibSurfaceCreateInfo struct {
 	Type    C.VkStructureType
@@ -168,7 +168,7 @@ func (i Instance) CreateXlibSurface(info XlibSurfaceCreateInfo) (Surface, error)
 }
 
 func (i Instance) DestroySurface(surface Surface) {
-	C.vkDestroySurfaceKHR((C.VkInstance)(unsafe.Pointer(i)), (C.VkSurfaceKHR)(unsafe.Pointer(surface)), nil)
+	C.vkDestroySurfaceKHR((C.VkInstance)(unsafe.Pointer(i)), *(*C.VkSurfaceKHR)(unsafe.Pointer(&surface)), nil)
 }
 
 type PhysicalDevice uintptr
@@ -194,7 +194,7 @@ type SwapchainCreateInfo struct {
 	CompositeAlpha        C.VkCompositeAlphaFlagBitsKHR
 	PresentMode           PresentMode
 	Clipped               C.VkBool32
-	OldSwapchain          C.VkSwapchainKHR
+	OldSwapchain          Swapchain
 }
 
 type Swapchain uintptr
@@ -359,7 +359,7 @@ func (i Instance) EnumeratePhysicalDevices() ([]PhysicalDevice, error) {
 
 func (d PhysicalDevice) GetSurfaceSupport(queueFamilyIndex uint32, surface Surface) (bool, error) {
 	var supported uint32
-	result := C.vkGetPhysicalDeviceSurfaceSupportKHR((C.VkPhysicalDevice)(unsafe.Pointer(d)), (C.uint32_t)(queueFamilyIndex), (C.VkSurfaceKHR)(unsafe.Pointer(surface)), (*C.VkBool32)(unsafe.Pointer(&supported)))
+	result := C.vkGetPhysicalDeviceSurfaceSupportKHR((C.VkPhysicalDevice)(unsafe.Pointer(d)), (C.uint32_t)(queueFamilyIndex), *(*C.VkSurfaceKHR)(unsafe.Pointer(&surface)), (*C.VkBool32)(unsafe.Pointer(&supported)))
 	if result != C.VK_SUCCESS {
 		return false, fmt.Errorf("surface support error")
 	}

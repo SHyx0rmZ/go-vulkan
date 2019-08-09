@@ -98,14 +98,24 @@ type SurfaceFormat struct {
 
 func (d PhysicalDevice) GetSurfaceFormats(surface Surface) ([]SurfaceFormat, error) {
 	var count uint32
-	result := C.vkGetPhysicalDeviceSurfaceFormatsKHR((C.VkPhysicalDevice)(unsafe.Pointer(d)), (C.VkSurfaceKHR)(unsafe.Pointer(surface)), (*C.uint32_t)(unsafe.Pointer(&count)), nil)
-	if result != C.VK_SUCCESS {
-		return nil, fmt.Errorf("PhysicalDevice.GetSurfaceFormats")
+	result := Result(C.vkGetPhysicalDeviceSurfaceFormatsKHR(
+		(C.VkPhysicalDevice)(unsafe.Pointer(d)),
+		*(*C.VkSurfaceKHR)(unsafe.Pointer(&surface)),
+		(*C.uint32_t)(unsafe.Pointer(&count)),
+		nil,
+	))
+	if result != Success {
+		return nil, result
 	}
 	formats := make([]SurfaceFormat, count)
-	result = C.vkGetPhysicalDeviceSurfaceFormatsKHR((C.VkPhysicalDevice)(unsafe.Pointer(d)), (C.VkSurfaceKHR)(unsafe.Pointer(surface)), (*C.uint32_t)(unsafe.Pointer(&count)), (*C.VkSurfaceFormatKHR)(unsafe.Pointer(&formats[0])))
-	if result != C.VK_SUCCESS {
-		return nil, fmt.Errorf("PhysicalDevice.GetSurfaceFormats")
+	result = Result(C.vkGetPhysicalDeviceSurfaceFormatsKHR(
+		(C.VkPhysicalDevice)(unsafe.Pointer(d)),
+		*(*C.VkSurfaceKHR)(unsafe.Pointer(&surface)),
+		(*C.uint32_t)(unsafe.Pointer(&count)),
+		(*C.VkSurfaceFormatKHR)(unsafe.Pointer(&formats[0])),
+	))
+	if result != Success {
+		return nil, result
 	}
 	return formats, nil
 }
@@ -114,12 +124,12 @@ type PresentMode C.VkPresentModeKHR
 
 func (d PhysicalDevice) GetSurfacePresentModes(surface Surface) ([]PresentMode, error) {
 	var count uint32
-	result := C.vkGetPhysicalDeviceSurfacePresentModesKHR((C.VkPhysicalDevice)(unsafe.Pointer(d)), (C.VkSurfaceKHR)(unsafe.Pointer(surface)), (*C.uint32_t)(unsafe.Pointer(&count)), nil)
+	result := C.vkGetPhysicalDeviceSurfacePresentModesKHR((C.VkPhysicalDevice)(unsafe.Pointer(d)), *(*C.VkSurfaceKHR)(unsafe.Pointer(&surface)), (*C.uint32_t)(unsafe.Pointer(&count)), nil)
 	if result != C.VK_SUCCESS {
 		return nil, fmt.Errorf("PhysicalDevice.GetSurfacePresentModes")
 	}
 	modes := make([]PresentMode, count)
-	result = C.vkGetPhysicalDeviceSurfacePresentModesKHR((C.VkPhysicalDevice)(unsafe.Pointer(d)), (C.VkSurfaceKHR)(unsafe.Pointer(surface)), (*C.uint32_t)(unsafe.Pointer(&count)), (*C.VkPresentModeKHR)(unsafe.Pointer(&modes[0])))
+	result = C.vkGetPhysicalDeviceSurfacePresentModesKHR((C.VkPhysicalDevice)(unsafe.Pointer(d)), *(*C.VkSurfaceKHR)(unsafe.Pointer(&surface)), (*C.uint32_t)(unsafe.Pointer(&count)), (*C.VkPresentModeKHR)(unsafe.Pointer(&modes[0])))
 	if result != C.VK_SUCCESS {
 		return nil, fmt.Errorf("PhysicalDevice.GetSurfacePresentModes")
 	}
@@ -141,7 +151,7 @@ type SurfaceCapabilities struct {
 
 func (d PhysicalDevice) GetSurfaceCapabilities(surface Surface) (SurfaceCapabilities, error) {
 	var capabilities SurfaceCapabilities
-	result := C.vkGetPhysicalDeviceSurfaceCapabilitiesKHR((C.VkPhysicalDevice)(unsafe.Pointer(d)), (C.VkSurfaceKHR)(unsafe.Pointer(surface)), (*C.VkSurfaceCapabilitiesKHR)(unsafe.Pointer(&capabilities)))
+	result := C.vkGetPhysicalDeviceSurfaceCapabilitiesKHR((C.VkPhysicalDevice)(unsafe.Pointer(d)), *(*C.VkSurfaceKHR)(unsafe.Pointer(&surface)), (*C.VkSurfaceCapabilitiesKHR)(unsafe.Pointer(&capabilities)))
 	if result != C.VK_SUCCESS {
 		return SurfaceCapabilities{}, fmt.Errorf("PhysicalDevice.GetSurfaceCapabilites")
 	}

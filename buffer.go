@@ -1,6 +1,6 @@
 package vulkan
 
-type Buffer uintptr
+type Buffer uint64
 
 type BufferCreateFlagBits uint32
 type BufferCreateFlags = BufferCreateFlagBits

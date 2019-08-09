@@ -14,7 +14,7 @@ type ImageViewCreateInfo struct {
 type ImageViewCreateFlagBits uint32
 type ImageViewCreateFlags = ImageViewCreateFlagBits
 
-type ImageView uintptr
+type ImageView uint64
 
 type ImageViewType uint32
 

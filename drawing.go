@@ -8,7 +8,7 @@ import (
 
 func CmdDraw(commandBuffer CommandBuffer, vertexCount, instanceCount, firstVertex, firstInstance uint32) {
 	C.vkCmdDraw(
-		(C.VkCommandBuffer)(unsafe.Pointer(commandBuffer)),
+		*(*C.VkCommandBuffer)(unsafe.Pointer(&commandBuffer)),
 		(C.uint32_t)(vertexCount),
 		(C.uint32_t)(instanceCount),
 		(C.uint32_t)(firstVertex),
@@ -18,7 +18,7 @@ func CmdDraw(commandBuffer CommandBuffer, vertexCount, instanceCount, firstVerte
 
 func CmdDrawIndexed(commandBuffer CommandBuffer, indexCount, instanceCount, firstIndex uint32, vertexOffset int32, firstInstance uint32) {
 	C.vkCmdDrawIndexed(
-		(C.VkCommandBuffer)(unsafe.Pointer(commandBuffer)),
+		*(*C.VkCommandBuffer)(unsafe.Pointer(&commandBuffer)),
 		(C.uint32_t)(indexCount),
 		(C.uint32_t)(instanceCount),
 		(C.uint32_t)(firstIndex),
@@ -59,7 +59,7 @@ func CmdClearAttachments(commandBuffer CommandBuffer, clearAttachments []ClearAt
 		}
 	}
 	C.vkCmdClearAttachments(
-		(C.VkCommandBuffer)(unsafe.Pointer(commandBuffer)),
+		*(*C.VkCommandBuffer)(unsafe.Pointer(&commandBuffer)),
 		(C.uint32_t)(len(clearAttachments)),
 		(*C.VkClearAttachment)(unsafe.Pointer(&_clearAttachments[0])),
 		(C.uint32_t)(len(rects)),

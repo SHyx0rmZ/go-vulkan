@@ -97,7 +97,7 @@ func ResetCommandPool(device Device, commandPool CommandPool, flags CommandPoolR
 func DestroyCommandPool(device Device, commandPool CommandPool, allocator *AllocationCallbacks) {
 	C.vkDestroyCommandPool(
 		(C.VkDevice)(unsafe.Pointer(device)),
-		(C.VkCommandPool)(unsafe.Pointer(commandPool)),
+		*(*C.VkCommandPool)(unsafe.Pointer(&commandPool)),
 		(*C.VkAllocationCallbacks)(unsafe.Pointer(allocator)),
 	)
 }
@@ -122,7 +122,7 @@ func ResetCommandBuffer(commandBuffer CommandBuffer, flags CommandBufferResetFla
 func FreeCommandBuffers(device Device, commandPool CommandPool, commandBuffers []CommandBuffer) {
 	C.vkFreeCommandBuffers(
 		(C.VkDevice)(unsafe.Pointer(device)),
-		(C.VkCommandPool)(unsafe.Pointer(commandPool)),
+		*(*C.VkCommandPool)(unsafe.Pointer(&commandPool)),
 		(C.uint32_t)(len(commandBuffers)),
 		(*C.VkCommandBuffer)(unsafe.Pointer(&commandBuffers[0])),
 	)
@@ -130,7 +130,7 @@ func FreeCommandBuffers(device Device, commandPool CommandPool, commandBuffers [
 
 func BeginCommandBuffer(commandBuffer CommandBuffer, beginInfo CommandBufferBeginInfo) error {
 	result := Result(C.vkBeginCommandBuffer(
-		(C.VkCommandBuffer)(unsafe.Pointer(commandBuffer)),
+		*(*C.VkCommandBuffer)(unsafe.Pointer(&commandBuffer)),
 		(*C.VkCommandBufferBeginInfo)(unsafe.Pointer(&beginInfo)),
 	))
 	if result != Success {
@@ -141,7 +141,7 @@ func BeginCommandBuffer(commandBuffer CommandBuffer, beginInfo CommandBufferBegi
 
 func EndCommandBuffer(commandBuffer CommandBuffer) error {
 	result := Result(C.vkEndCommandBuffer(
-		(C.VkCommandBuffer)(unsafe.Pointer(commandBuffer)),
+		*(*C.VkCommandBuffer)(unsafe.Pointer(&commandBuffer)),
 	))
 	if result != Success {
 		return result
@@ -168,7 +168,7 @@ func QueueSubmit(queue Queue, submits []SubmitInfo, fence Fence) (freeFunc, erro
 		(C.VkQueue)(unsafe.Pointer(queue)),
 		(C.uint32_t)(len(submits)),
 		(*C.VkSubmitInfo)(unsafe.Pointer(&_submits[0])),
-		(C.VkFence)(unsafe.Pointer(fence)),
+		*(*C.VkFence)(unsafe.Pointer(&fence)),
 	))
 	if result != Success {
 		return ff, result
@@ -237,14 +237,14 @@ func CreateBuffer(device Device, createInfo BufferCreateInfo, allocator *Allocat
 func DestroyBuffer(device Device, buffer Buffer, allocator *AllocationCallbacks) {
 	C.vkDestroyBuffer(
 		(C.VkDevice)(unsafe.Pointer(device)),
-		(C.VkBuffer)(unsafe.Pointer(buffer)),
+		*(*C.VkBuffer)(unsafe.Pointer(&buffer)),
 		(*C.VkAllocationCallbacks)(unsafe.Pointer(allocator)),
 	)
 }
 
 func CmdBindVertexBuffers(commandBuffer CommandBuffer, firstBinding uint32, buffers []Buffer, offsets []DeviceSize) {
 	C.vkCmdBindVertexBuffers(
-		(C.VkCommandBuffer)(unsafe.Pointer(commandBuffer)),
+		*(*C.VkCommandBuffer)(unsafe.Pointer(&commandBuffer)),
 		(C.uint32_t)(firstBinding),
 		(C.uint32_t)(len(buffers)),
 		(*C.VkBuffer)(unsafe.Pointer(&buffers[0])),
@@ -254,8 +254,8 @@ func CmdBindVertexBuffers(commandBuffer CommandBuffer, firstBinding uint32, buff
 
 func CmdBindIndexBuffer(commandBuffer CommandBuffer, buffer Buffer, offset DeviceSize, indexType uint32) {
 	C.vkCmdBindIndexBuffer(
-		(C.VkCommandBuffer)(unsafe.Pointer(commandBuffer)),
-		(C.VkBuffer)(unsafe.Pointer(buffer)),
+		*(*C.VkCommandBuffer)(unsafe.Pointer(&commandBuffer)),
+		*(*C.VkBuffer)(unsafe.Pointer(&buffer)),
 		(C.VkDeviceSize)(offset),
 		(C.VkIndexType)(indexType),
 	)
@@ -278,7 +278,7 @@ func AllocateMemory(device Device, allocateInfo MemoryAllocateInfo, allocator *A
 func FreeMemory(device Device, memory DeviceMemory, allocator *AllocationCallbacks) {
 	C.vkFreeMemory(
 		(C.VkDevice)(unsafe.Pointer(device)),
-		(C.VkDeviceMemory)(unsafe.Pointer(memory)),
+		*(*C.VkDeviceMemory)(unsafe.Pointer(&memory)),
 		(*C.VkAllocationCallbacks)(unsafe.Pointer(allocator)),
 	)
 }
@@ -288,7 +288,7 @@ func MapMemory(device Device, memory DeviceMemory, offset, size DeviceSize, flag
 	fmt.Println(data)
 	result := Result(C.vkMapMemory(
 		(C.VkDevice)(unsafe.Pointer(device)),
-		(C.VkDeviceMemory)(unsafe.Pointer(memory)),
+		*(*C.VkDeviceMemory)(unsafe.Pointer(&memory)),
 		(C.VkDeviceSize)(offset),
 		(C.VkDeviceSize)(size),
 		(C.VkMemoryMapFlags)(flags),
@@ -304,7 +304,7 @@ func MapMemory(device Device, memory DeviceMemory, offset, size DeviceSize, flag
 func UnmapMemory(device Device, memory DeviceMemory) {
 	C.vkUnmapMemory(
 		(C.VkDevice)(unsafe.Pointer(device)),
-		(C.VkDeviceMemory)(unsafe.Pointer(memory)),
+		*(*C.VkDeviceMemory)(unsafe.Pointer(&memory)),
 	)
 }
 
@@ -332,7 +332,7 @@ func GetBufferMemoryRequirements(device Device, buffer Buffer) MemoryRequirement
 	var memoryRequirements MemoryRequirements
 	C.vkGetBufferMemoryRequirements(
 		(C.VkDevice)(unsafe.Pointer(device)),
-		(C.VkBuffer)(unsafe.Pointer(buffer)),
+		*(*C.VkBuffer)(unsafe.Pointer(&buffer)),
 		(*C.VkMemoryRequirements)(unsafe.Pointer(&memoryRequirements)),
 	)
 	return memoryRequirements
@@ -350,8 +350,8 @@ func GetPhysicalDeviceMemoryProperties(device PhysicalDevice) PhysicalDeviceMemo
 func BindBufferMemory(device Device, buffer Buffer, memory DeviceMemory, offset DeviceSize) error {
 	result := Result(C.vkBindBufferMemory(
 		(C.VkDevice)(unsafe.Pointer(device)),
-		(C.VkBuffer)(unsafe.Pointer(buffer)),
-		(C.VkDeviceMemory)(unsafe.Pointer(memory)),
+		*(*C.VkBuffer)(unsafe.Pointer(&buffer)),
+		*(*C.VkDeviceMemory)(unsafe.Pointer(&memory)),
 		(C.VkDeviceSize)(offset),
 	))
 	if result != Success {
@@ -461,7 +461,7 @@ func CreateImage(device Device, createInfo ImageCreateInfo, allocator *Allocatio
 func DestroyImage(device Device, image Image, allocator *AllocationCallbacks) {
 	C.vkDestroyImage(
 		(C.VkDevice)(unsafe.Pointer(device)),
-		(C.VkImage)(unsafe.Pointer(image)),
+		*(*C.VkImage)(unsafe.Pointer(&image)),
 		(*C.VkAllocationCallbacks)(allocator),
 	)
 }
@@ -470,7 +470,7 @@ func GetImageMemoryRequirements(device Device, image Image) MemoryRequirements {
 	var memoryRequirements MemoryRequirements
 	C.vkGetImageMemoryRequirements(
 		(C.VkDevice)(unsafe.Pointer(device)),
-		(C.VkImage)(unsafe.Pointer(image)),
+		*(*C.VkImage)(unsafe.Pointer(&image)),
 		(*C.VkMemoryRequirements)(unsafe.Pointer(&memoryRequirements)),
 	)
 	return memoryRequirements
@@ -479,8 +479,8 @@ func GetImageMemoryRequirements(device Device, image Image) MemoryRequirements {
 func BindImageMemory(device Device, image Image, memory DeviceMemory, memoryOffset DeviceSize) error {
 	result := Result(C.vkBindImageMemory(
 		(C.VkDevice)(unsafe.Pointer(device)),
-		(C.VkImage)(unsafe.Pointer(image)),
-		(C.VkDeviceMemory)(unsafe.Pointer(memory)),
+		*(*C.VkImage)(unsafe.Pointer(&image)),
+		*(*C.VkDeviceMemory)(unsafe.Pointer(&memory)),
 		(C.VkDeviceSize)(memoryOffset),
 	))
 	if result != Success {
@@ -492,9 +492,9 @@ func BindImageMemory(device Device, image Image, memory DeviceMemory, memoryOffs
 // todo
 func CmdCopyBufferToImage(commandBuffer CommandBuffer, srcBuffer Buffer, dstImage Image, dstImageLayout ImageLayout, regions []BufferImageCopy) {
 	C.vkCmdCopyBufferToImage(
-		(C.VkCommandBuffer)(unsafe.Pointer(commandBuffer)),
-		(C.VkBuffer)(unsafe.Pointer(srcBuffer)),
-		(C.VkImage)(unsafe.Pointer(dstImage)),
+		*(*C.VkCommandBuffer)(unsafe.Pointer(&commandBuffer)),
+		*(*C.VkBuffer)(unsafe.Pointer(&srcBuffer)),
+		*(*C.VkImage)(unsafe.Pointer(&dstImage)),
 		(C.VkImageLayout)(dstImageLayout),
 		(C.uint32_t)(len(regions)),
 		(*C.VkBufferImageCopy)(unsafe.Pointer(&regions[0])),
@@ -504,10 +504,10 @@ func CmdCopyBufferToImage(commandBuffer CommandBuffer, srcBuffer Buffer, dstImag
 // todo
 func CmdCopyImageToBuffer(commandBuffer CommandBuffer, srcImage Image, srcImageLayout ImageLayout, dstBuffer Buffer, regions []BufferImageCopy) {
 	C.vkCmdCopyImageToBuffer(
-		(C.VkCommandBuffer)(unsafe.Pointer(commandBuffer)),
-		(C.VkImage)(unsafe.Pointer(srcImage)),
+		*(*C.VkCommandBuffer)(unsafe.Pointer(&commandBuffer)),
+		*(*C.VkImage)(unsafe.Pointer(&srcImage)),
 		(C.VkImageLayout)(srcImageLayout),
-		(C.VkBuffer)(unsafe.Pointer(dstBuffer)),
+		*(*C.VkBuffer)(unsafe.Pointer(&dstBuffer)),
 		(C.uint32_t)(len(regions)),
 		(*C.VkBufferImageCopy)(unsafe.Pointer(&regions[0])),
 	)
@@ -530,7 +530,7 @@ func CreateSampler(device Device, createInfo SamplerCreateInfo, allocator *Alloc
 func DestroySampler(device Device, sampler Sampler, allocator *AllocationCallbacks) {
 	C.vkDestroySampler(
 		(C.VkDevice)(unsafe.Pointer(device)),
-		(C.VkSampler)(unsafe.Pointer(sampler)),
+		*(*C.VkSampler)(unsafe.Pointer(&sampler)),
 		(*C.VkAllocationCallbacks)(unsafe.Pointer(allocator)),
 	)
 }

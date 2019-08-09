@@ -165,12 +165,12 @@ func CreateImageView(device Device, createInfo ImageViewCreateInfo, allocator *A
 func DestroyImageView(device Device, imageView ImageView, allocator *AllocationCallbacks) {
 	C.vkDestroyImageView(
 		(C.VkDevice)(unsafe.Pointer(device)),
-		(C.VkImageView)(unsafe.Pointer(imageView)),
+		*(*C.VkImageView)(unsafe.Pointer(&imageView)),
 		(*C.VkAllocationCallbacks)(unsafe.Pointer(allocator)),
 	)
 }
 
-type RenderPass uintptr
+type RenderPass uint64
 
 type RenderPassCreateInfo struct {
 	Type         C.VkStructureType
@@ -276,7 +276,7 @@ func CreateShaderModule(device Device, createInfo ShaderModuleCreateInfo, alloca
 func DestroyShaderModule(device Device, shaderModule ShaderModule, allocator *AllocationCallbacks) {
 	C.vkDestroyShaderModule(
 		(C.VkDevice)(unsafe.Pointer(device)),
-		(C.VkShaderModule)(unsafe.Pointer(shaderModule)),
+		*(*C.VkShaderModule)(unsafe.Pointer(&shaderModule)),
 		(*C.VkAllocationCallbacks)(unsafe.Pointer(allocator)),
 	)
 }
