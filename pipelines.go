@@ -8,9 +8,9 @@ import (
 	"unsafe"
 )
 
-type PipelineCache uint64
+type PipelineCache uintptr
 
-type Pipeline uint64
+type Pipeline uintptr
 
 type PipelineCreateFlags uint32
 type PipelineShaderStageCreateFlags uint32
@@ -499,7 +499,7 @@ const (
 )
 
 type PipelineDynamicStateCreateInfo struct{}
-type PipelineLayout uint64
+type PipelineLayout uintptr
 type GraphicsPipelineCreateInfo struct {
 	Type               StructureType
 	Next               uintptr
@@ -648,7 +648,7 @@ func CreateComputePipelines(device Device, pipelineCache PipelineCache, createIn
 	pipelines := make([]Pipeline, len(createInfos))
 	result := Result(C.vkCreateComputePipelines(
 		(C.VkDevice)(unsafe.Pointer(device)),
-		*(*C.VkPipelineCache)(unsafe.Pointer(&pipelineCache)),
+		(C.VkPipelineCache)(unsafe.Pointer(pipelineCache)),
 		(C.uint32_t)(len(createInfos)),
 		(*C.VkComputePipelineCreateInfo)(unsafe.Pointer(&createInfos[0])),
 		(*C.VkAllocationCallbacks)(unsafe.Pointer(allocator)),
@@ -674,7 +674,7 @@ func CreateGraphicsPipelines(device Device, pipelineCache PipelineCache, createI
 	}()
 	result := Result(C.vkCreateGraphicsPipelines(
 		(C.VkDevice)(unsafe.Pointer(device)),
-		*(*C.VkPipelineCache)(unsafe.Pointer(&pipelineCache)),
+		(C.VkPipelineCache)(unsafe.Pointer(pipelineCache)),
 		(C.uint32_t)(len(_createInfos)),
 		(*C.VkGraphicsPipelineCreateInfo)(unsafe.Pointer(&_createInfos[0])),
 		(*C.VkAllocationCallbacks)(unsafe.Pointer(allocator)),
@@ -689,7 +689,7 @@ func CreateGraphicsPipelines(device Device, pipelineCache PipelineCache, createI
 func DestroyPipeline(device Device, pipeline Pipeline, allocator *AllocationCallbacks) {
 	C.vkDestroyPipeline(
 		(C.VkDevice)(unsafe.Pointer(device)),
-		*(*C.VkPipeline)(unsafe.Pointer(&pipeline)),
+		(C.VkPipeline(unsafe.Pointer(pipeline))),
 		(*C.VkAllocationCallbacks)(unsafe.Pointer(allocator)),
 	)
 }
@@ -711,7 +711,7 @@ func CreatePipelineCache(device Device, createInfo PipelineCacheCreateInfo, allo
 func MergePipelineCaches(device Device, dstCache PipelineCache, srcCaches []PipelineCache) error {
 	result := Result(C.vkMergePipelineCaches(
 		(C.VkDevice)(unsafe.Pointer(device)),
-		*(*C.VkPipelineCache)(unsafe.Pointer(&dstCache)),
+		(C.VkPipelineCache)(unsafe.Pointer(dstCache)),
 		(C.uint32_t)(len(srcCaches)),
 		(*C.VkPipelineCache)(unsafe.Pointer(&srcCaches[0])),
 	))
@@ -725,7 +725,7 @@ func GetPipelineCacheData(device Device, pipelineCache PipelineCache, data []byt
 	var size uint32
 	result := Result(C.vkGetPipelineCacheData(
 		(C.VkDevice)(unsafe.Pointer(device)),
-		*(*C.VkPipelineCache)(unsafe.Pointer(&pipelineCache)),
+		(C.VkPipelineCache)(unsafe.Pointer(pipelineCache)),
 		(*C.size_t)(unsafe.Pointer(&size)),
 		unsafe.Pointer(&data[0]),
 	))
@@ -738,15 +738,15 @@ func GetPipelineCacheData(device Device, pipelineCache PipelineCache, data []byt
 func DestroyPipelineCache(device Device, pipelineCache PipelineCache, allocator *AllocationCallbacks) {
 	C.vkDestroyPipelineCache(
 		(C.VkDevice)(unsafe.Pointer(device)),
-		*(*C.VkPipelineCache)(unsafe.Pointer(&pipelineCache)),
+		(C.VkPipelineCache)(unsafe.Pointer(pipelineCache)),
 		(*C.VkAllocationCallbacks)(unsafe.Pointer(allocator)),
 	)
 }
 
 func CmdBindPipeline(commandBuffer CommandBuffer, pipelineBindPoint PipelineBindPoint, pipeline Pipeline) {
 	C.vkCmdBindPipeline(
-		*(*C.VkCommandBuffer)(unsafe.Pointer(&commandBuffer)),
+		(C.VkCommandBuffer)(unsafe.Pointer(commandBuffer)),
 		(C.VkPipelineBindPoint)(pipelineBindPoint),
-		*(*C.VkPipeline)(unsafe.Pointer(&pipeline)),
+		(C.VkPipeline)(unsafe.Pointer(pipeline)),
 	)
 }

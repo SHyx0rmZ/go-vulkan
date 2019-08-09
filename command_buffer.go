@@ -58,9 +58,9 @@ type CommandPoolCreateInfo struct {
 	QueueFamilyIndex uint32
 }
 
-type CommandPool uint64
+type CommandPool uintptr
 
-type CommandBuffer uint64
+type CommandBuffer uintptr
 
 type CommandPoolTrimFlags uint32
 

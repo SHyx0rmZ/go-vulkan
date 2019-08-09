@@ -37,7 +37,7 @@ type Rect2D struct {
 	Extent Extent2D
 }
 
-type Framebuffer uint64
+type Framebuffer uintptr
 
 type RenderPassBeginInfo struct {
 	Type        StructureType
@@ -210,7 +210,7 @@ func CreateRenderPass(device Device, createInfo RenderPassCreateInfo, allocator 
 func DestroyRenderPass(device Device, renderPass RenderPass, allocator *AllocationCallbacks) {
 	C.vkDestroyRenderPass(
 		(C.VkDevice)(unsafe.Pointer(device)),
-		*(*C.VkRenderPass)(unsafe.Pointer(&renderPass)),
+		(C.VkRenderPass)(unsafe.Pointer(renderPass)),
 		(*C.VkAllocationCallbacks)(unsafe.Pointer(allocator)),
 	)
 }
@@ -250,7 +250,7 @@ func CreateFramebuffer(device Device, createInfo FramebufferCreateInfo, allocato
 func DestroyFramebuffer(device Device, framebuffer Framebuffer, allocator *AllocationCallbacks) {
 	C.vkDestroyFramebuffer(
 		(C.VkDevice)(unsafe.Pointer(device)),
-		*(*C.VkFramebuffer)(unsafe.Pointer(&framebuffer)),
+		(C.VkFramebuffer)(unsafe.Pointer(framebuffer)),
 		(*C.VkAllocationCallbacks)(unsafe.Pointer(allocator)),
 	)
 }
@@ -260,7 +260,7 @@ func CmdBeginRenderPass(commandBuffer CommandBuffer, beginInfo RenderPassBeginIn
 	beginInfo.C(&_beginInfo)
 	//defer beginInfo.C(&_beginInfo).Free()
 	C.vkCmdBeginRenderPass(
-		*(*C.VkCommandBuffer)(unsafe.Pointer(&commandBuffer)),
+		(C.VkCommandBuffer)(unsafe.Pointer(commandBuffer)),
 		(*C.VkRenderPassBeginInfo)(unsafe.Pointer(&_beginInfo)),
 		(C.VkSubpassContents)(contents),
 	)
@@ -270,7 +270,7 @@ func GetRenderAreaGranularity(device Device, renderPass RenderPass) Extent2D {
 	var granularity Extent2D
 	C.vkGetRenderAreaGranularity(
 		(C.VkDevice)(unsafe.Pointer(device)),
-		*(*C.VkRenderPass)(unsafe.Pointer(&renderPass)),
+		(C.VkRenderPass)(unsafe.Pointer(renderPass)),
 		(*C.VkExtent2D)(unsafe.Pointer(&granularity)),
 	)
 	return granularity
@@ -278,13 +278,13 @@ func GetRenderAreaGranularity(device Device, renderPass RenderPass) Extent2D {
 
 func CmdNextSubpass(commandBuffer CommandBuffer, contents SubpassContents) {
 	C.vkCmdNextSubpass(
-		*(*C.VkCommandBuffer)(unsafe.Pointer(&commandBuffer)),
+		(C.VkCommandBuffer)(unsafe.Pointer(commandBuffer)),
 		(C.VkSubpassContents)(contents),
 	)
 }
 
 func CmdEndRenderPass(commandBuffer CommandBuffer) {
 	C.vkCmdEndRenderPass(
-		*(*C.VkCommandBuffer)(unsafe.Pointer(&commandBuffer)),
+		(C.VkCommandBuffer)(unsafe.Pointer(commandBuffer)),
 	)
 }
