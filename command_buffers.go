@@ -5,6 +5,7 @@ package vulkan
 // #include <string.h>
 import "C"
 import (
+	"fmt"
 	"unsafe"
 )
 
@@ -150,7 +151,11 @@ func EndCommandBuffer(commandBuffer CommandBuffer) error {
 
 func QueueSubmit(queue Queue, submits []SubmitInfo, fence Fence) (freeFunc, error) {
 	_submits := make([]submitInfo, len(submits))
+	fmt.Println("submit", unsafe.Pointer(&_submits[0]))
 	var fs []freeFunc
+	fs = append(fs, func() {
+		_submits = nil
+	})
 	for i, submit := range submits {
 		fs = append(fs, submit.C(&_submits[i]))
 	}
@@ -280,6 +285,7 @@ func FreeMemory(device Device, memory DeviceMemory, allocator *AllocationCallbac
 
 func MapMemory(device Device, memory DeviceMemory, offset, size DeviceSize, flags MemoryMapFlags) (uintptr, error) {
 	var data uintptr
+	fmt.Println(data)
 	result := Result(C.vkMapMemory(
 		(C.VkDevice)(unsafe.Pointer(device)),
 		(C.VkDeviceMemory)(unsafe.Pointer(memory)),
@@ -288,7 +294,7 @@ func MapMemory(device Device, memory DeviceMemory, offset, size DeviceSize, flag
 		(C.VkMemoryMapFlags)(flags),
 		(*unsafe.Pointer)(unsafe.Pointer(&data)),
 	))
-	//fmt.Println("MapMemory(", device, memory, offset, size, flags, ") = ", data, result)
+	fmt.Println("MapMemory(", device, memory, offset, size, flags, ") = ", data, result)
 	if result != Success {
 		return 0, result
 	}
