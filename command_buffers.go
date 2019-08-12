@@ -405,6 +405,18 @@ func FlushMappedMemoryRanges(device Device, memoryRanges []MappedMemoryRange) er
 	return nil
 }
 
+func InvalidateMappedMemoryRanges(device Device, memoryRanges []MappedMemoryRange) error {
+	result := Result(C.vkInvalidateMappedMemoryRanges(
+		(C.VkDevice)(unsafe.Pointer(device)),
+		(C.uint32_t)(len(memoryRanges)),
+		(*C.VkMappedMemoryRange)(unsafe.Pointer(&memoryRanges[0])),
+	))
+	if result != Success {
+		return result
+	}
+	return nil
+}
+
 func GetBufferMemoryRequirements(device Device, buffer Buffer) MemoryRequirements {
 	var memoryRequirements MemoryRequirements
 	C.vkGetBufferMemoryRequirements(
