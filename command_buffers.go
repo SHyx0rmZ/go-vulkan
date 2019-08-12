@@ -5,7 +5,6 @@ package vulkan
 // #include <string.h>
 import "C"
 import (
-	"fmt"
 	"unsafe"
 )
 
@@ -151,7 +150,7 @@ func EndCommandBuffer(commandBuffer CommandBuffer) error {
 
 func QueueSubmit(queue Queue, submits []SubmitInfo, fence Fence) (freeFunc, error) {
 	_submits := make([]submitInfo, len(submits))
-	fmt.Println("submit", unsafe.Pointer(&_submits[0]))
+	//fmt.Println("submit", unsafe.Pointer(&_submits[0]))
 	var fs []freeFunc
 	fs = append(fs, func() {
 		_submits = nil
