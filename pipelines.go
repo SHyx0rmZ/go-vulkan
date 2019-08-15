@@ -12,7 +12,17 @@ type PipelineCache uintptr
 
 type Pipeline uintptr
 
-type PipelineCreateFlags uint32
+type PipelineCreateFlagBits uint32
+type PipelineCreateFlags = PipelineCreateFlagBits
+
+const (
+	PipelineCreateDisableOptimizationBit PipelineCreateFlagBits = 1 << iota
+	PipelineCreateAllowDerivativeBit
+	PipelineCreateDerivativeBit
+	PipelineCreateViewIndexFromDeviceIndexBit
+	PipelineCreateDispatchBase
+)
+
 type PipelineShaderStageCreateFlags uint32
 
 type ShaderStageFlagBits uint32
