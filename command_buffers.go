@@ -405,10 +405,14 @@ func FlushMappedMemoryRanges(device Device, memoryRanges []MappedMemoryRange) er
 }
 
 func InvalidateMappedMemoryRanges(device Device, memoryRanges []MappedMemoryRange) error {
+	var ptr unsafe.Pointer
+	if len(memoryRanges) > 0 {
+		ptr = unsafe.Pointer(&memoryRanges[0])
+	}
 	result := Result(C.vkInvalidateMappedMemoryRanges(
 		(C.VkDevice)(unsafe.Pointer(device)),
 		(C.uint32_t)(len(memoryRanges)),
-		(*C.VkMappedMemoryRange)(unsafe.Pointer(&memoryRanges[0])),
+		(*C.VkMappedMemoryRange)(ptr),
 	))
 	if result != Success {
 		return result
