@@ -35,7 +35,7 @@ type createInfo struct {
 	Type                  StructureType
 	Next                  *createInfo
 	Flags                 C.VkInstanceCreateFlags
-	ApplicationInfo       *ApplicationInfo
+	ApplicationInfo       *applicationInfo
 	EnabledLayerCount     uint32
 	EnabledLayerNames     *C.char
 	EnabledExtensionCount uint32
@@ -43,11 +43,43 @@ type createInfo struct {
 }
 
 type ApplicationInfo struct {
-	Type               C.VkStructureType
-	Next               *ApplicationInfo
-	ApplicationName    *[]uint8
+	Type               StructureType
+	Next               uintptr
+	ApplicationName    string
 	ApplicationVersion uint32
-	EngineName         *[]uint8
+	EngineName         string
+	EngineVersion      uint32
+	APIVersion         uint32
+}
+
+func (info *ApplicationInfo) C(_info *applicationInfo) freeFunc {
+	*_info = applicationInfo{
+		Type:               info.Type,
+		Next:               info.Next,
+		ApplicationName:    nil,
+		ApplicationVersion: info.ApplicationVersion,
+		EngineName:         nil,
+		EngineVersion:      info.EngineVersion,
+		APIVersion:         info.APIVersion,
+	}
+	var application *C.char
+	var engine *C.char
+	application = C.CString(info.ApplicationName)
+	engine = C.CString(info.EngineName)
+	_info.ApplicationName = application
+	_info.EngineName = engine
+	return func() {
+		C.free(unsafe.Pointer(engine))
+		C.free(unsafe.Pointer(application))
+	}
+}
+
+type applicationInfo struct {
+	Type               StructureType
+	Next               uintptr
+	ApplicationName    *C.char
+	ApplicationVersion uint32
+	EngineName         *C.char
 	EngineVersion      uint32
 	APIVersion         uint32
 }
@@ -116,12 +148,15 @@ func CreateInstance(info CreateInfo) (Instance, error) {
 		fmt.Println()
 	}
 
+	_appInfo := (*applicationInfo)(C.malloc(C.size_t(unsafe.Sizeof(applicationInfo{}))))
+	defer C.free(unsafe.Pointer(_appInfo))
+	defer info.ApplicationInfo.C(_appInfo).Free()
 	var instance Instance
 	_info := createInfo{
 		Type: info.Type,
 		//Next:                  nil, // todo
 		Flags:                 info.Flags,
-		ApplicationInfo:       info.ApplicationInfo,
+		ApplicationInfo:       _appInfo,
 		EnabledLayerCount:     uint32(len(info.EnabledLayers)),
 		EnabledLayerNames:     nil,
 		EnabledExtensionCount: uint32(len(info.EnabledExtensions)),
