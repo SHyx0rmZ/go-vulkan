@@ -56,8 +56,23 @@ const (
 	ErrorTooManyObjects
 	ErrorFormatNotSupported
 	ErrorFragmentedPool
-	ErrorOutOfPoolMemory
-	ErrorInvalidExternalHandle
+)
+
+const (
+	ErrorOutOfPoolMemory                     Result = -1000069000
+	ErrorInvalidExternalHandle               Result = -1000072003
+	ErrorSurfaceLost                         Result = -1000000000
+	ErrorNativeWindowInUse                   Result = -1000000001
+	Suboptimal                               Result = -1000001003
+	ErrorOutOfDate                           Result = -1000001004
+	ErrorIncompatibleDisplay                 Result = -1000003001
+	ErrorValidationFailed                    Result = -1000011001
+	ErrorInvalidShader                       Result = -1000012000
+	ErrorInvalidDRMFormatModifierPlaneLayout Result = -1000158000
+	ErrorFragmentation                       Result = -1000161000
+	ErrorNotPermitted                        Result = -1000174001
+	ErrorInvalidDeviceAddress                Result = -1000244000
+	ErrorFullScreenExclusiveModeLost         Result = -1000255000
 )
 
 func (r Result) Error() string {
@@ -98,10 +113,34 @@ func (r Result) Error() string {
 		return "format not supported"
 	case ErrorFragmentedPool:
 		return "fragmented pool"
-	//case ErrorOutOfPoolMemory:
-	//	return "out of pool memory"
-	//case ErrorInvalidExternalHandle:
-	//	return "invalid external handle"
+	case ErrorOutOfPoolMemory:
+		return "out of pool memory"
+	case ErrorInvalidExternalHandle:
+		return "invalid external handle"
+	case ErrorSurfaceLost:
+		return "surface lost"
+	case ErrorNativeWindowInUse:
+		return "native window in use"
+	case Suboptimal:
+		return "suboptimal"
+	case ErrorOutOfDate:
+		return "out of date"
+	case ErrorIncompatibleDisplay:
+		return "incompatible display"
+	case ErrorValidationFailed:
+		return "validation failed"
+	case ErrorInvalidShader:
+		return "invalid shader"
+	case ErrorInvalidDRMFormatModifierPlaneLayout:
+		return "invalid DRM format modifier plane layout"
+	case ErrorFragmentation:
+		return "fragmentation"
+	case ErrorNotPermitted:
+		return "not permitted"
+	case ErrorInvalidDeviceAddress:
+		return "invalid device address"
+	case ErrorFullScreenExclusiveModeLost:
+		return "full screen exclusive mode lost"
 	default:
 		panic(fmt.Sprintf("unknown result: %#v", r))
 	}
