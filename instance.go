@@ -49,7 +49,7 @@ type ApplicationInfo struct {
 	ApplicationVersion uint32
 	EngineName         string
 	EngineVersion      uint32
-	APIVersion         uint32
+	APIVersion         Version
 }
 
 func (info *ApplicationInfo) C(_info *applicationInfo) freeFunc {
@@ -81,7 +81,7 @@ type applicationInfo struct {
 	ApplicationVersion uint32
 	EngineName         *C.char
 	EngineVersion      uint32
-	APIVersion         uint32
+	APIVersion         Version
 }
 
 const ptrSize = 4 << (^uintptr(0) >> 63)
