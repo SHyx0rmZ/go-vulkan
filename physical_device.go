@@ -93,7 +93,7 @@ type PhysicalDeviceProperties struct {
 
 type SurfaceFormat struct {
 	Format     Format
-	ColorSpace C.VkColorSpaceKHR
+	ColorSpace ColorSpace
 }
 
 func (d PhysicalDevice) GetSurfaceFormats(surface Surface) ([]SurfaceFormat, error) {
