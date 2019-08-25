@@ -236,6 +236,31 @@ type DescriptorPoolSize struct {
 	DescriptorCount uint32
 }
 
+// CreateDescriptorPool - Creates a descriptor pool object.
+//
+// Parameters
+// - device is the logical device that creates the descriptor pool.
+// - createInfo is a pointer to an instance of the VkDescriptorPoolCreateInfo structure specifying the state of the
+//   descriptor pool object.
+// - allocator controls host memory allocation as described in the Memory Allocation chapter.
+// - pDescriptorPool points to a VkDescriptorPool handle in which the resulting descriptor pool object is returned. (TODO)
+//
+// allocator controls host memory allocation as described in the Memory Allocation chapter.
+// The created descriptor pool is returned in pDescriptorPool. (TODO)
+//
+// Valid Usage (Implicit)
+// - device must be a valid Device handle
+// - createInfo must be a valid pointer to a valid DescriptorPoolCreateInfo structure
+// - If allocator is not nil, allocator must be a valid pointer to a valid AllocationCallbacks structure
+// - pDescriptorPool must be a valid pointer to a VkDescriptorPool handle (TODO)
+//
+// Return Codes
+// - On success, this command returns
+//   - Success
+// - On failure, this command returns
+//   - ErrorOutOfHostMemory
+//   - ErrorOutOfDeviceMemory
+//   - ErrorFragmentation
 func CreateDescriptorPool(device Device, createInfo DescriptorPoolCreateInfo, allocator *AllocationCallbacks) (DescriptorPool, error) {
 	var pool DescriptorPool
 	var _createInfo descriptorPoolCreateInfo
@@ -252,10 +277,35 @@ func CreateDescriptorPool(device Device, createInfo DescriptorPoolCreateInfo, al
 	return pool, nil
 }
 
-func DestroyDescriptorPool(device Device, pool DescriptorPool, allocator *AllocationCallbacks) {
+// DestroyDescriptorPool - Destroy a descriptor pool object.
+//
+// Parameters
+// - device is the logical device that destroys the descriptor pool.
+// - descriptorPool is the descriptor pool to destroy.
+// - allocator controls host memory allocation as described in the Memory Allocation chapter.
+//
+// When a pool is destroyed, all descriptor sets allocated from the pool are implicitly freed and become invalid.
+// Descriptor sets allocated from a given pool do not need to be freed before destroying that descriptor pool.
+//
+// Valid Usage
+// - All submitted commands that refer to descriptorPool (via any allocated descriptor sets) must have completed
+//   execution
+// - If AllocationCallbacks were provided when descriptorPool was created, a compatible set of callbacks must be
+//   provided here
+// - If no AllocationCallbacks were provided when descriptorPool was created, allocator must be nil
+//
+// Valid Usage (Implicit)
+// - device must be a valid Device handle
+// - If descriptorPool is not NullHandle, descriptorPool must be a valid DescriptorPool handle
+// - If allocator is not nil, allocator must be a valid pointer to a valid AllocationCallbacks structure
+// - If descriptorPool is a valid handle, it must have been created, allocated, or retrieved from device
+//
+// Host Synchronization
+// - Host access to descriptorPool must be externally synchronized
+func DestroyDescriptorPool(device Device, descriptorPool DescriptorPool, allocator *AllocationCallbacks) {
 	C.vkDestroyDescriptorPool(
 		(C.VkDevice)(unsafe.Pointer(device)),
-		(C.VkDescriptorPool)(unsafe.Pointer(pool)),
+		(C.VkDescriptorPool)(unsafe.Pointer(descriptorPool)),
 		(*C.VkAllocationCallbacks)(unsafe.Pointer(allocator)),
 	)
 }
