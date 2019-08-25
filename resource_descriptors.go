@@ -192,6 +192,46 @@ const (
 	DescriptorPoolCreateFreeDescriptorSetBit DescriptorPoolCreateFlagBits = 1 << iota
 )
 
+// DescriptorPoolCreateInfo - Structure specifying parameters of a newly created descriptor pool
+//
+// Members
+// - Type is the type of this structure.
+// - Next is 0 or a pointer to an extension-specific structure.
+// - Flags is a bitmask of DescriptorPoolCreateFlagBits specifying certain supported operations on the pool.
+// - MaxSets is the maximum number of descriptor sets that can be allocated from the pool.
+// - PoolSizes is a slice of DescriptorPoolSize structures, each containing a descriptor type and number of
+//   descriptors of that type to be allocated in the pool.
+//
+// If multiple DescriptorPoolSize structures appear in the PoolSizes slice then the pool will be created with
+// enough storage for the total number of descriptors of each type.
+//
+// Fragmentation of a descriptor pool is possible and may lead to descriptor set allocation failures. A failure due
+// to fragmentation is defined as failing a descriptor set allocation despite the sum of all outstanding descriptor
+// set allocations from the pool plus the requested allocation requiring no more than the total number of descriptors
+// requested at pool creation. Implementations provide certain guarantees of when fragmentation must not cause
+// allocation failure, as described below.
+//
+// If a descriptor pool has not had any descriptor sets freed since it was created or most recently reset then
+// fragmentation must not cause an allocation failure (note that this is always the case for a pool created without
+// the DescriptorPoolCreateFreeDescriptorSetBit bit set). Additionally, if all sets allocated from the pool since it
+// was created or most recently reset use the same number of descriptors (of each type) and the requested allocation
+// also uses that same number of descriptors (of each type), then fragmentation must not cause an allocation failure.
+//
+// If an allocation failure occurs due to fragmentation, an application can create an additional descriptor pool
+// to perform further descriptor set allocations.
+//
+// If flags has the DescriptorPoolCreateUpdateAfterBindBit bit set, descriptor pool creation may fail with the error
+// ErrorFragmentation if the total number of descriptors across all pools (including this one) created with this bit
+// set exceeds MaxUpdateAfterBindDescriptorsInAllPools, or if fragmentation of the underlying hardware resources occurs.
+//
+// Valid Usage
+// - MaxSets must be greater than 0
+//
+// Valid Usage (Implicit)
+// - Type must be StructureTypeDescriptorPoolCreateInfo
+// - Next must be 0 or a pointer to a valid instance of DescriptorPoolInlineUniformBlockCreateInfoEXT (TODO)
+// - Flags must be a valid combination of DescriptorPoolCreateFlagBits values
+// - PoolSizes must be a slice of valid DescriptorPoolSize structures
 type DescriptorPoolCreateInfo struct {
 	Type      StructureType
 	Next      uintptr
@@ -231,6 +271,24 @@ type descriptorPoolCreateInfo struct {
 	PoolSizes     *DescriptorPoolSize
 }
 
+// DescriptorPoolSize - Structure specifying descriptor pool size.
+//
+// Members
+// - Type is the type of descriptor.
+// - DescriptorCount is the number of descriptors of that type to allocate. If type is
+//   DescriptorTypeInlineUniformBlock then descriptorCount is the number of bytes to allocate for descriptors of
+//   this type.
+//
+// Note: When creating a descriptor pool that will contain descriptors for combined image
+//       samplers of multi-planar formats, an application needs to account for non-trivial
+//       descriptor consumption when choosing the descriptorCount value, as indicated by
+//       SamplerYcbcrConversionImageFormatProperties.combinedImageSamplerDescriptorCount.
+// Valid Usage
+// - DescriptorCount must be greater than 0
+// - If type is DescriptorTypeInlineUniformBlock then descriptorCount must be a multiple of 4
+//
+// Valid Usage (Implicit)
+// - Type must be a valid DescriptorType value
 type DescriptorPoolSize struct {
 	Type            DescriptorType
 	DescriptorCount uint32
