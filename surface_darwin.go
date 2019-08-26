@@ -2,7 +2,7 @@ package vulkan
 
 // #define VK_USE_PLATFORM_MACOS_MVK 1
 // #include <vulkan/vulkan.h>
-// #include <window.h>
+// #include <AppKit/AppKit.h>
 import "C"
 import (
 	"fmt"
