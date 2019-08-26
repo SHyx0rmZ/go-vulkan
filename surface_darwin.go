@@ -1,7 +1,9 @@
 package vulkan
 
+// #cgo CFLAGS: -x objective-c
 // #define VK_USE_PLATFORM_MACOS_MVK 1
 // #include <vulkan/vulkan.h>
+// #include <Foundation/Foundation.h>
 // #include <AppKit/AppKit.h>
 import "C"
 import (
@@ -18,7 +20,7 @@ func CreateSurface(instance Instance, info sdl.WMInfo) (Surface, error) {
 
 	cocoa := *(*sdl.WMInfoCocoa)(unsafe.Pointer(&info))
 
-	window := (*C.NSWindow)(unsafe.Pointer(cocoa.Window))
+	window := (*C.NSWindow)(unsafe.Pointer((*C.void)(cocoa.Window)))
 	view := window.contentView
 
 	return instance.CreateMacOSSurface(MacOSSurfaceCreateInfo{
