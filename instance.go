@@ -7,6 +7,7 @@ import (
 )
 
 // #cgo linux freebsd darwin LDFLAGS: -lvulkan
+// #cgo windows LDFLAGS: -lvulkan-1
 // #include <stdlib.h>
 // #define VK_KHR_SURFACE 1
 // #define VK_KHR_SWAPCHAIN 1
