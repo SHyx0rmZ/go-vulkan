@@ -114,14 +114,24 @@ type PresentMode C.VkPresentModeKHR
 
 func (d PhysicalDevice) GetSurfacePresentModes(surface Surface) ([]PresentMode, error) {
 	var count uint32
-	result := C.vkGetPhysicalDeviceSurfacePresentModesKHR((C.VkPhysicalDevice)(unsafe.Pointer(d)), (C.VkSurfaceKHR)(unsafe.Pointer(surface)), (*C.uint32_t)(unsafe.Pointer(&count)), nil)
-	if result != C.VK_SUCCESS {
-		return nil, fmt.Errorf("PhysicalDevice.GetSurfacePresentModes")
+	result := Result(C.vkGetPhysicalDeviceSurfacePresentModesKHR(
+		(C.VkPhysicalDevice)(unsafe.Pointer(d)),
+		(C.VkSurfaceKHR)(unsafe.Pointer(surface)),
+		(*C.uint32_t)(unsafe.Pointer(&count)),
+		nil,
+	))
+	if result != Success {
+		return nil, fmt.Errorf("previ: %s", result)
 	}
 	modes := make([]PresentMode, count)
-	result = C.vkGetPhysicalDeviceSurfacePresentModesKHR((C.VkPhysicalDevice)(unsafe.Pointer(d)), (C.VkSurfaceKHR)(unsafe.Pointer(surface)), (*C.uint32_t)(unsafe.Pointer(&count)), (*C.VkPresentModeKHR)(unsafe.Pointer(&modes[0])))
-	if result != C.VK_SUCCESS {
-		return nil, fmt.Errorf("PhysicalDevice.GetSurfacePresentModes")
+	result = Result(C.vkGetPhysicalDeviceSurfacePresentModesKHR(
+		(C.VkPhysicalDevice)(unsafe.Pointer(d)),
+		(C.VkSurfaceKHR)(unsafe.Pointer(surface)),
+		(*C.uint32_t)(unsafe.Pointer(&count)),
+		(*C.VkPresentModeKHR)(unsafe.Pointer(&modes[0])),
+	))
+	if result != Success {
+		return nil, result
 	}
 	return modes, nil
 }
