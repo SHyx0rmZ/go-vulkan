@@ -20,12 +20,12 @@ func CreateSurface(instance Instance, info sdl.WMInfo) (Surface, error) {
 
 	cocoa := *(*sdl.WMInfoCocoa)(unsafe.Pointer(&info))
 
-	window := (*C.NSWindow)(unsafe.Pointer((*C.void)(cocoa.Window)))
-	view := window.contentView
+	window := unsafe.Pointer(cocoa.Window)
+	view := (*uintptr)(unsafe.Pointer(uintptr(window) + 32))
 
 	return instance.CreateMacOSSurface(MacOSSurfaceCreateInfo{
 		Type: 1000123000,
-		View: view,
+		View: *view,
 	})
 }
 
