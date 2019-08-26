@@ -8,17 +8,12 @@ import (
 
 // #cgo linux freebsd darwin LDFLAGS: -lvulkan
 // #include <stdlib.h>
-// #define VK_USE_PLATFORM_XLIB_KHR 1
 // #define VK_KHR_SURFACE 1
 // #define VK_KHR_SWAPCHAIN 1
 // #include <vulkan/vulkan.h>
 // void (*_f)(VkPhysicalDevice device, VkPhysicalDeviceProperties2KHR *properties);
 // void doInvoke(VkPhysicalDevice device, VkPhysicalDeviceProperties2KHR *properties) {
 //   _f(device, properties);
-// }
-// VkResult (*_ptr_vkCreateXlibSurfaceKHR)(VkInstance instance, const VkXlibSurfaceCreateInfoKHR *info, const VkAllocationCallbacks *allocator, VkSurfaceKHR *surface);
-// VkResult _vkCreateXlibSurfaceKHR(VkInstance instance, const VkXlibSurfaceCreateInfoKHR *info, const VkAllocationCallbacks *allocator, VkSurfaceKHR *surface) {
-//   return _ptr_vkCreateXlibSurfaceKHR(instance, info, allocator, surface);
 // }
 import "C"
 
@@ -179,27 +174,6 @@ func (i Instance) Destroy() {
 }
 
 type Surface uintptr
-
-type XlibSurfaceCreateInfo struct {
-	Type    C.VkStructureType
-	Next    *XlibSurfaceCreateInfo
-	Flags   C.VkFlags
-	Display uintptr
-	Window  uintptr
-}
-
-func (i Instance) CreateXlibSurface(info XlibSurfaceCreateInfo) (Surface, error) {
-	str := C.CString("vkCreateXlibSurfaceKHR")
-	defer C.free(unsafe.Pointer(str))
-	C._ptr_vkCreateXlibSurfaceKHR = C.vkGetInstanceProcAddr((C.VkInstance)(unsafe.Pointer(i)), str)
-	var surface Surface
-	info.Next = nil
-	result := C.vkCreateXlibSurfaceKHR((C.VkInstance)(unsafe.Pointer(i)), (*C.struct_VkXlibSurfaceCreateInfoKHR)(unsafe.Pointer(&info)), nil, (*C.VkSurfaceKHR)(unsafe.Pointer(&surface)))
-	if result != C.VK_SUCCESS {
-		return 0, fmt.Errorf("surface error")
-	}
-	return surface, nil
-}
 
 func (i Instance) DestroySurface(surface Surface) {
 	C.vkDestroySurfaceKHR((C.VkInstance)(unsafe.Pointer(i)), (C.VkSurfaceKHR)(unsafe.Pointer(surface)), nil)
