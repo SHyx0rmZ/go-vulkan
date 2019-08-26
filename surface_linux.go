@@ -10,6 +10,8 @@ import (
 	sdl "code.witches.io/go/sdl2"
 )
 
+const SurfaceExtension = "VK_KHR_xlib_surface"
+
 func CreateSurface(instance Instance, info sdl.WMInfo) (Surface, error) {
 	if info.Subsystem != sdl.SubsystemX11 {
 		return NullHandle, fmt.Errorf("unexpected subsystem while expecting '%s': %s", sdl.SubsystemX11, info.Subsystem)

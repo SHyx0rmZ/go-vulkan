@@ -13,6 +13,8 @@ import (
 	sdl "code.witches.io/go/sdl2"
 )
 
+const SurfaceExtension = "VK_MVK_macos_surface"
+
 func CreateSurface(instance Instance, info sdl.WMInfo) (Surface, error) {
 	if info.Subsystem != sdl.SubsystemCocoa {
 		return NullHandle, fmt.Errorf("unexpected subsystem while expecting '%s': %s", sdl.SubsystemCocoa, info.Subsystem)
