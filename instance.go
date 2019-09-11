@@ -171,7 +171,11 @@ func CreateInstance(info CreateInfo) (Instance, error) {
 type Instance uintptr
 
 func (i Instance) Destroy() {
-	C.vkDestroyInstance((C.VkInstance)(unsafe.Pointer(i)), nil)
+	DestroyInstance(i)
+}
+
+func DestroyInstance(instance Instance) {
+	C.vkDestroyInstance((C.VkInstance)(unsafe.Pointer(instance)), nil)
 }
 
 type Surface uintptr
