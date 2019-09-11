@@ -32,6 +32,13 @@ const (
 	MaxDescriptionSize        = 256
 )
 
+// 1.1
+const (
+	MaxDeviceGroupSize  = 32
+	LUIDSize            = 8
+	QueueFamilyExternal = ^uint32(0) - 1
+)
+
 type Result int32
 
 const (

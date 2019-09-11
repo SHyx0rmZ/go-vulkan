@@ -319,16 +319,51 @@ type DeviceQueueCreateInfo struct {
 //}
 
 func (i Instance) EnumeratePhysicalDevices() ([]PhysicalDevice, error) {
+	return EnumeratePhysicalDevices(i)
+}
+
+type PhysicalDeviceGroupProperties struct {
+	Type                StructureType
+	Next                uintptr
+	PhysicalDeviceCount uint32
+	PhysicalDevices     [MaxDeviceGroupSize]PhysicalDevice
+	SubsetAllocation    bool
+	_                   [3]byte
+}
+
+func EnumeratePhysicalDeviceGroups(instance Instance) ([]PhysicalDeviceGroupProperties, error) {
+	var count uint32
+	result := Result(C.vkEnumeratePhysicalDeviceGroups(
+		(C.VkInstance)(unsafe.Pointer(instance)),
+		(*C.uint32_t)(unsafe.Pointer(&count)),
+		nil,
+	))
+	if result != Success {
+		return nil, result
+	}
+	groups := make([]PhysicalDeviceGroupProperties, count)
+	result = Result(C.vkEnumeratePhysicalDeviceGroups(
+		(C.VkInstance)(unsafe.Pointer(instance)),
+		(*C.uint32_t)(unsafe.Pointer(&count)),
+		(*C.VkPhysicalDeviceGroupProperties)(unsafe.Pointer(&groups[0])),
+	))
+	if result != Success {
+		return nil, result
+	}
+	return groups, nil
+}
+
+func EnumeratePhysicalDevices(instance Instance) ([]PhysicalDevice, error) {
 	var count C.uint32_t
 	// var devices uintptr
 	// (*C.VkPhysicalDevice)(unsafe.Pointer(&devices))
 	fmt.Println(unsafe.Sizeof(PhysicalDeviceProperties2KHR{}))
-	result := C.vkEnumeratePhysicalDevices((C.VkInstance)(unsafe.Pointer(i)), &count, nil)
+	result := C.vkEnumeratePhysicalDevices((C.VkInstance)(unsafe.Pointer(instance)), &count, nil)
 	if result != C.VK_SUCCESS {
 		return nil, Result(result)
 	}
 	devices := make([]PhysicalDevice, count)
-	result = C.vkEnumeratePhysicalDevices((C.VkInstance)(unsafe.Pointer(i)), &count, (*C.VkPhysicalDevice)(unsafe.Pointer(&devices[0])))
+	result = C.vkEnumeratePhysicalDevices((C.VkInstance)(unsafe.Pointer(instance)), &count, (*C.VkPhysicalDevice)(unsafe.Pointer(&devices[0])))
 	// C._f = C.vkGetInstanceProcAddr((C.VkInstance)(unsafe.Pointer(i)), C.CString("vkGetPhysicalDeviceProperties2KHR"))
 	// if C._f == nil {
 	// 	panic("empty function pointer")
