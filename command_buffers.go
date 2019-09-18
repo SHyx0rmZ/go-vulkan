@@ -344,20 +344,25 @@ func FreeMemory(device Device, memory DeviceMemory, allocator *AllocationCallbac
 //   - ErrorOutOfDeviceMemory
 //   - ErrorMemoryMapFailed
 func MapMemory(device Device, memory DeviceMemory, offset, size DeviceSize, flags MemoryMapFlags) (uintptr, error) {
+	//const minMemoryMapAlignment = 4096
+	//var data [minMemoryMapAlignment / unsafe.Sizeof(uintptr(0))]uintptr
+	//addr := uintptr(unsafe.Pointer(&data[0]))
+	//idx := (((addr + minMemoryMapAlignment - 1) & ^uintptr(minMemoryMapAlignment-1)) - addr) / unsafe.Sizeof(uintptr(0))
 	var data uintptr
-	// fmt.Println(data)
 	result := Result(C.vkMapMemory(
 		(C.VkDevice)(unsafe.Pointer(device)),
 		(C.VkDeviceMemory)(unsafe.Pointer(memory)),
 		(C.VkDeviceSize)(offset),
 		(C.VkDeviceSize)(size),
 		(C.VkMemoryMapFlags)(flags),
+		//(*unsafe.Pointer)(unsafe.Pointer(&data[idx])),
 		(*unsafe.Pointer)(unsafe.Pointer(&data)),
 	))
 	// fmt.Println("MapMemory(", device, memory, offset, size, flags, ") = ", data, result)
 	if result != Success {
 		return 0, result
 	}
+	//return data[idx], nil
 	return data, nil
 }
 
