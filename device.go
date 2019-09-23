@@ -25,15 +25,11 @@ func DestroyDevice(device Device, allocator *AllocationCallbacks) {
 	)
 }
 
-func (d Device) CreateSwapchain(info SwapchainCreateInfo, surface Surface) (Swapchain, error) {
-	str := C.CString("vkCreateSwapchainKHR")
-	defer C.free(unsafe.Pointer(str))
-	C._ptr_vkCreateSwapchainKHR = C.vkGetDeviceProcAddr((C.VkDevice)(unsafe.Pointer(d)), str)
+func CreateSwapchain(device Device, info SwapchainCreateInfo, surface Surface, allocator *AllocationCallbacks) (Swapchain, error) {
 	var swapchain Swapchain
-	fmt.Println("vkCreateSwapchainKHR", unsafe.Pointer(C._ptr_vkCreateSwapchainKHR))
 	info = SwapchainCreateInfo{
 		Type:            1000001000,
-		Surface:         (C.VkSurfaceKHR)(unsafe.Pointer(surface)),
+		Surface:         surface,
 		MinImageCount:   3,
 		Format:          info.Format,
 		PresentMode:     info.PresentMode,
@@ -46,21 +42,24 @@ func (d Device) CreateSwapchain(info SwapchainCreateInfo, surface Surface) (Swap
 			Height: 800,
 		},
 		ImageArrayLayers:      1,
-		ImageUsage:            C.VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
+		ImageUsage:            ImageUsageColorAttachmentBit,
 		ImageSharingMode:      SharingModeExclusive,
 		QueueFamilyIndexCount: 0,
 		QueueFamilyIndices:    nil,
 		PreTransform:          1,
 		CompositeAlpha:        1,
-		Clipped:               C.VK_TRUE,
-		OldSwapchain:          nil,
+		Clipped:               true,
+		OldSwapchain:          NullHandle,
 	}
-	p := C.malloc(4)
-	*(*uint32)(p) = 0
-	info.QueueFamilyIndices = (*uint32)(p)
-	defer C.free(p)
-	fmt.Println("internal ", unsafe.Pointer(C.vkCreateSwapchainKHR))
-	result := C.vkCreateSwapchainKHR((C.VkDevice)(unsafe.Pointer(d)), (*C.VkSwapchainCreateInfoKHR)(unsafe.Pointer(&info)), nil, (*C.VkSwapchainKHR)(unsafe.Pointer(&swapchain)))
+	//p := C.malloc(4)
+	//*(*uint32)(p) = 0
+	//info.QueueFamilyIndices = (*uint32)(p)
+	//defer C.free(p)
+	result := C.vkCreateSwapchainKHR(
+		(C.VkDevice)(unsafe.Pointer(device)),
+		(*C.VkSwapchainCreateInfoKHR)(unsafe.Pointer(&info)),
+		(*C.VkAllocationCallbacks)(unsafe.Pointer(allocator)),
+		(*C.VkSwapchainKHR)(unsafe.Pointer(&swapchain)))
 	if result != C.VK_SUCCESS {
 		return 0, fmt.Errorf("swapchain error")
 	}

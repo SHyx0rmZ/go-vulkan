@@ -162,7 +162,20 @@ func GetPhysicalDeviceSurfaceFormats(physicalDevice PhysicalDevice, surface Surf
 	return formats[:count:count], nil
 }
 
-type PresentMode C.VkPresentModeKHR
+//go:generate go run stringer.go -type PresentMode -output present_mode_string.go
+type PresentMode uint32
+
+const (
+	PresentModeImmediate PresentMode = iota
+	PresentModeMailbox
+	PresentModeFIFO
+	PresentModeFIFORelaxed
+)
+
+const (
+	PresentModeSharedDemandRefresh     PresentMode = 1000111000
+	PresentModeSharedContinuousRefresh PresentMode = 1000111001
+)
 
 func GetPhysicalDeviceSurfacePresentModes(physicalDevice PhysicalDevice, surface Surface) ([]PresentMode, error) {
 	var count uint32

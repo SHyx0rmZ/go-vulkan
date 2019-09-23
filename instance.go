@@ -186,28 +186,34 @@ func (i Instance) DestroySurface(surface Surface) {
 
 type PhysicalDevice uintptr
 
+type SwapchainCreateFlagBits uint32
+type SwapchainCreateFlags = SwapchainCreateFlagBits
+
+const (
+	SwapchainCreateSplitInstanceBindRegionsBit SwapchainCreateFlagBits = 1 << iota
+	SwapchainCreateProtectedBit
+	SwapchainCreateMutableFormatBit
+)
+
 type SwapchainCreateInfo struct {
-	Type            C.VkStructureType
-	Next            uintptr
-	Flags           C.VkSwapchainCreateFlagsKHR
-	Surface         C.VkSurfaceKHR
-	MinImageCount   uint32
-	Format          Format
-	ImageColorSpace C.VkColorSpaceKHR
-	ImageExtent     struct {
-		Width  uint32
-		Height uint32
-	}
+	Type                  StructureType
+	Next                  uintptr
+	Flags                 C.VkSwapchainCreateFlagsKHR
+	Surface               Surface
+	MinImageCount         uint32
+	Format                Format
+	ImageColorSpace       ColorSpace
+	ImageExtent           Extent2D
 	ImageArrayLayers      uint32
-	ImageUsage            C.VkImageUsageFlags
+	ImageUsage            ImageUsageFlags
 	ImageSharingMode      SharingMode
 	QueueFamilyIndexCount uint32
 	QueueFamilyIndices    *uint32
 	PreTransform          C.VkSurfaceTransformFlagBitsKHR
 	CompositeAlpha        C.VkCompositeAlphaFlagBitsKHR
 	PresentMode           PresentMode
-	Clipped               C.VkBool32
-	OldSwapchain          C.VkSwapchainKHR
+	Clipped               bool
+	OldSwapchain          Swapchain
 }
 
 type Swapchain uintptr
