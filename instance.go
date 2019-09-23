@@ -323,6 +323,13 @@ func (i Instance) EnumeratePhysicalDevices() ([]PhysicalDevice, error) {
 }
 
 type PhysicalDeviceGroupProperties struct {
+	Type             StructureType
+	Next             uintptr
+	PhysicalDevices  []PhysicalDevice
+	SubsetAllocation bool
+}
+
+type physicalDeviceGroupProperties struct {
 	Type                StructureType
 	Next                uintptr
 	PhysicalDeviceCount uint32
@@ -341,14 +348,23 @@ func EnumeratePhysicalDeviceGroups(instance Instance) ([]PhysicalDeviceGroupProp
 	if result != Success {
 		return nil, result
 	}
-	groups := make([]PhysicalDeviceGroupProperties, count)
+	_groups := make([]physicalDeviceGroupProperties, count)
 	result = Result(C.vkEnumeratePhysicalDeviceGroups(
 		(C.VkInstance)(unsafe.Pointer(instance)),
 		(*C.uint32_t)(unsafe.Pointer(&count)),
-		(*C.VkPhysicalDeviceGroupProperties)(unsafe.Pointer(&groups[0])),
+		(*C.VkPhysicalDeviceGroupProperties)(unsafe.Pointer(&_groups[0])),
 	))
 	if result != Success {
 		return nil, result
+	}
+	groups := make([]PhysicalDeviceGroupProperties, count)
+	for i := range _groups {
+		groups[i] = PhysicalDeviceGroupProperties{
+			Type:             _groups[i].Type,
+			Next:             _groups[i].Next,
+			PhysicalDevices:  _groups[i].PhysicalDevices[:_groups[i].PhysicalDeviceCount:_groups[i].PhysicalDeviceCount],
+			SubsetAllocation: _groups[i].SubsetAllocation,
+		}
 	}
 	return groups, nil
 }
