@@ -557,6 +557,23 @@ func EnumeratePhysicalDevices(instance Instance) ([]PhysicalDevice, error) {
 	return devices, nil
 }
 
+func GetPhysicalDeviceSurfaceSupport(physicalDevice PhysicalDevice, queueFamilyIndex uint32, surface Surface) (bool, error) {
+	var supported struct {
+		bool
+		_ [3]byte
+	}
+	result := Result(C.vkGetPhysicalDeviceSurfaceSupportKHR(
+		(C.VkPhysicalDevice)(unsafe.Pointer(physicalDevice)),
+		(C.uint32_t)(queueFamilyIndex),
+		(C.VkSurfaceKHR)(unsafe.Pointer(surface)),
+		(*C.VkBool32)(unsafe.Pointer(&supported.bool)),
+	))
+	if result != Success {
+		return false, result
+	}
+	return supported.bool, nil
+}
+
 func (d PhysicalDevice) GetSurfaceSupport(queueFamilyIndex uint32, surface Surface) (bool, error) {
 	var supported uint32
 	result := C.vkGetPhysicalDeviceSurfaceSupportKHR((C.VkPhysicalDevice)(unsafe.Pointer(d)), (C.uint32_t)(queueFamilyIndex), (C.VkSurfaceKHR)(unsafe.Pointer(surface)), (*C.VkBool32)(unsafe.Pointer(&supported)))

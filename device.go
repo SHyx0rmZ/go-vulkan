@@ -18,9 +18,13 @@ import (
 
 type Device uintptr
 
-func (d Device) Destroy() {
-	C.vkDestroyDevice((C.VkDevice)(unsafe.Pointer(d)), nil)
+func DestroyDevice(device Device, allocator *AllocationCallbacks) {
+	C.vkDestroyDevice(
+		(C.VkDevice)(unsafe.Pointer(device)),
+		(*C.VkAllocationCallbacks)(unsafe.Pointer(allocator)),
+	)
 }
+
 func (d Device) CreateSwapchain(info SwapchainCreateInfo, surface Surface) (Swapchain, error) {
 	str := C.CString("vkCreateSwapchainKHR")
 	defer C.free(unsafe.Pointer(str))
