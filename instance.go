@@ -674,3 +674,11 @@ func (d PhysicalDevice) GetSurfaceSupport(queueFamilyIndex uint32, surface Surfa
 	}
 	return supported == C.VK_TRUE, nil
 }
+
+func DestroySurface(instance Instance, surface Surface, allocator *AllocationCallbacks) {
+	C.vkDestroySurfaceKHR(
+		(C.VkInstance)(unsafe.Pointer(instance)),
+		(C.VkSurfaceKHR)(unsafe.Pointer(surface)),
+		(*C.VkAllocationCallbacks)(unsafe.Pointer(allocator)),
+	)
+}
