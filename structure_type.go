@@ -1,5 +1,6 @@
 package vulkan
 
+//go:generate stringer -type=StructureType -output=structure_type_string.go
 type StructureType uint32
 
 // cat s.txt | head -n 49 | sed 's/[A-Z]/\L&/g;s/_\([a-z]\)/\U\1/g;s/^\s\+vk//;s/\s=\s[0-9]\+,$//'
@@ -55,3 +56,5 @@ const (
 	StructureTypeLoaderInstanceCreateInfo
 	StructureTypeLoaderDeviceCreateInfo
 )
+
+const StructureTypePhysicalDeviceGroupProperties StructureType = 1000070000
