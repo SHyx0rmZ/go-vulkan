@@ -15,7 +15,7 @@ import (
 
 const SurfaceExtension = "VK_MVK_macos_surface"
 
-func CreateSurface(instance Instance, info sdl.WMInfo) (Surface, error) {
+func CreateSurface(instance Instance, info sdl.WMInfo, allocator *AllocationCallbacks) (Surface, error) {
 	if info.Subsystem != sdl.SubsystemCocoa {
 		return NullHandle, fmt.Errorf("unexpected subsystem while expecting '%s': %s", sdl.SubsystemCocoa, info.Subsystem)
 	}
@@ -25,10 +25,10 @@ func CreateSurface(instance Instance, info sdl.WMInfo) (Surface, error) {
 	window := unsafe.Pointer(cocoa.Window)
 	view := (*uintptr)(unsafe.Pointer(uintptr(window) + 32))
 
-	return instance.CreateMacOSSurface(MacOSSurfaceCreateInfo{
-		Type: 1000123000,
+	return CreateMacOSSurface(instance, MacOSSurfaceCreateInfo{
+		Type: StructureTypeMacOSSurfaceCreateInfo,
 		View: *view,
-	})
+	}, allocator)
 }
 
 type MacOSSurfaceCreateFlags uint32
@@ -40,16 +40,16 @@ type MacOSSurfaceCreateInfo struct {
 	View  uintptr
 }
 
-func (i Instance) CreateMacOSSurface(info MacOSSurfaceCreateInfo) (Surface, error) {
+func CreateMacOSSurface(instance Instance, info MacOSSurfaceCreateInfo, allocator *AllocationCallbacks) (Surface, error) {
 	var surface Surface
 	result := Result(C.vkCreateMacOSSurfaceMVK(
-		(C.VkInstance)(unsafe.Pointer(i)),
+		(C.VkInstance)(unsafe.Pointer(instance)),
 		(*C.VkMacOSSurfaceCreateInfoMVK)(unsafe.Pointer(&info)),
-		nil,
+		(*C.VkAllocationCallbacks)(unsafe.Pointer(allocator)),
 		(*C.VkSurfaceKHR)(unsafe.Pointer(&surface)),
 	))
 	if result != Success {
-		return 0, result
+		return NullHandle, result
 	}
 	return surface, nil
 }

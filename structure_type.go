@@ -57,4 +57,18 @@ const (
 	StructureTypeLoaderDeviceCreateInfo
 )
 
+const (
+	StructureTypeDisplayModeCreateInfo      StructureType = 1000002000
+	StructureTypeDisplaySurfaceCreateInfo   StructureType = 1000002001
+	StructureTypeDisplayPresentInfo         StructureType = 1000003000
+	StructureTypeXlibSurfaceCreateInfo      StructureType = 1000004000
+	StructureTypeXCBSurfaceCreateInfo       StructureType = 1000005000
+	StructureTypeWaylandSurfaceCreateInfo   StructureType = 1000006000
+	StructureTypeAndroidSurfaceCreateInfo   StructureType = 1000008000
+	StructureTypeWin32SurfaceCreateInfo     StructureType = 1000009000
+	StructureTypeVISurfaceCreateInfo        StructureType = 1000062000
+	StructureTypeIOSSurfaceCreateInfo       StructureType = 1000122000
+	StructureTypeMacOSSurfaceCreateInfo     StructureType = 1000123000
+	StructureTypeImagePipeSurfaceCreateInfo StructureType = 1000214000
+)
 const StructureTypePhysicalDeviceGroupProperties StructureType = 1000070000

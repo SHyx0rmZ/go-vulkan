@@ -12,40 +12,39 @@ import (
 
 const SurfaceExtension = "VK_KHR_win32_surface"
 
-func CreateSurface(instance Instance, info sdl.WMInfo) (Surface, error) {
+func CreateSurface(instance Instance, info sdl.WMInfo, allocator *AllocationCallbacks) (Surface, error) {
 	if info.Subsystem != sdl.SubsystemWindows {
 		return NullHandle, fmt.Errorf("unexpected subsystem while expecting '%s': %s", sdl.SubsystemWindows, info.Subsystem)
 	}
 
 	win32 := *(*sdl.WMInfoWin32)(unsafe.Pointer(&info))
-	return instance.CreateWin32Surface(Win32SurfaceCreateInfo{
-		Type:     1000009000,
+	return CreateWin32Surface(instance, Win32SurfaceCreateInfo{
+		Type:     StructureTypeWin32SurfaceCreateInfo,
 		Instance: win32.Instance,
 		Window:   win32.Window,
-	})
+	}, allocator)
 }
-
 
 type Win32SurfaceCreateFlags uint32
 
 type Win32SurfaceCreateInfo struct {
-	Type    StructureType
-	Next    uintptr
-	Flags   Win32SurfaceCreateFlags
+	Type     StructureType
+	Next     uintptr
+	Flags    Win32SurfaceCreateFlags
 	Instance uintptr
-	Window  uintptr
+	Window   uintptr
 }
 
-func (i Instance) CreateWin32Surface(info Win32SurfaceCreateInfo) (Surface, error) {
+func CreateWin32Surface(instance Instance, info Win32SurfaceCreateInfo, allocator *AllocationCallbacks) (Surface, error) {
 	var surface Surface
 	result := Result(C.vkCreateWin32SurfaceKHR(
 		(C.VkInstance)(unsafe.Pointer(i)),
 		(*C.VkWin32SurfaceCreateInfoKHR)(unsafe.Pointer(&info)),
-		nil,
+		(*C.VkAllocationCallbacks)(unsafe.Pointer(allocator)),
 		(*C.VkSurfaceKHR)(unsafe.Pointer(&surface)),
 	))
 	if result != Success {
-		return 0, result
+		return NullHandle, result
 	}
 	return surface, nil
 }
