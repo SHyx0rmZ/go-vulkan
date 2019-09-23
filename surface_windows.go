@@ -19,7 +19,7 @@ func CreateSurface(instance Instance, info sdl.WMInfo, allocator *AllocationCall
 
 	win32 := *(*sdl.WMInfoWin32)(unsafe.Pointer(&info))
 	return CreateWin32Surface(instance, Win32SurfaceCreateInfo{
-		Type:     StructureTypeWin32SurfaceCreateInfo,
+		Type:     StructureTypeWin32SurfaceCreateInfoKHR,
 		Instance: win32.Instance,
 		Window:   win32.Window,
 	}, allocator)

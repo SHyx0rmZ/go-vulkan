@@ -19,7 +19,7 @@ func CreateSurface(instance Instance, info sdl.WMInfo, allocator *AllocationCall
 
 	xlib := *(*sdl.WMInfoXlib)(unsafe.Pointer(&info))
 	return CreateXlibSurface(instance, XlibSurfaceCreateInfo{
-		Type:    StructureTypeXlibSurfaceCreateInfo,
+		Type:    StructureTypeXlibSurfaceCreateInfoKHR,
 		Display: xlib.Display,
 		Window:  xlib.Window,
 	}, allocator)

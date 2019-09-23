@@ -26,7 +26,7 @@ func CreateSurface(instance Instance, info sdl.WMInfo, allocator *AllocationCall
 	view := (*uintptr)(unsafe.Pointer(uintptr(window) + 32))
 
 	return CreateMacOSSurface(instance, MacOSSurfaceCreateInfo{
-		Type: StructureTypeMacOSSurfaceCreateInfo,
+		Type: StructureTypeMacOSSurfaceCreateInfoMVK,
 		View: *view,
 	}, allocator)
 }
