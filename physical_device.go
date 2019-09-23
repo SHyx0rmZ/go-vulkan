@@ -8,11 +8,86 @@ import (
 	"unsafe"
 )
 
+type QueueFlagBit uint32
+type QueueFlags = QueueFlagBit
+
+const (
+	QueueGraphicsBit QueueFlagBit = iota
+	QueueComputeBit
+	QueueTransferBit
+	QueueProtectedBit
+	QueueSparseBindingBit
+)
+
 type QueueFamilyProperties struct {
-	QueueFlags                  C.VkQueueFlags
+	QueueFlags                  QueueFlags
 	QueueCount                  uint32
 	TimestampValidBits          uint32
-	MinImageTransferGranularity C.VkExtent3D
+	MinImageTransferGranularity Extent3D
+}
+
+type QueueFamilyProperties2 struct {
+	Type                        StructureType
+	Next                        uintptr
+	QueueFlags                  QueueFlags
+	QueueCount                  uint32
+	TimestampValidBits          uint32
+	MinImageTransferGranularity Extent3D
+}
+
+func GetPhysicalDeviceQueueFamilyProperties(physicalDevice PhysicalDevice) []QueueFamilyProperties {
+	var count uint32
+	C.vkGetPhysicalDeviceQueueFamilyProperties(
+		(C.VkPhysicalDevice)(unsafe.Pointer(physicalDevice)),
+		(*C.uint32_t)(unsafe.Pointer(&count)),
+		nil,
+	)
+	queueFamilyProperties := make([]QueueFamilyProperties, count)
+	C.vkGetPhysicalDeviceQueueFamilyProperties(
+		(C.VkPhysicalDevice)(unsafe.Pointer(physicalDevice)),
+		(*C.uint32_t)(unsafe.Pointer(&count)),
+		(*C.VkQueueFamilyProperties)(unsafe.Pointer(&queueFamilyProperties[0])),
+	)
+	return queueFamilyProperties[:count:count]
+}
+
+func GetPhysicalDeviceQueueFamilyProperties2(physicalDevice PhysicalDevice) []QueueFamilyProperties2 {
+	var count uint32
+	C.vkGetPhysicalDeviceQueueFamilyProperties2(
+		(C.VkPhysicalDevice)(unsafe.Pointer(physicalDevice)),
+		(*C.uint32_t)(unsafe.Pointer(&count)),
+		nil,
+	)
+	queueFamilyProperties := make([]QueueFamilyProperties2, count)
+	C.vkGetPhysicalDeviceQueueFamilyProperties2(
+		(C.VkPhysicalDevice)(unsafe.Pointer(physicalDevice)),
+		(*C.uint32_t)(unsafe.Pointer(&count)),
+		(*C.VkQueueFamilyProperties2)(unsafe.Pointer(&queueFamilyProperties[0])),
+	)
+	return queueFamilyProperties[:count:count]
+}
+
+func CreateDevice(physicalDevice PhysicalDevice, info DeviceCreateInfo, allocator *AllocationCallbacks) (Device, error) {
+	var device Device
+	_info := deviceCreateInfo{
+		Type:                  info.Type,
+		Next:                  info.Next,
+		Flags:                 info.Flags,
+		QueueCreateInfoCount:  uint32(len(info.QueueCreateInfos)),
+		EnabledLayerCount:     uint32(len(info.EnabledLayers)),
+		EnabledExtensionCount: uint32(len(info.EnabledExtensions)),
+		EnabledFeatures:       info.EnabledFeatures,
+	}
+	result := Result(C.vkCreateDevice(
+		(C.VkPhysicalDevice)(unsafe.Pointer(physicalDevice)),
+		(*C.VkDeviceCreateInfo)(unsafe.Pointer(&_info)),
+		(*C.VkAllocationCallbacks)(unsafe.Pointer(allocator)),
+		(*C.VkDevice)(unsafe.Pointer(&device)),
+	))
+	if result != Success {
+		return NullHandle, result
+	}
+	return device, nil
 }
 
 func (d PhysicalDevice) CreateDevice(info DeviceCreateInfo) (Device, error) {
