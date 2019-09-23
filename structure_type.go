@@ -72,3 +72,4 @@ const (
 	StructureTypeImagePipeSurfaceCreateInfo StructureType = 1000214000
 )
 const StructureTypePhysicalDeviceGroupProperties StructureType = 1000070000
+const StructureTypeQueueFamilyProperties2 StructureType = 1000059005

@@ -59,6 +59,9 @@ func GetPhysicalDeviceQueueFamilyProperties2(physicalDevice PhysicalDevice) []Qu
 		nil,
 	)
 	queueFamilyProperties := make([]QueueFamilyProperties2, count)
+	for i := range queueFamilyProperties {
+		queueFamilyProperties[i].Type = StructureTypeQueueFamilyProperties2
+	}
 	C.vkGetPhysicalDeviceQueueFamilyProperties2(
 		(C.VkPhysicalDevice)(unsafe.Pointer(physicalDevice)),
 		(*C.uint32_t)(unsafe.Pointer(&count)),
@@ -112,64 +115,6 @@ func CreateDevice(physicalDevice PhysicalDevice, info DeviceCreateInfo, allocato
 	))
 	if result != Success {
 		return NullHandle, result
-	}
-	return device, nil
-}
-
-func (d PhysicalDevice) CreateDevice(info DeviceCreateInfo) (Device, error) {
-	var device Device
-	_info := deviceCreateInfo{
-		Type:                  info.Type,
-		Next:                  0, // todo
-		Flags:                 info.Flags,
-		QueueCreateInfoCount:  uint32(len(info.QueueCreateInfos)),
-		EnabledLayerCount:     uint32(len(info.EnabledLayers)),
-		EnabledExtensionCount: uint32(len(info.EnabledExtensions)),
-		EnabledFeatures:       info.EnabledFeatures,
-	}
-	if _info.QueueCreateInfoCount > 0 {
-		sz := unsafe.Sizeof(deviceQueueCreateInfo{})
-		var l uintptr
-		for range info.QueueCreateInfos {
-			l += 1 * unsafe.Sizeof(float32(0))
-		}
-		p := C.malloc(C.size_t(len(info.QueueCreateInfos))*C.size_t(sz) + C.size_t(l))
-		var o uintptr
-		for _, info := range info.QueueCreateInfos {
-			*(*deviceQueueCreateInfo)(unsafe.Pointer(uintptr(p) + o)) = deviceQueueCreateInfo{
-				Type:             info.Type,
-				Next:             info.Next,
-				Flags:            info.Flags,
-				QueueFamilyIndex: info.QueueFamilyIndex,
-				QueueCount:       uint32(len(info.QueuePriorities)),
-				QueuePriorities:  (*float32)(unsafe.Pointer(uintptr(p) + o + sz)),
-			}
-			o += sz
-			for _, priority := range info.QueuePriorities {
-				*(*float32)(unsafe.Pointer(uintptr(p) + o)) = priority
-				o += unsafe.Sizeof(float32(0))
-			}
-		}
-		_info.QueueCreateInfos = (*deviceQueueCreateInfo)(p)
-		defer func() {
-			C.free(unsafe.Pointer(_info.QueueCreateInfos))
-		}()
-	}
-	defer fillNames(info.EnabledLayers, &_info.EnabledLayerCount, &_info.EnabledLayerNames).Free()
-	defer fillNames(info.EnabledExtensions, &_info.EnabledExtensionCount, &_info.EnabledExtensionNames).Free()
-
-	var count uint32
-	C.vkGetPhysicalDeviceQueueFamilyProperties((C.VkPhysicalDevice)(unsafe.Pointer(d)), (*C.uint32_t)(unsafe.Pointer(&count)), nil)
-	fmt.Println(count, "queue family properties")
-	queueFamilyProperties := make([]QueueFamilyProperties, count)
-	C.vkGetPhysicalDeviceQueueFamilyProperties((C.VkPhysicalDevice)(unsafe.Pointer(d)), (*C.uint32_t)(unsafe.Pointer(&count)), (*C.VkQueueFamilyProperties)(unsafe.Pointer(&queueFamilyProperties[0])))
-	for _, p := range queueFamilyProperties {
-		fmt.Printf("queue family properties: %+v\n", p)
-	}
-
-	result := C.vkCreateDevice((C.VkPhysicalDevice)(unsafe.Pointer(d)), (*C.VkDeviceCreateInfo)(unsafe.Pointer(&_info)), nil, (*C.VkDevice)(unsafe.Pointer(&device)))
-	if result != C.VK_SUCCESS {
-		return 0, Result(result)
 	}
 	return device, nil
 }
@@ -239,7 +184,7 @@ func (d PhysicalDevice) GetSurfacePresentModes(surface Surface) ([]PresentMode, 
 
 type SurfaceCapabilities struct {
 	MinImageCount           uint32
-	MaxImageCOunt           uint32
+	MaxImageCount           uint32
 	CurrentExtent           Extent2D
 	MinImageExtent          Extent2D
 	MaxImageExtent          Extent2D
@@ -247,7 +192,7 @@ type SurfaceCapabilities struct {
 	SupportedTransforms     C.VkSurfaceTransformFlagsKHR
 	CurrentTransform        C.VkSurfaceTransformFlagBitsKHR
 	SupportedCompositeAlpha C.VkCompositeAlphaFlagsKHR
-	SupportedUsageFlags     C.VkImageUsageFlags
+	SupportedUsageFlags     ImageUsageFlags
 }
 
 func (d PhysicalDevice) GetSurfaceCapabilities(surface Surface) (SurfaceCapabilities, error) {

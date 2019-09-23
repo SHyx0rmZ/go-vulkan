@@ -15,6 +15,7 @@ const (
 	ImageTilingLinear
 )
 
+//go:generate stringer -type ImageUsageFlagBits -output image_usage_flags_string.go
 type ImageUsageFlagBits uint32
 type ImageUsageFlags = ImageUsageFlagBits
 
