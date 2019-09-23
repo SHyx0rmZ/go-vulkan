@@ -525,7 +525,7 @@ type deviceCreateInfo struct {
 	Next                  uintptr
 	Flags                 DeviceCreateFlags
 	QueueCreateInfoCount  uint32
-	QueueCreateInfos      *DeviceQueueCreateInfo
+	QueueCreateInfos      *deviceQueueCreateInfo
 	EnabledLayerCount     uint32
 	EnabledLayerNames     *C.char
 	EnabledExtensionCount uint32
@@ -536,10 +536,25 @@ type deviceCreateInfo struct {
 type DeviceQueueCreateInfo struct {
 	Type             StructureType
 	Next             uintptr
-	Flags            C.VkDeviceQueueCreateFlags
+	Flags            DeviceQueueCreateFlags
+	QueueFamilyIndex uint32
+	QueuePriorities  []float32
+}
+
+type DeviceQueueCreateFlagBits uint32
+type DeviceQueueCreateFlags = DeviceQueueCreateFlagBits
+
+const (
+	DeviceQueueCreateProtectedBit DeviceQueueCreateFlagBits = 1 << iota
+)
+
+type deviceQueueCreateInfo struct {
+	Type             StructureType
+	Next             uintptr
+	Flags            DeviceQueueCreateFlags
 	QueueFamilyIndex uint32
 	QueueCount       uint32
-	QueuePriorities  uintptr // todo
+	QueuePriorities  *float32
 }
 
 //type deviceQueueCreateInfo struct {
