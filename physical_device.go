@@ -27,12 +27,9 @@ type QueueFamilyProperties struct {
 }
 
 type QueueFamilyProperties2 struct {
-	Type                        StructureType
-	Next                        uintptr
-	QueueFlags                  QueueFlags
-	QueueCount                  uint32
-	TimestampValidBits          uint32
-	MinImageTransferGranularity Extent3D
+	Type StructureType
+	Next uintptr
+	QueueFamilyProperties
 }
 
 func GetPhysicalDeviceQueueFamilyProperties(physicalDevice PhysicalDevice) []QueueFamilyProperties {
