@@ -66,20 +66,25 @@ const (
 )
 
 const (
-	ErrorOutOfPoolMemory                     Result = -1000069000
-	ErrorInvalidExternalHandle               Result = -1000072003
-	ErrorSurfaceLost                         Result = -1000000000
-	ErrorNativeWindowInUse                   Result = -1000000001
-	Suboptimal                               Result = -1000001003
-	ErrorOutOfDate                           Result = -1000001004
-	ErrorIncompatibleDisplay                 Result = -1000003001
-	ErrorValidationFailed                    Result = -1000011001
-	ErrorInvalidShader                       Result = -1000012000
-	ErrorInvalidDRMFormatModifierPlaneLayout Result = -1000158000
-	ErrorFragmentation                       Result = -1000161000
-	ErrorNotPermitted                        Result = -1000174001
-	ErrorInvalidDeviceAddress                Result = -1000244000
-	ErrorFullScreenExclusiveModeLost         Result = -1000255000
+	ErrorOutOfPoolMemory                        Result = -1000069000
+	ErrorInvalidExternalHandle                  Result = -1000072003
+	ErrorSurfaceLostKHR                         Result = -1000000000
+	ErrorNativeWindowInUseKHR                   Result = -1000000001
+	SuboptimalKHR                               Result = -1000001003
+	ErrorOutOfDateKHR                           Result = -1000001004
+	ErrorIncompatibleDisplayKHR                 Result = -1000003001
+	ErrorValidationFailedEXT                    Result = -1000011001
+	ErrorInvalidShaderNV                        Result = -1000012000
+	ErrorInvalidDRMFormatModifierPlaneLayoutEXT Result = -1000158000
+	ErrorFragmentationEXT                       Result = -1000161000
+	ErrorNotPermittedEXT                        Result = -1000174001
+	ErrorInvalidDeviceAddressEXT                Result = -1000244000
+	ErrorFullScreenExclusiveModeLostEXT         Result = -1000255000
+)
+
+const (
+	ErrorOutOfPoolMemoryKHR       = ErrorOutOfPoolMemory
+	ErrorInvalidExternalHandleKHR = ErrorInvalidExternalHandle
 )
 
 func (r Result) Error() string {
@@ -124,29 +129,29 @@ func (r Result) Error() string {
 		return "out of pool memory"
 	case ErrorInvalidExternalHandle:
 		return "invalid external handle"
-	case ErrorSurfaceLost:
+	case ErrorSurfaceLostKHR:
 		return "surface lost"
-	case ErrorNativeWindowInUse:
+	case ErrorNativeWindowInUseKHR:
 		return "native window in use"
-	case Suboptimal:
+	case SuboptimalKHR:
 		return "suboptimal"
-	case ErrorOutOfDate:
+	case ErrorOutOfDateKHR:
 		return "out of date"
-	case ErrorIncompatibleDisplay:
+	case ErrorIncompatibleDisplayKHR:
 		return "incompatible display"
-	case ErrorValidationFailed:
+	case ErrorValidationFailedEXT:
 		return "validation failed"
-	case ErrorInvalidShader:
+	case ErrorInvalidShaderNV:
 		return "invalid shader"
-	case ErrorInvalidDRMFormatModifierPlaneLayout:
+	case ErrorInvalidDRMFormatModifierPlaneLayoutEXT:
 		return "invalid DRM format modifier plane layout"
-	case ErrorFragmentation:
+	case ErrorFragmentationEXT:
 		return "fragmentation"
-	case ErrorNotPermitted:
+	case ErrorNotPermittedEXT:
 		return "not permitted"
-	case ErrorInvalidDeviceAddress:
+	case ErrorInvalidDeviceAddressEXT:
 		return "invalid device address"
-	case ErrorFullScreenExclusiveModeLost:
+	case ErrorFullScreenExclusiveModeLostEXT:
 		return "full screen exclusive mode lost"
 	default:
 		panic(fmt.Sprintf("unknown result: %#v", r))

@@ -383,13 +383,12 @@ const (
 )
 
 const (
-	StructureTypePhysicalDeviceVariablePointerFeatures     = StructureTypePhysicalDeviceVariablePointersFeatures
-	StructureTypePhysicalDeviceShaderDrawParameterFeatures = StructureTypePhysicalDeviceShaderDrawParametersFeatures
-	StructureTypeDebugReportCreateInfoEXT                  = StructureTypeDebugReportCallbackCreateInfoEXT
-	StructureTypeRenderPassMultiviewCreateInfoKHR          = StructureTypeRenderPassMultiviewCreateInfo
-	StructureTypePhysicalDeviceMultiviewFeaturesKHR        = StructureTypePhysicalDeviceMultiviewFeatures
-	StructureTypePhysicalDeviceMultiviewPropertiesKHR      = StructureTypePhysicalDeviceMultiviewProperties
-
+	StructureTypePhysicalDeviceVariablePointerFeatures              = StructureTypePhysicalDeviceVariablePointersFeatures
+	StructureTypePhysicalDeviceShaderDrawParameterFeatures          = StructureTypePhysicalDeviceShaderDrawParametersFeatures
+	StructureTypeDebugReportCreateInfoEXT                           = StructureTypeDebugReportCallbackCreateInfoEXT
+	StructureTypeRenderPassMultiviewCreateInfoKHR                   = StructureTypeRenderPassMultiviewCreateInfo
+	StructureTypePhysicalDeviceMultiviewFeaturesKHR                 = StructureTypePhysicalDeviceMultiviewFeatures
+	StructureTypePhysicalDeviceMultiviewPropertiesKHR               = StructureTypePhysicalDeviceMultiviewProperties
 	StructureTypePhysicalDeviceFeatures2KHR                         = StructureTypePhysicalDeviceFeatures2
 	StructureTypePhysicalDeviceProperties2KHR                       = StructureTypePhysicalDeviceProperties2
 	StructureTypeFormatProperties2KHR                               = StructureTypeFormatProperties2
@@ -412,7 +411,7 @@ const (
 	StructureTypeExternalImageFormatPropertiesKHR                   = StructureTypeExternalImageFormatProperties
 	StructureTypePhysicalDeviceExternalBufferInfoKHR                = StructureTypePhysicalDeviceExternalBufferInfo
 	StructureTypeExternalBufferPropertiesKHR                        = StructureTypeExternalBufferProperties
-	StructureTypePhysicalDeviceIdPropertiesKHR                      = StructureTypePhysicalDeviceIDProperties
+	StructureTypePhysicalDeviceIDPropertiesKHR                      = StructureTypePhysicalDeviceIDProperties
 	StructureTypeExternalMemoryBufferCreateInfoKHR                  = StructureTypeExternalMemoryBufferCreateInfo
 	StructureTypeExternalMemoryImageCreateInfoKHR                   = StructureTypeExternalMemoryImageCreateInfo
 	StructureTypeExportMemoryAllocateInfoKHR                        = StructureTypeExportMemoryAllocateInfo
@@ -438,12 +437,12 @@ const (
 	StructureTypeImageSparseMemoryRequirementsInfo2KHR              = StructureTypeImageSparseMemoryRequirementsInfo2
 	StructureTypeMemoryRequirements2KHR                             = StructureTypeMemoryRequirements2
 	StructureTypeSparseImageMemoryRequirements2KHR                  = StructureTypeSparseImageMemoryRequirements2
-	StructureTypeSamplerYcbcrConversionCreateInfoKHR                = StructureTypeSamplerYCbCrConversionCreateInfo
-	StructureTypeSamplerYcbcrConversionInfoKHR                      = StructureTypeSamplerYCbCrConversionInfo
+	StructureTypeSamplerYCbCrConversionCreateInfoKHR                = StructureTypeSamplerYCbCrConversionCreateInfo
+	StructureTypeSamplerYCbCrConversionInfoKHR                      = StructureTypeSamplerYCbCrConversionInfo
 	StructureTypeBindImagePlaneMemoryInfoKHR                        = StructureTypeBindImagePlaneMemoryInfo
 	StructureTypeImagePlaneMemoryRequirementsInfoKHR                = StructureTypeImagePlaneMemoryRequirementsInfo
-	StructureTypePhysicalDeviceSamplerYcbcrConversionFeaturesKHR    = StructureTypePhysicalDeviceSamplerYCbCrConversionFeatures
-	StructureTypeSamplerYcbcrConversionImageFormatPropertiesKHR     = StructureTypeSamplerYCbCrConversionImageFormatProperties
+	StructureTypePhysicalDeviceSamplerYCbCrConversionFeaturesKHR    = StructureTypePhysicalDeviceSamplerYCbCrConversionFeatures
+	StructureTypeSamplerYCbCrConversionImageFormatPropertiesKHR     = StructureTypeSamplerYCbCrConversionImageFormatProperties
 	StructureTypeBindBufferMemoryInfoKHR                            = StructureTypeBindBufferMemoryInfo
 	StructureTypeBindImageMemoryInfoKHR                             = StructureTypeBindImageMemoryInfo
 	StructureTypePhysicalDeviceMaintenance3PropertiesKHR            = StructureTypePhysicalDeviceMaintenance3Properties
