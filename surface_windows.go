@@ -38,7 +38,7 @@ type Win32SurfaceCreateInfo struct {
 func CreateWin32Surface(instance Instance, info Win32SurfaceCreateInfo, allocator *AllocationCallbacks) (Surface, error) {
 	var surface Surface
 	result := Result(C.vkCreateWin32SurfaceKHR(
-		(C.VkInstance)(unsafe.Pointer(i)),
+		(C.VkInstance)(unsafe.Pointer(instance)),
 		(*C.VkWin32SurfaceCreateInfoKHR)(unsafe.Pointer(&info)),
 		(*C.VkAllocationCallbacks)(unsafe.Pointer(allocator)),
 		(*C.VkSurfaceKHR)(unsafe.Pointer(&surface)),
