@@ -39,7 +39,37 @@ const (
 	ShaderStageAll         = ^ShaderStageFlagBits(0x80000000)
 )
 
-type ComputePipelineCreateInfo struct{}
+type ComputePipelineCreateInfo struct{
+	Type StructureType
+	Next uintptr
+	Flags PipelineCreateFlags
+	Stage PipelineShaderStageCreateInfo
+	Layout PipelineLayout
+	BasePipelineHandle Pipeline
+	BasePipelineIndex int32
+}
+
+func (info *ComputePipelineCreateInfo) C(_info *computePipelineCreateInfo) freeFunc {
+	*_info = computePipelineCreateInfo{
+		Type:   info.Type,
+		Next:   info.Next,
+		Flags:  info.Flags,
+		Layout: info.Layout,
+		BasePipelineHandle: info.BasePipelineHandle,
+		BasePipelineIndex: info.BasePipelineIndex,
+	}
+	return info.Stage.C(&_info.Stage)
+}
+
+type computePipelineCreateInfo struct {
+	Type StructureType
+	Next uintptr
+	Flags PipelineCreateFlags
+	Stage pipelineShaderStageCreateInfo
+	Layout PipelineLayout
+	BasePipelineHandle Pipeline
+	BasePipelineIndex int32
+}
 
 type PipelineShaderStageCreateInfo struct {
 	Type               StructureType
@@ -656,11 +686,22 @@ type PipelineCacheCreateInfo struct{}
 
 func CreateComputePipelines(device Device, pipelineCache PipelineCache, createInfos []ComputePipelineCreateInfo, allocator *AllocationCallbacks) ([]Pipeline, error) {
 	pipelines := make([]Pipeline, len(createInfos))
+	_createInfos := make([]computePipelineCreateInfo, len(createInfos))
+	var ps []freeFunc
+	for i, createInfo := range createInfos {
+		ps = append(ps, createInfo.C(&_createInfos[i]))
+		// ps = append(ps, createInfo.C((*computePipelineCreateInfo{})(unsafe.Pointer(&_createInfos[i]))))
+	}
+	defer func() {
+		for i := len(ps); i > 0; i-- {
+			ps[i-1].Free()
+		}
+	}()
 	result := Result(C.vkCreateComputePipelines(
 		(C.VkDevice)(unsafe.Pointer(device)),
 		(C.VkPipelineCache)(unsafe.Pointer(pipelineCache)),
-		(C.uint32_t)(len(createInfos)),
-		(*C.VkComputePipelineCreateInfo)(unsafe.Pointer(&createInfos[0])),
+		(C.uint32_t)(len(_createInfos)),
+		(*C.VkComputePipelineCreateInfo)(unsafe.Pointer(&_createInfos[0])),
 		(*C.VkAllocationCallbacks)(unsafe.Pointer(allocator)),
 		(*C.VkPipeline)(unsafe.Pointer(&pipelines[0])),
 	))

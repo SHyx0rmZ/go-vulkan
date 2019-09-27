@@ -27,6 +27,35 @@ func CmdDrawIndexed(commandBuffer CommandBuffer, indexCount, instanceCount, firs
 	)
 }
 
+func CmdDispatch(commandBuffer CommandBuffer, groupCountX, groupCountY, groupCountZ uint32) {
+	C.vkCmdDispatch(
+		(C.VkCommandBuffer)(unsafe.Pointer(commandBuffer)),
+		(C.uint32_t)(groupCountX),
+		(C.uint32_t)(groupCountY),
+		(C.uint32_t)(groupCountZ),
+	)
+}
+
+func CmdDispatchIndirect(commandBuffer CommandBuffer, buffer Buffer, offset DeviceSize) {
+	C.vkCmdDispatchIndirect(
+		(C.VkCommandBuffer)(unsafe.Pointer(commandBuffer)),
+		(C.VkBuffer)(unsafe.Pointer(buffer)),
+		(C.VkDeviceSize)(offset),
+	)
+}
+
+func CmdDispatchBase(commandBuffer CommandBuffer, baseGroupX, baseGroupY, baseGroupZ, groupCountX, groupCountY, groupCountZ uint32) {
+	C.vkCmdDispatchBase(
+		(C.VkCommandBuffer)(unsafe.Pointer(commandBuffer)),
+		(C.uint32_t)(baseGroupX),
+		(C.uint32_t)(baseGroupY),
+		(C.uint32_t)(baseGroupZ),
+		(C.uint32_t)(groupCountX),
+		(C.uint32_t)(groupCountY),
+		(C.uint32_t)(groupCountZ),
+	)
+}
+
 type ClearAttachment struct {
 	AspectMask      ImageAspectFlags
 	ColorAttachment uint32

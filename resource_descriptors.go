@@ -151,10 +151,15 @@ const (
 	DescriptorTypeUniformTexelBuffer
 	DescriptorTypeStorageTexelBuffer
 	DescriptorTypeUniformBuffer
-	DescriptorTypeUniformBufferDynamic
 	DescriptorTypeStorageBuffer
+	DescriptorTypeUniformBufferDynamic
 	DescriptorTypeStorageBufferDynamic
-	DescriptorTypeImageAttachment
+	DescriptorTypeInputAttachment
+)
+
+const (
+	DescriptorTypeInlineUniformBlockEXT DescriptorType = 1000138000
+	DescriptorTypeAccelerationStructureNV DescriptorType = 1000165000
 )
 
 type Sampler uintptr
