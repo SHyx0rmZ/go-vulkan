@@ -1,6 +1,12 @@
 package vulkan
 
+import "fmt"
+
 type Version uint32
+
+func (v Version) String() string {
+	return fmt.Sprintf("%d.%d.%d", VersionMajor(v), VersionMinor(v), VersionPatch(v))
+}
 
 func MakeVersion(major, minor, patch uint) Version {
 	return Version(major<<22 | minor<<12 | patch)
