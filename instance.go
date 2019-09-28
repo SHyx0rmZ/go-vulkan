@@ -117,6 +117,17 @@ type Layer struct {
 	Description           [MaxDescriptionSize]uint8
 }
 
+func EnumerateInstanceVersion() (Version, error) {
+	var version Version
+	result := Result(C.vkEnumerateInstanceVersion(
+		(*C.uint32_t)(&version),
+	))
+	if result != Success {
+		return 0, result
+	}
+	return version, nil
+}
+
 func CreateInstance(info CreateInfo) (Instance, error) {
 	var count uint32
 	result := C.vkEnumerateInstanceLayerProperties((*C.uint32_t)(unsafe.Pointer(&count)), nil)
