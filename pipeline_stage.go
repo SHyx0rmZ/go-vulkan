@@ -15,7 +15,7 @@ const (
 	PipelineStageEarlyFragmentTestsBit
 	PipelineStageLateFragmentTestsBit
 	PipelineStageColorAttachmentOutputBit
-	PipelienStageComputeShaderBit
+	PipelineStageComputeShaderBit
 	PipelineStageTransferBit
 	PipelineStageBottomOfPipeBit
 	PipelineStageHostBit
