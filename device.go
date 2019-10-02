@@ -104,14 +104,24 @@ type Image uintptr
 
 func (d Device) GetSwapchainImages(swapchain Swapchain) ([]Image, error) {
 	var count uint32
-	result := C.vkGetSwapchainImagesKHR((C.VkDevice)(unsafe.Pointer(d)), (C.VkSwapchainKHR)(unsafe.Pointer(swapchain)), (*C.uint32_t)(unsafe.Pointer(&count)), nil)
-	if result != C.VK_SUCCESS {
-		panic("asdds")
+	result := Result(C.vkGetSwapchainImagesKHR(
+		(C.VkDevice)(unsafe.Pointer(d)),
+		(C.VkSwapchainKHR)(unsafe.Pointer(swapchain)),
+		(*C.uint32_t)(unsafe.Pointer(&count)),
+		nil,
+	))
+	if result != Success {
+		return nil, result
 	}
 	images := make([]Image, count)
-	result = C.vkGetSwapchainImagesKHR((C.VkDevice)(unsafe.Pointer(d)), (C.VkSwapchainKHR)(unsafe.Pointer(swapchain)), (*C.uint32_t)(unsafe.Pointer(&count)), (*C.VkImage)(unsafe.Pointer(&images[0])))
-	if result != C.VK_SUCCESS {
-		panic("asd98")
+	result = Result(C.vkGetSwapchainImagesKHR(
+		(C.VkDevice)(unsafe.Pointer(d)),
+		(C.VkSwapchainKHR)(unsafe.Pointer(swapchain)),
+		(*C.uint32_t)(unsafe.Pointer(&count)),
+		(*C.VkImage)(unsafe.Pointer(&images[0])),
+	))
+	if result != Success {
+		return nil, result
 	}
 	for _, image := range images {
 		fmt.Printf("image: %#v\n", image)
