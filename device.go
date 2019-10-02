@@ -30,7 +30,7 @@ func CreateSwapchain(device Device, info SwapchainCreateInfo, surface Surface, a
 	info = SwapchainCreateInfo{
 		Type:            1000001000,
 		Surface:         surface,
-		MinImageCount:   3,
+		MinImageCount:   info.MinImageCount,
 		Format:          info.Format,
 		PresentMode:     info.PresentMode,
 		ImageColorSpace: 0,
