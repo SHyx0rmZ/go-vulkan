@@ -39,36 +39,36 @@ const (
 	ShaderStageAll         = ^ShaderStageFlagBits(0x80000000)
 )
 
-type ComputePipelineCreateInfo struct{
-	Type StructureType
-	Next uintptr
-	Flags PipelineCreateFlags
-	Stage PipelineShaderStageCreateInfo
-	Layout PipelineLayout
+type ComputePipelineCreateInfo struct {
+	Type               StructureType
+	Next               uintptr
+	Flags              PipelineCreateFlags
+	Stage              PipelineShaderStageCreateInfo
+	Layout             PipelineLayout
 	BasePipelineHandle Pipeline
-	BasePipelineIndex int32
+	BasePipelineIndex  int32
 }
 
 func (info *ComputePipelineCreateInfo) C(_info *computePipelineCreateInfo) freeFunc {
 	*_info = computePipelineCreateInfo{
-		Type:   info.Type,
-		Next:   info.Next,
-		Flags:  info.Flags,
-		Layout: info.Layout,
+		Type:               info.Type,
+		Next:               info.Next,
+		Flags:              info.Flags,
+		Layout:             info.Layout,
 		BasePipelineHandle: info.BasePipelineHandle,
-		BasePipelineIndex: info.BasePipelineIndex,
+		BasePipelineIndex:  info.BasePipelineIndex,
 	}
 	return info.Stage.C(&_info.Stage)
 }
 
 type computePipelineCreateInfo struct {
-	Type StructureType
-	Next uintptr
-	Flags PipelineCreateFlags
-	Stage pipelineShaderStageCreateInfo
-	Layout PipelineLayout
+	Type               StructureType
+	Next               uintptr
+	Flags              PipelineCreateFlags
+	Stage              pipelineShaderStageCreateInfo
+	Layout             PipelineLayout
 	BasePipelineHandle Pipeline
-	BasePipelineIndex int32
+	BasePipelineIndex  int32
 }
 
 type PipelineShaderStageCreateInfo struct {
@@ -684,10 +684,10 @@ type graphicsPipelineCreateInfo struct {
 
 type PipelineCacheCreateFlags uint32
 
-type PipelineCacheCreateInfo struct{
-	Type StructureType
-	Next uintptr
-	Flags PipelineCacheCreateFlags
+type PipelineCacheCreateInfo struct {
+	Type        StructureType
+	Next        uintptr
+	Flags       PipelineCacheCreateFlags
 	InitialData []byte
 }
 
@@ -697,20 +697,20 @@ func (info *PipelineCacheCreateInfo) C(_info *pipelineCacheCreateInfo) {
 		initialData = unsafe.Pointer(&info.InitialData[0])
 	}
 	*_info = pipelineCacheCreateInfo{
-		Type: info.Type,
-		Next: info.Next,
-		Flags: info.Flags,
+		Type:            info.Type,
+		Next:            info.Next,
+		Flags:           info.Flags,
 		InitialDataSize: uint32(len(info.InitialData)),
-		InitialData: initialData,
+		InitialData:     initialData,
 	}
 }
 
 type pipelineCacheCreateInfo struct {
-	Type StructureType
-	Next uintptr
-	Flags PipelineCacheCreateFlags
+	Type            StructureType
+	Next            uintptr
+	Flags           PipelineCacheCreateFlags
 	InitialDataSize uint32
-	InitialData unsafe.Pointer
+	InitialData     unsafe.Pointer
 }
 
 func CreateComputePipelines(device Device, pipelineCache PipelineCache, createInfos []ComputePipelineCreateInfo, allocator *AllocationCallbacks) ([]Pipeline, error) {

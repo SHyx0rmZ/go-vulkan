@@ -158,7 +158,7 @@ const (
 )
 
 const (
-	DescriptorTypeInlineUniformBlockEXT DescriptorType = 1000138000
+	DescriptorTypeInlineUniformBlockEXT   DescriptorType = 1000138000
 	DescriptorTypeAccelerationStructureNV DescriptorType = 1000165000
 )
 
