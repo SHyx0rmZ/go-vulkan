@@ -31,7 +31,41 @@ type CommandBufferBeginInfo struct {
 	InheritanceInfo *CommandBufferInheritanceInfo
 }
 
-type CommandBufferInheritanceInfo struct{}
+type QueryControlFlagBits uint32
+type QueryControlFlags = QueryControlFlagBits
+
+const (
+	QueryControlPreciseBit QueryControlFlagBits = 1 << iota
+)
+
+type QueryPipelineStatisticFlagBits uint32
+type QueryPipelineStatisticsFlags = QueryPipelineStatisticFlagBits
+
+const (
+	QueryPipelineStatisticInputAssemblyVerticesBit QueryPipelineStatisticFlagBits = 1 << iota
+	QueryPipelineStatisticInputAssemblyPrimitivesBit
+	QueryPipelineStatisticVertexShaderInvocationsBit
+	QueryPipelineStatisticGeometryShaderInvocationsBit
+	QueryPipelineStatisticGeometryShaderPrimitivesBit
+	QueryPipelineStatisticClippingInvocationsBit
+	QueryPipelineStatisticClippingPrimitivesBit
+	QueryPipelineStatisticFragmentShaderInvocationsBit
+	QueryPipelineStatisticTessellationControlShaderPatchesBit
+	QueryPipelineStatisticTessellationEvaluationShaderInvocationsBit
+	QueryPipelineStatisticComputeShaderInvocations
+)
+
+type CommandBufferInheritanceInfo struct{
+	Type StructureType
+	Next uintptr
+	RenderPass RenderPass
+	Subpass uint32
+	Framebuffer Framebuffer
+	OcclusionQueryEnable bool
+	_ [3]byte
+	QueryFlags QueryControlFlags
+	PipelineStatistics QueryPipelineStatisticFlags
+}
 
 type SubmitInfo struct {
 	Type             StructureType
