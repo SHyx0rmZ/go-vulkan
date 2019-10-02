@@ -682,7 +682,32 @@ type graphicsPipelineCreateInfo struct {
 	BasePipelineIndex  int32
 }
 
-type PipelineCacheCreateInfo struct{}
+type PipelineCacheCreateFlags uint32
+
+type PipelineCacheCreateInfo struct{
+	Type StructureType
+	Next uintptr
+	Flags PipelineCacheCreateFlags
+	InitialData []byte
+}
+
+func (info *PipelineCacheCreateInfo) C(_info *pipelineCacheCreateInfo) {
+	*_info = pipelineCacheCreateInfo{
+		Type: info.Type,
+		Next: info.Next,
+		Flags: info.Flags,
+		InitialDataSize: uint32(len(info.InitialData)),
+		InitialData: (*C.void)(unsafe.Pointer(&info.InitialData[0])),
+	}
+}
+
+type pipelineCacheCreateInfo struct {
+	Type StructureType
+	Next uintptr
+	Flags PipelineCacheCreateFlags
+	InitialDataSize uint32
+	InitialData *C.void
+}
 
 func CreateComputePipelines(device Device, pipelineCache PipelineCache, createInfos []ComputePipelineCreateInfo, allocator *AllocationCallbacks) ([]Pipeline, error) {
 	pipelines := make([]Pipeline, len(createInfos))
@@ -747,9 +772,11 @@ func DestroyPipeline(device Device, pipeline Pipeline, allocator *AllocationCall
 
 func CreatePipelineCache(device Device, createInfo PipelineCacheCreateInfo, allocator *AllocationCallbacks) (PipelineCache, error) {
 	var pipelineCache PipelineCache
+	var _createInfo pipelineCacheCreateInfo
+	createInfo.C(&_createInfo)
 	result := Result(C.vkCreatePipelineCache(
 		(C.VkDevice)(unsafe.Pointer(device)),
-		(*C.VkPipelineCacheCreateInfo)(unsafe.Pointer(&createInfo)),
+		(*C.VkPipelineCacheCreateInfo)(unsafe.Pointer(&_createInfo)),
 		(*C.VkAllocationCallbacks)(unsafe.Pointer(allocator)),
 		(*C.VkPipelineCache)(unsafe.Pointer(&pipelineCache)),
 	))
