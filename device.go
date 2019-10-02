@@ -152,18 +152,30 @@ func (d Device) CreateImage() (Image, error) {
 		//QueueFamilyIndices:    nil,
 		//InitialLayout:         nil,
 	}
-	result := C.vkCreateImage((C.VkDevice)(unsafe.Pointer(d)), (*C.VkImageCreateInfo)(unsafe.Pointer(&info)), nil, (*C.VkImage)(unsafe.Pointer(&image)))
-	if result != C.VK_SUCCESS {
-		return 0, fmt.Errorf("image error")
+	result := Result(C.vkCreateImage(
+		(C.VkDevice)(unsafe.Pointer(d)),
+		(*C.VkImageCreateInfo)(unsafe.Pointer(&info)),
+		nil,
+		(*C.VkImage)(unsafe.Pointer(&image)),
+	))
+	if result != Success {
+		return 0, result
 	}
 	return image, nil
 }
 
 func (d Device) AcquireNextImage(swapchain Swapchain, semaphore Semaphore, fence Fence) (uint32, error) {
 	var image uint32
-	result := C.vkAcquireNextImageKHR((C.VkDevice)(unsafe.Pointer(d)), (C.VkSwapchainKHR)(unsafe.Pointer(swapchain)), C.uint64_t(^uint64(0)), (C.VkSemaphore)(unsafe.Pointer(semaphore)), (C.VkFence)(unsafe.Pointer(fence)), (*C.uint32_t)(unsafe.Pointer(&image)))
-	if result != C.VK_SUCCESS {
-		return 0, fmt.Errorf("image error")
+	result := Result(C.vkAcquireNextImageKHR(
+		(C.VkDevice)(unsafe.Pointer(d)),
+		(C.VkSwapchainKHR)(unsafe.Pointer(swapchain)),
+		C.uint64_t(^uint64(0)),
+		(C.VkSemaphore)(unsafe.Pointer(semaphore)),
+		(C.VkFence)(unsafe.Pointer(fence)),
+		(*C.uint32_t)(unsafe.Pointer(&image)),
+	))
+	if result != Success {
+		return 0, result
 	}
 	return image, nil
 }
@@ -173,9 +185,14 @@ func (d Device) CreateSemaphore() (Semaphore, error) {
 		Type: StructureTypeSemaphoreCreateInfo,
 	}
 	var semaphore Semaphore
-	result := C.vkCreateSemaphore((C.VkDevice)(unsafe.Pointer(d)), (*C.VkSemaphoreCreateInfo)(unsafe.Pointer(&info)), nil, (*C.VkSemaphore)(unsafe.Pointer(&semaphore)))
-	if result != C.VK_SUCCESS {
-		return 0, fmt.Errorf("semaphore error")
+	result := Result(C.vkCreateSemaphore(
+		(C.VkDevice)(unsafe.Pointer(d)),
+		(*C.VkSemaphoreCreateInfo)(unsafe.Pointer(&info)),
+		nil,
+		(*C.VkSemaphore)(unsafe.Pointer(&semaphore)),
+	))
+	if result != Success {
+		return 0, result
 	}
 	return semaphore, nil
 }

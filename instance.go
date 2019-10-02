@@ -275,7 +275,7 @@ func (info *PresentInfo) C(_info *presentInfo) freeFunc {
 		_info.ImageIndices = (*uint32)(p)
 	}
 	if info.Results != nil {
-		p := C.malloc(C.size_t(uintptr(_info.SwapchainCount) * unsafe.Sizeof(Result(0))))
+		p := C.calloc(C.size_t(uintptr(_info.SwapchainCount) * unsafe.Sizeof(Result(0))), 1)
 		ps = append(ps, p)
 		_info.Results = (*Result)(p)
 	}

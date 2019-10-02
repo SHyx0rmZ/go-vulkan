@@ -10,10 +10,16 @@ import (
 
 type Queue uintptr
 
-func (q Queue) Present(info PresentInfo) error {
+func (q Queue) Present(info PresentInfo) (freeFunc, error) {
 	var _info presentInfo
-	defer info.C(&_info).Free()
-	result := C.vkQueuePresentKHR((C.VkQueue)(unsafe.Pointer(q)), (*C.VkPresentInfoKHR)(unsafe.Pointer(&_info)))
+	ff := info.C(&_info)
+	fmt.Println(q)
+	fmt.Printf("%+v\n", info)
+	fmt.Printf("%+v\n", _info)
+	result := Result(C.vkQueuePresentKHR(
+		(C.VkQueue)(unsafe.Pointer(q)),
+		(*C.VkPresentInfoKHR)(unsafe.Pointer(&_info)),
+	))
 	if info.Results != nil {
 		for i := range info.Results {
 			result := *(*Result)(unsafe.Pointer(uintptr(unsafe.Pointer(_info.Results)) + uintptr(i)*unsafe.Sizeof(Result(0))))
@@ -21,10 +27,10 @@ func (q Queue) Present(info PresentInfo) error {
 			fmt.Printf("swapchain #%d: %s", i, result)
 		}
 	}
-	if result != C.VK_SUCCESS {
-		return fmt.Errorf("present error")
+	if result != Success {
+		return ff, result
 	}
-	return nil
+	return ff, nil
 }
 
 //
