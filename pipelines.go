@@ -692,12 +692,16 @@ type PipelineCacheCreateInfo struct{
 }
 
 func (info *PipelineCacheCreateInfo) C(_info *pipelineCacheCreateInfo) {
+	var initialData unsafe.Pointer
+	if len(info.InitialData) > 0 {
+		initialData = unsafe.Pointer(&info.InitialData[0])
+	}
 	*_info = pipelineCacheCreateInfo{
 		Type: info.Type,
 		Next: info.Next,
 		Flags: info.Flags,
 		InitialDataSize: uint32(len(info.InitialData)),
-		InitialData: (*C.void)(unsafe.Pointer(&info.InitialData[0])),
+		InitialData: initialData,
 	}
 }
 
@@ -706,7 +710,7 @@ type pipelineCacheCreateInfo struct {
 	Next uintptr
 	Flags PipelineCacheCreateFlags
 	InitialDataSize uint32
-	InitialData *C.void
+	InitialData unsafe.Pointer
 }
 
 func CreateComputePipelines(device Device, pipelineCache PipelineCache, createInfos []ComputePipelineCreateInfo, allocator *AllocationCallbacks) ([]Pipeline, error) {
