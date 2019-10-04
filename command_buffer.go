@@ -39,7 +39,7 @@ const (
 )
 
 type QueryPipelineStatisticFlagBits uint32
-type QueryPipelineStatisticsFlags = QueryPipelineStatisticFlagBits
+type QueryPipelineStatisticFlags = QueryPipelineStatisticFlagBits
 
 const (
 	QueryPipelineStatisticInputAssemblyVerticesBit QueryPipelineStatisticFlagBits = 1 << iota
