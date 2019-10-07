@@ -465,6 +465,14 @@ func Memcpy(dst unsafe.Pointer, src unsafe.Pointer, size uintptr) {
 	)
 }
 
+func Memset(dst unsafe.Pointer, val byte, size uintptr) {
+	C.memset(
+		dst,
+		C.int(val),
+		C.size_t(size),
+	)
+}
+
 type SharingMode uint32
 
 const (
