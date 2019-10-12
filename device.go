@@ -28,7 +28,7 @@ func DestroyDevice(device Device, allocator *AllocationCallbacks) {
 func CreateSwapchain(device Device, info SwapchainCreateInfo, surface Surface, allocator *AllocationCallbacks) (Swapchain, error) {
 	var swapchain Swapchain
 	info = SwapchainCreateInfo{
-		Type:            1000001000,
+		Type:            StructureTypeSwapchainCreateInfoKHR,
 		Surface:         surface,
 		MinImageCount:   info.MinImageCount,
 		Format:          info.Format,

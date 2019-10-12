@@ -804,12 +804,16 @@ func MergePipelineCaches(device Device, dstCache PipelineCache, srcCaches []Pipe
 }
 
 func GetPipelineCacheData(device Device, pipelineCache PipelineCache, data []byte) (uint, error) {
-	var size uint32
+	size := uint32(len(data))
+	var dataPtr unsafe.Pointer
+	if data != nil {
+		dataPtr = unsafe.Pointer(&data[0])
+	}
 	result := Result(C.vkGetPipelineCacheData(
 		(C.VkDevice)(unsafe.Pointer(device)),
 		(C.VkPipelineCache)(unsafe.Pointer(pipelineCache)),
 		(*C.size_t)(unsafe.Pointer(&size)),
-		unsafe.Pointer(&data[0]),
+		dataPtr,
 	))
 	if result != Success {
 		return 0, result

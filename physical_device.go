@@ -75,7 +75,6 @@ func CreateDevice(physicalDevice PhysicalDevice, info DeviceCreateInfo, allocato
 		QueueCreateInfoCount:  uint32(len(info.QueueCreateInfos)),
 		EnabledLayerCount:     uint32(len(info.EnabledLayers)),
 		EnabledExtensionCount: uint32(len(info.EnabledExtensions)),
-		EnabledFeatures:       info.EnabledFeatures,
 	}
 	if _info.QueueCreateInfoCount > 0 {
 		l := uintptr(len(info.QueueCreateInfos)) * unsafe.Sizeof(float32(0))
@@ -100,6 +99,12 @@ func CreateDevice(physicalDevice PhysicalDevice, info DeviceCreateInfo, allocato
 		defer func() {
 			C.free(unsafe.Pointer(_info.QueueCreateInfos))
 		}()
+	}
+	if info.EnabledFeatures != nil {
+		p := C.malloc(C.size_t(unsafe.Sizeof(PhysicalDeviceFeatures{})))
+		defer C.free(p)
+		_info.EnabledFeatures = (*PhysicalDeviceFeatures)(p)
+		*_info.EnabledFeatures = *info.EnabledFeatures
 	}
 	defer fillNames(info.EnabledLayers, &_info.EnabledLayerCount, &_info.EnabledLayerNames).Free()
 	defer fillNames(info.EnabledExtensions, &_info.EnabledExtensionCount, &_info.EnabledExtensionNames).Free()
