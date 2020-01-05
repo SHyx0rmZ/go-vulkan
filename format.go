@@ -4,6 +4,7 @@ import (
 	"unsafe"
 )
 
+//go:generate go run stringer.go -type=Format -output=format_string.go
 type Format uint32
 
 const (
