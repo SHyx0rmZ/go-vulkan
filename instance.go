@@ -574,6 +574,15 @@ func EnumeratePhysicalDevices(instance Instance) ([]PhysicalDevice, error) {
 	return devices, nil
 }
 
+func GetPhysicalDeviceProperties(physicalDevice PhysicalDevice) PhysicalDeviceProperties {
+	var properties PhysicalDeviceProperties
+	C.vkGetPhysicalDeviceProperties(
+		(C.VkPhysicalDevice)(unsafe.Pointer(physicalDevice)),
+		(*C.VkPhysicalDeviceProperties)(unsafe.Pointer(&properties)),
+	)
+	return properties
+}
+
 func GetPhysicalDeviceSurfaceSupport(physicalDevice PhysicalDevice, queueFamilyIndex uint32, surface Surface) (bool, error) {
 	var supported struct {
 		bool
