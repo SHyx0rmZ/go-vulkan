@@ -38,7 +38,7 @@ type XlibSurfaceCreateInfo struct {
 func CreateXlibSurface(instance Instance, info XlibSurfaceCreateInfo, allocator *AllocationCallbacks) (Surface, error) {
 	var surface Surface
 	result := Result(C.vkCreateXlibSurfaceKHR(
-		(C.VkInstance)(unsafe.Pointer(instance)),
+		*(*C.VkInstance)(unsafe.Pointer(&instance)),
 		(*C.VkXlibSurfaceCreateInfoKHR)(unsafe.Pointer(&info)),
 		(*C.VkAllocationCallbacks)(unsafe.Pointer(allocator)),
 		(*C.VkSurfaceKHR)(unsafe.Pointer(&surface)),

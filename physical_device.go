@@ -4,6 +4,7 @@ package vulkan
 // #include <stdlib.h>
 import "C"
 import (
+	"bytes"
 	"unsafe"
 )
 
@@ -66,6 +67,144 @@ func GetPhysicalDeviceQueueFamilyProperties2(physicalDevice PhysicalDevice) []Qu
 	return queueFamilyProperties[:count:count]
 }
 
+type LayerName [MaxExtensionNameSize]byte
+type Description [MaxDescriptionSize]byte
+type ExtensionName [MaxExtensionNameSize]byte
+
+func (x LayerName) String() string {
+	return string(x[:bytes.IndexByte(x[:], 0)])
+}
+
+func (x Description) String() string {
+	return string(x[:bytes.IndexByte(x[:], 0)])
+}
+
+func (x ExtensionName) String() string {
+	return string(x[:bytes.IndexByte(x[:], 0)])
+}
+
+type LayerProperties struct {
+	LayerName             LayerName
+	SpecVersion           Version
+	ImplementationVersion Version
+	Description           Description
+}
+
+func EnumerateInstanceLayerProperties() ([]LayerProperties, error) {
+	var count uint32
+	result := Result(C.vkEnumerateInstanceLayerProperties(
+		(*C.uint32_t)(unsafe.Pointer(&count)),
+		nil,
+	))
+	if result != Success {
+		return nil, result
+	}
+	if count == 0 {
+		return nil, nil
+	}
+	properties := make([]LayerProperties, count)
+	result = Result(C.vkEnumerateInstanceLayerProperties(
+		(*C.uint32_t)(unsafe.Pointer(&count)),
+		(*C.VkLayerProperties)(unsafe.Pointer(&properties[0])),
+	))
+	if result != Success {
+		return nil, result
+	}
+	return properties[:count:count], nil
+}
+
+func EnumerateDeviceLayerProperties(physicalDevice PhysicalDevice) ([]LayerProperties, error) {
+	var count uint32
+	result := Result(C.vkEnumerateDeviceLayerProperties(
+		(C.VkPhysicalDevice)(unsafe.Pointer(physicalDevice)),
+		(*C.uint32_t)(unsafe.Pointer(&count)),
+		nil,
+	))
+	if result != Success {
+		return nil, result
+	}
+	if count == 0 {
+		return nil, nil
+	}
+	properties := make([]LayerProperties, count)
+	result = Result(C.vkEnumerateDeviceLayerProperties(
+		(C.VkPhysicalDevice)(unsafe.Pointer(physicalDevice)),
+		(*C.uint32_t)(unsafe.Pointer(&count)),
+		(*C.VkLayerProperties)(unsafe.Pointer(&properties[0])),
+	))
+	if result != Success {
+		return nil, result
+	}
+	return properties[:count:count], nil
+}
+
+type ExtensionProperties struct {
+	ExtensionName ExtensionName
+	SpecVersion   Version
+}
+
+func EnumerateInstanceExtensionProperties(layerName string) ([]ExtensionProperties, error) {
+	var _layerName *C.char
+	if layerName != "" {
+		_layerName = C.CString(layerName)
+		defer C.free(unsafe.Pointer(_layerName))
+	}
+	var count uint32
+	result := Result(C.vkEnumerateInstanceExtensionProperties(
+		_layerName,
+		(*C.uint32_t)(unsafe.Pointer(&count)),
+		nil,
+	))
+	if result != Success {
+		return nil, result
+	}
+	if count == 0 {
+		return nil, nil
+	}
+	properties := make([]ExtensionProperties, count)
+	result = Result(C.vkEnumerateInstanceExtensionProperties(
+		_layerName,
+		(*C.uint32_t)(unsafe.Pointer(&count)),
+		(*C.VkExtensionProperties)(unsafe.Pointer(&properties[0])),
+	))
+	if result != Success {
+		return nil, result
+	}
+	return properties[:count:count], nil
+}
+
+func EnumerateDeviceExtensionProperties(physicalDevice PhysicalDevice, layerName string) ([]ExtensionProperties, error) {
+	var _layerName *C.char
+	if layerName != "" {
+		_layerName = C.CString(layerName)
+		defer C.free(unsafe.Pointer(_layerName))
+	}
+	var count uint32
+	result := Result(C.vkEnumerateDeviceExtensionProperties(
+		(C.VkPhysicalDevice)(unsafe.Pointer(physicalDevice)),
+		_layerName,
+		(*C.uint32_t)(unsafe.Pointer(&count)),
+		nil,
+	))
+	if result != Success {
+		return nil, result
+	}
+	if count == 0 {
+		return nil, nil
+	}
+	properties := make([]ExtensionProperties, count)
+	result = Result(C.vkEnumerateDeviceExtensionProperties(
+		*(*C.VkPhysicalDevice)(unsafe.Pointer(&physicalDevice)),
+		_layerName,
+		(*C.uint32_t)(unsafe.Pointer(&count)),
+		(*C.VkExtensionProperties)(unsafe.Pointer(&properties[0])),
+	))
+	if result != Success {
+		return nil, result
+	}
+	return properties[:count:count], nil
+}
+
 func CreateDevice(physicalDevice PhysicalDevice, info DeviceCreateInfo, allocator *AllocationCallbacks) (Device, error) {
 	var device Device
 	_info := deviceCreateInfo{
@@ -126,16 +265,80 @@ type PhysicalDeviceProperties2KHR struct {
 	PhysicalDeviceProperties
 }
 
+type PhysicalDeviceProperties2 PhysicalDeviceProperties2KHR
+
+type PhysicalDeviceName [MaxPhysicalDeviceNameSize]byte
+
+func (x PhysicalDeviceName) String() string {
+	return string(x[:bytes.IndexByte(x[:], 0)])
+}
+
+type UUID [UUIDSize]byte
+
+const hextable = "0123456789abcdef"
+
+func (x UUID) String() string {
+	return string([]byte{
+		hextable[x[0]>>4],
+		hextable[x[0]&15],
+		hextable[x[1]>>4],
+		hextable[x[1]&15],
+		hextable[x[2]>>4],
+		hextable[x[2]&15],
+		hextable[x[3]>>4],
+		hextable[x[3]&15],
+		'-',
+		hextable[x[4]>>4],
+		hextable[x[4]&15],
+		hextable[x[5]>>4],
+		hextable[x[5]&15],
+		'-',
+		hextable[x[6]>>4],
+		hextable[x[6]&15],
+		hextable[x[7]>>4],
+		hextable[x[7]&15],
+		'-',
+		hextable[x[8]>>4],
+		hextable[x[8]&15],
+		hextable[x[9]>>4],
+		hextable[x[9]&15],
+		'-',
+		hextable[x[10]>>4],
+		hextable[x[10]&15],
+		hextable[x[11]>>4],
+		hextable[x[11]&15],
+		hextable[x[12]>>4],
+		hextable[x[12]&15],
+		hextable[x[13]>>4],
+		hextable[x[13]&15],
+		hextable[x[14]>>4],
+		hextable[x[14]&15],
+		hextable[x[15]>>4],
+		hextable[x[15]&15],
+	})
+}
+
 type PhysicalDeviceProperties struct {
 	APIVersion        uint32
 	DriverVersion     uint32
 	VendorID          uint32
 	DeviceID          uint32
 	DeviceType        C.VkPhysicalDeviceType
-	DeviceName        [MaxPhysicalDeviceNameSize]uint8
-	PipelineCacheUUID [UUIDSize]uint8
+	DeviceName        PhysicalDeviceName
+	PipelineCacheUUID UUID
 	Limits            C.VkPhysicalDeviceLimits
 	SparseProperties  C.VkPhysicalDeviceSparseProperties
+}
+
+func GetPhysicalDeviceProperties2(physicalDevice PhysicalDevice) PhysicalDeviceProperties2 {
+	properties := PhysicalDeviceProperties2{
+		Type: (C.VkStructureType)(StructureTypePhysicalDeviceProperties2),
+	}
+	C.vkGetPhysicalDeviceProperties2(
+		*(*C.VkPhysicalDevice)(unsafe.Pointer(&physicalDevice)),
+		(*C.VkPhysicalDeviceProperties2)(unsafe.Pointer(&properties)),
+	)
+	return properties
 }
 
 type SurfaceFormat struct {
