@@ -47,6 +47,8 @@ const (
 	MemoryPropertyHostCachedBit
 	MemoryPropertyLazilyAllocatedBit
 	MemoryPropertyProtectedBit
+	MemoryPropertyDeviceCoherentBitAMD
+	MemoryPropertyDeviceUncachedBitAMD
 )
 
 type MemoryType struct {

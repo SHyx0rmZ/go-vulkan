@@ -160,6 +160,65 @@ func (r Result) Error() string {
 
 type AllocationCallbacks C.VkAllocationCallbacks
 
+// SystemAllocationScope - Allocation scope
+//
+// Most Vulkan commands operate on a single object, or there is a sole object that is being created or manipulated.
+// When an allocation uses an allocation scope of SystemAllocationScopeObject or SystemAllocationScopeCache, the
+// allocation is scoped to the object being created or manipulated.
+//
+// When an implementation requires host memory, it will make callbacks to the application using the most specific
+// allocator and allocation scope available.
+//
+//   - If an allocation is scoped to the duration of a command, the allocator will use the SystemAllocationScopeCommand
+//     allocation scope. The most specific allocator available is used: if the object being created or manipulated has
+//     an allocator, that object's allocator will be used, else if the parent Device has an allocator it will be used,
+//     else if the parent Instance has an allocator it will be used. Else,
+//
+//   - If an allocation is associated with a ValidationCacheEXT or PipelineCache object, the allocator will use the
+//     SystemAllocationScopeCache allocation scope. The most specific allocator available is used (cache, else device,
+//     else instance). Else,
+//
+//   - If an allocation is scoped to the lifetime of an object, that object is being created or manipulated by the
+//     command, and that object's type is not Device or Instance, the allocator will use an allocation scope of
+//     SystemAllocationScopeObject. The most specific allocator available is used (object, else device, else instance).
+//     Else,
+//
+//   - If an allocation is scoped to the lifetime of a device, the allocator will use an allocation scope of
+//     SystemAllocationScopeDevice. The most specific allocator available is used (device, else instance). Else,
+//
+//   - If the allocation is scoped to the lifetime of an instance and the instance has an allocator, its allocator will
+//     be used with an allocation scope of SystemAllocationScopeInstance.
+//
+// - Otherwise an implementation will allocate memory through an alternative mechanism that is unspecified.
+type SystemAllocationScope uint32
+
+const (
+	// SystemAllocationScopeCommand specifies that the allocation is scoped to the duration of the Vulkan
+	// command.
+	SystemAllocationScopeCommand SystemAllocationScope = iota
+
+	// SystemAllocationScopeObject specifies that the allocation is scoped to the lifetime of the Vulkan object
+	// that is being created or used.
+	SystemAllocationScopeObject
+
+	// SystemAllocationScopeCache specifies that the allocation is scoped to the lifetime of a PipelineCache
+	// or ValidationCacheEXT object.
+	SystemAllocationScopeCache
+
+	// SystemAllocationScopeDevice specifies that the allocation is scoped to the lifetime of the Vulkan device.
+	SystemAllocationScopeDevice
+
+	// SystemAllocationScopeInstance specifies that the allocation is scoped to the lifetime of the Vulkan
+	// instance.
+	SystemAllocationScopeInstance
+)
+
+type InternalAllocationType uint32
+
+const (
+	InternalAllocationTypeExecutable InternalAllocationType = iota
+)
+
 type ComponentMapping struct {
 	R ComponentSwizzle
 	G ComponentSwizzle
@@ -224,7 +283,7 @@ func DestroyImageView(device Device, imageView ImageView, allocator *AllocationC
 type RenderPass uintptr
 
 type RenderPassCreateInfo struct {
-	Type         C.VkStructureType
+	Type         StructureType
 	Next         uintptr
 	Flags        C.VkRenderPassCreateFlags
 	Attachments  []AttachmentDescription

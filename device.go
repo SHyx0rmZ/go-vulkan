@@ -28,26 +28,20 @@ func DestroyDevice(device Device, allocator *AllocationCallbacks) {
 func CreateSwapchain(device Device, info SwapchainCreateInfo, surface Surface, allocator *AllocationCallbacks) (Swapchain, error) {
 	var swapchain Swapchain
 	info = SwapchainCreateInfo{
-		Type:            StructureTypeSwapchainCreateInfoKHR,
-		Surface:         surface,
-		MinImageCount:   info.MinImageCount,
-		Format:          info.Format,
-		PresentMode:     info.PresentMode,
-		ImageColorSpace: 0,
-		ImageExtent: struct {
-			Width  uint32
-			Height uint32
-		}{
-			Width:  1280,
-			Height: 800,
-		},
+		Type:                  StructureTypeSwapchainCreateInfoKHR,
+		Surface:               surface,
+		MinImageCount:         info.MinImageCount,
+		Format:                info.Format,
+		PresentMode:           info.PresentMode,
+		ImageColorSpace:       info.ImageColorSpace,
+		ImageExtent:           info.ImageExtent,
 		ImageArrayLayers:      1,
 		ImageUsage:            ImageUsageColorAttachmentBit,
 		ImageSharingMode:      SharingModeExclusive,
 		QueueFamilyIndexCount: 0,
 		QueueFamilyIndices:    nil,
 		PreTransform:          1,
-		CompositeAlpha:        1,
+		CompositeAlpha:        info.CompositeAlpha,
 		Clipped:               true,
 		OldSwapchain:          NullHandle,
 	}
@@ -72,9 +66,30 @@ func (d Device) DestroySwapchain(swapchain Swapchain) {
 	C._ptr_vkDestroySwapchainKHR = C.vkGetDeviceProcAddr((C.VkDevice)(unsafe.Pointer(d)), str)
 	C._vkDestroySwapchainKHR((C.VkDevice)(unsafe.Pointer(d)), (C.VkSwapchainKHR)(unsafe.Pointer(swapchain)), nil)
 }
+
+func DestroySwapchain(device Device, swapchain Swapchain, allocator *AllocationCallbacks) {
+	C.vkDestroySwapchainKHR(
+		*(*C.VkDevice)(unsafe.Pointer(&device)),
+		*(*C.VkSwapchainKHR)(unsafe.Pointer(&swapchain)),
+		(*C.VkAllocationCallbacks)(allocator),
+	)
+}
+
 func (d Device) GetQueue(queueFamilyIndex, queueIndex uint32) Queue {
 	var queue Queue
-	C.vkGetDeviceQueue((C.VkDevice)(unsafe.Pointer(d)), C.uint32_t(queueFamilyIndex), C.uint32_t(queueIndex), (*C.VkQueue)(unsafe.Pointer(&queue)))
+	info := struct { // VkDeviceQueueInfo2
+		Type             StructureType
+		Next             uintptr
+		Flags            DeviceQueueCreateFlags
+		QueueFamilyIndex uint32
+		QueueIndex       uint32
+	}{
+		Type:             StructureTypeDeviceQueueInfo2,
+		Flags:            0, //DeviceQueueCreateProtectedBit,
+		QueueFamilyIndex: queueFamilyIndex,
+		QueueIndex:       queueIndex,
+	}
+	C.vkGetDeviceQueue2((C.VkDevice)(unsafe.Pointer(d)), (*C.VkDeviceQueueInfo2)(unsafe.Pointer(&info)), (*C.VkQueue)(unsafe.Pointer(&queue)))
 	return queue
 }
 
@@ -172,6 +187,29 @@ func (d Device) AcquireNextImage(swapchain Swapchain, semaphore Semaphore, fence
 		C.uint64_t(^uint64(0)),
 		(C.VkSemaphore)(unsafe.Pointer(semaphore)),
 		(C.VkFence)(unsafe.Pointer(fence)),
+		(*C.uint32_t)(unsafe.Pointer(&image)),
+	))
+	if result != Success {
+		return 0, result
+	}
+	return image, nil
+}
+
+type AcquireNextImageInfo struct {
+	Type       StructureType
+	Next       uintptr
+	Swapchain  Swapchain
+	Timeout    uint64
+	Semaphore  Semaphore
+	Fence      Fence
+	DeviceMask uint32
+}
+
+func AcquireNextImage(device Device, acquireInfo AcquireNextImageInfo) (uint32, error) {
+	var image uint32
+	result := Result(C.vkAcquireNextImage2KHR(
+		*(*C.VkDevice)(unsafe.Pointer(&device)),
+		(*C.VkAcquireNextImageInfoKHR)(unsafe.Pointer(&acquireInfo)),
 		(*C.uint32_t)(unsafe.Pointer(&image)),
 	))
 	if result != Success {

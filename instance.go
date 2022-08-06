@@ -1,11 +1,5 @@
 package vulkan
 
-import (
-	"bytes"
-	"fmt"
-	"unsafe"
-)
-
 // #cgo linux freebsd darwin LDFLAGS: -lvulkan
 // #cgo windows LDFLAGS: -lvulkan-1
 // #include <stdlib.h>
@@ -17,6 +11,11 @@ import (
 //   _f(device, properties);
 // }
 import "C"
+import (
+	"bytes"
+	"fmt"
+	"unsafe"
+)
 
 type CreateInfo struct {
 	Type              StructureType
@@ -98,13 +97,13 @@ func fillNames(slice []string, count *uint32, names **C.char) interface{ Free() 
 
 	p := C.malloc(C.size_t(len(slice)) * ptrSize)
 	for i, name := range slice {
-		*(**C.char)(unsafe.Pointer(uintptr(p) + uintptr(i*ptrSize))) = C.CString(name)
+		*(**C.char)(unsafe.Add(p, i*ptrSize)) = C.CString(name)
 	}
 	*count = uint32(len(slice))
 	*names = (*C.char)(p)
 	return freeFunc(func() {
 		for i := uint32(0); i < *count; i++ {
-			C.free(unsafe.Pointer(*(**C.char)(unsafe.Pointer(uintptr(p) + uintptr(i*ptrSize)))))
+			C.free(unsafe.Pointer(*(**C.char)(unsafe.Add(p, i*ptrSize))))
 		}
 		C.free(p)
 	})
@@ -128,7 +127,7 @@ func EnumerateInstanceVersion() (Version, error) {
 	return version, nil
 }
 
-func CreateInstance(info CreateInfo) (Instance, error) {
+func CreateInstance(info CreateInfo, allocator *AllocationCallbacks) (Instance, error) {
 	var count uint32
 	result := C.vkEnumerateInstanceLayerProperties((*C.uint32_t)(unsafe.Pointer(&count)), nil)
 	if result != C.VK_SUCCESS {
@@ -172,7 +171,11 @@ func CreateInstance(info CreateInfo) (Instance, error) {
 	defer fillNames(info.EnabledLayers, &_info.EnabledLayerCount, &_info.EnabledLayerNames).Free()
 	defer fillNames(info.EnabledExtensions, &_info.EnabledExtensionCount, &_info.EnabledExtensionNames).Free()
 	_info.Next = (*createInfo)(unsafe.Pointer(uintptr(0)))
-	result = C.vkCreateInstance((*C.VkInstanceCreateInfo)(unsafe.Pointer(&_info)), nil, (*C.VkInstance)(unsafe.Pointer(&instance)))
+	result = C.vkCreateInstance(
+		(*C.VkInstanceCreateInfo)(unsafe.Pointer(&_info)),
+		(*C.VkAllocationCallbacks)(allocator),
+		(*C.VkInstance)(unsafe.Pointer(&instance)),
+	)
 	if result != C.VK_SUCCESS {
 		return 0, Result(result)
 	}
@@ -206,10 +209,20 @@ const (
 	SwapchainCreateMutableFormatBit
 )
 
+type CompositeAlphaFlagBits uint32
+type CompositeAlphaFlags = CompositeAlphaFlagBits
+
+const (
+	CompositeAlphaOpaqueBit CompositeAlphaFlagBits = 1 << iota
+	CompositeAlphaPreMultipliedBit
+	CompositeAlphaPostMultipliedBit
+	CompositeAlphaInheritBit
+)
+
 type SwapchainCreateInfo struct {
 	Type                  StructureType
 	Next                  uintptr
-	Flags                 C.VkSwapchainCreateFlagsKHR
+	Flags                 SwapchainCreateFlags
 	Surface               Surface
 	MinImageCount         uint32
 	Format                Format
@@ -221,7 +234,7 @@ type SwapchainCreateInfo struct {
 	QueueFamilyIndexCount uint32
 	QueueFamilyIndices    *uint32
 	PreTransform          C.VkSurfaceTransformFlagBitsKHR
-	CompositeAlpha        C.VkCompositeAlphaFlagBitsKHR
+	CompositeAlpha        CompositeAlphaFlags
 	PresentMode           PresentMode
 	Clipped               bool
 	OldSwapchain          Swapchain
@@ -275,7 +288,7 @@ func (info *PresentInfo) C(_info *presentInfo) freeFunc {
 		_info.ImageIndices = (*uint32)(p)
 	}
 	if info.Results != nil {
-		p := C.calloc(C.size_t(uintptr(_info.SwapchainCount) * unsafe.Sizeof(Result(0))), 1)
+		p := C.calloc(C.size_t(uintptr(_info.SwapchainCount)*unsafe.Sizeof(Result(0))), 1)
 		ps = append(ps, p)
 		_info.Results = (*Result)(p)
 	}
@@ -492,7 +505,8 @@ type physicalDeviceGroupProperties struct {
 }
 
 func EnumeratePhysicalDeviceGroups(instance Instance) ([]PhysicalDeviceGroupProperties, error) {
-	var count uint32
+	//var count uint32
+	count := uint32(0)
 	result := Result(C.vkEnumeratePhysicalDeviceGroups(
 		(C.VkInstance)(unsafe.Pointer(instance)),
 		(*C.uint32_t)(unsafe.Pointer(&count)),
@@ -502,6 +516,9 @@ func EnumeratePhysicalDeviceGroups(instance Instance) ([]PhysicalDeviceGroupProp
 		return nil, result
 	}
 	_groups := make([]physicalDeviceGroupProperties, count)
+	for i := range _groups {
+		_groups[i].Type = StructureTypePhysicalDeviceGroupProperties
+	}
 	result = Result(C.vkEnumeratePhysicalDeviceGroups(
 		(C.VkInstance)(unsafe.Pointer(instance)),
 		(*C.uint32_t)(unsafe.Pointer(&count)),
@@ -523,28 +540,26 @@ func EnumeratePhysicalDeviceGroups(instance Instance) ([]PhysicalDeviceGroupProp
 }
 
 func EnumeratePhysicalDevices(instance Instance) ([]PhysicalDevice, error) {
-	var count C.uint32_t
-	// var devices uintptr
-	// (*C.VkPhysicalDevice)(unsafe.Pointer(&devices))
+	var count C.uint32_t //asd768687
 	fmt.Println(unsafe.Sizeof(PhysicalDeviceProperties2KHR{}))
-	result := C.vkEnumeratePhysicalDevices((C.VkInstance)(unsafe.Pointer(instance)), &count, nil)
+	result := C.vkEnumeratePhysicalDevices(
+		(C.VkInstance)(unsafe.Pointer(instance)),
+		&count,
+		nil,
+	)
 	if result != C.VK_SUCCESS {
 		return nil, Result(result)
 	}
 	devices := make([]PhysicalDevice, count)
-	result = C.vkEnumeratePhysicalDevices((C.VkInstance)(unsafe.Pointer(instance)), &count, (*C.VkPhysicalDevice)(unsafe.Pointer(&devices[0])))
-	// C._f = C.vkGetInstanceProcAddr((C.VkInstance)(unsafe.Pointer(i)), C.CString("vkGetPhysicalDeviceProperties2KHR"))
-	// if C._f == nil {
-	// 	panic("empty function pointer")
-	// }
+	result = C.vkEnumeratePhysicalDevices(
+		(C.VkInstance)(unsafe.Pointer(instance)),
+		&count,
+		(*C.VkPhysicalDevice)(unsafe.Pointer(&devices[0])),
+	)
 	for _, device := range devices {
 		var properties PhysicalDeviceProperties
-		// properties.Type = 1000059001
-		// C.doInvoke((C.VkPhysicalDevice)(unsafe.Pointer(device)), (*C.VkPhysicalDeviceProperties2KHR)(unsafe.Pointer(&properties)))
 		C.vkGetPhysicalDeviceProperties((C.VkPhysicalDevice)(unsafe.Pointer(device)), (*C.VkPhysicalDeviceProperties)(unsafe.Pointer(&properties)))
 		fmt.Println("- physical device found:")
-		// fmt.Println("  name:", string(propertieis.DeviceName[:bytes.IndexByte(properties.DeviceName[:], 0)]))
-		// fmt.Println("  uuid:", string(properties.PipelineCacheUUID[:bytes.IndexByte(properties.PipelineCacheUUID[:], 0)]))
 		name := string(properties.DeviceName[:])
 		if off := bytes.IndexByte(properties.DeviceName[:], 0); off != -1 {
 			name = string(properties.DeviceName[:off])
