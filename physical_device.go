@@ -216,22 +216,27 @@ func CreateDevice(physicalDevice PhysicalDevice, info DeviceCreateInfo, allocato
 		EnabledExtensionCount: uint32(len(info.EnabledExtensions)),
 	}
 	if _info.QueueCreateInfoCount > 0 {
-		l := uintptr(len(info.QueueCreateInfos)) * unsafe.Sizeof(float32(0))
-		p := C.malloc(C.size_t(len(info.QueueCreateInfos))*C.size_t(unsafe.Sizeof(deviceQueueCreateInfo{})) + C.size_t(l))
+		const sizeOfDeviceQueueCreateInfo = unsafe.Sizeof(deviceQueueCreateInfo{})
+		const sizeOfFloat32 = unsafe.Sizeof(float32(0))
+		var l uintptr
+		for _, info := range info.QueueCreateInfos {
+			l += uintptr(len(info.QueuePriorities)) * sizeOfFloat32
+		}
+		p := C.malloc(C.size_t(len(info.QueueCreateInfos))*C.size_t(sizeOfDeviceQueueCreateInfo) + C.size_t(l))
 		var o uintptr
 		for _, info := range info.QueueCreateInfos {
-			*(*deviceQueueCreateInfo)(unsafe.Pointer(uintptr(p) + o)) = deviceQueueCreateInfo{
+			*(*deviceQueueCreateInfo)(unsafe.Add(p, o)) = deviceQueueCreateInfo{
 				Type:             info.Type,
 				Next:             info.Next,
 				Flags:            info.Flags,
 				QueueFamilyIndex: info.QueueFamilyIndex,
 				QueueCount:       uint32(len(info.QueuePriorities)),
-				QueuePriorities:  (*float32)(unsafe.Pointer(uintptr(p) + o + unsafe.Sizeof(deviceQueueCreateInfo{}))),
+				QueuePriorities:  (*float32)(unsafe.Add(p, o+sizeOfDeviceQueueCreateInfo)),
 			}
-			o += unsafe.Sizeof(deviceQueueCreateInfo{})
+			o += sizeOfDeviceQueueCreateInfo
 			for _, priority := range info.QueuePriorities {
-				*(*float32)(unsafe.Pointer(uintptr(p) + o)) = priority
-				o += unsafe.Sizeof(float32(0))
+				*(*float32)(unsafe.Add(p, o)) = priority
+				o += sizeOfFloat32
 			}
 		}
 		_info.QueueCreateInfos = (*deviceQueueCreateInfo)(p)
