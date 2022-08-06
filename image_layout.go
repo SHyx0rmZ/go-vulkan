@@ -9,7 +9,7 @@ const (
 	ImageLayoutDepthStencilAttachmentOptimal
 	ImageLayoutDepthStencilReadOnlyOptimal
 	ImageLayoutShaderReadOnlyOptimal
-	ImageLayoutTranserSrcOptimal
+	ImageLayoutTransferSrcOptimal
 	ImageLayoutTransferDstOptimal
 	ImageLayoutPreinitialized
 )
