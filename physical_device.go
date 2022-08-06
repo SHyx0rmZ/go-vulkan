@@ -456,6 +456,159 @@ func GetPhysicalDeviceSurfaceCapabilities(physicalDevice PhysicalDevice, surface
 	return capabilities, nil
 }
 
+type PhysicalDeviceVulkan11Features struct {
+	Type                               StructureType
+	Next                               uintptr
+	StorageBuffer16BitAccess           bool
+	_                                  [3]byte
+	UniformAndStorageBuffer16BitAccess bool
+	_                                  [3]byte
+	StoragePushConstant16              bool
+	_                                  [3]byte
+	StorageInputOutput16               bool
+	_                                  [3]byte
+	Multiview                          bool
+	_                                  [3]byte
+	MultiviewGeometryShader            bool
+	_                                  [3]byte
+	MultiviewTessellationShader        bool
+	_                                  [3]byte
+	VariablePointersStorageBuffer      bool
+	_                                  [3]byte
+	VariablePointers                   bool
+	_                                  [3]byte
+	ProtectedMemory                    bool
+	_                                  [3]byte
+	SamplerYcbcrConversion             bool
+	_                                  [3]byte
+	ShaderDrawParameters               bool
+	_                                  [3]byte
+}
+
+type PhysicalDeviceVulkan12Features struct {
+	Type                                               StructureType
+	Next                                               uintptr
+	SamplerMirrorClampToEdge                           bool
+	_                                                  [3]byte
+	DrawIndirectCount                                  bool
+	_                                                  [3]byte
+	StorageBuffer8BitAccess                            bool
+	_                                                  [3]byte
+	UniformAndStorageBuffer8BitAccess                  bool
+	_                                                  [3]byte
+	StoragePushConstant8                               bool
+	_                                                  [3]byte
+	ShaderBufferInt64Atomics                           bool
+	_                                                  [3]byte
+	ShaderSharedInt64Atomics                           bool
+	_                                                  [3]byte
+	ShaderFloat16                                      bool
+	_                                                  [3]byte
+	ShaderInt8                                         bool
+	_                                                  [3]byte
+	DescriptorIndexing                                 bool
+	_                                                  [3]byte
+	ShaderInputAttachmentArrayDynamicIndexing          bool
+	_                                                  [3]byte
+	ShaderUniformTexelBufferArrayDynamicIndexing       bool
+	_                                                  [3]byte
+	ShaderStorageTexelBufferArrayDynamicIndexing       bool
+	_                                                  [3]byte
+	ShaderUniformBufferArrayNonUniformIndexing         bool
+	_                                                  [3]byte
+	ShaderSampledImagedArrayNonUniformIndexing         bool
+	_                                                  [3]byte
+	ShaderStorageBufferArrayNonUniformIndexing         bool
+	_                                                  [3]byte
+	ShaderStorageImageArrayNonUniformIndexing          bool
+	_                                                  [3]byte
+	ShaderInputAttachmentArrayNonUniformIndexing       bool
+	_                                                  [3]byte
+	ShaderUniformTexelBufferArrayNonUniformIndexing    bool
+	_                                                  [3]byte
+	ShaderStorageTexelBufferArrayNonUniformIndexing    bool
+	_                                                  [3]byte
+	DescriptorBindingUniformBufferUpdateAfterBind      bool
+	_                                                  [3]byte
+	DescriptorBindingSampledImageUpdateAfterBind       bool
+	_                                                  [3]byte
+	DescriptorBindingStorageImageUpdateAfterBind       bool
+	_                                                  [3]byte
+	DescriptorBindingStorageBufferUpdateAfterBind      bool
+	_                                                  [3]byte
+	DescriptorBindingUniformTexelBufferUpdateAfterBind bool
+	_                                                  [3]byte
+	DescriptorBindingStorageTexelBufferUpdateAfterBind bool
+	_                                                  [3]byte
+	DescriptorBindingUpdateUnusedWhilePending          bool
+	_                                                  [3]byte
+	DescriptorBindingPartiallyBound                    bool
+	_                                                  [3]byte
+	DescriptorBindingVariableDescriptorCount           bool
+	_                                                  [3]byte
+	RuntimeDescriptorArray                             bool
+	_                                                  [3]byte
+	SamplerFilterMinmax                                bool
+	_                                                  [3]byte
+	ScalarBlockLayout                                  bool
+	_                                                  [3]byte
+	ImagelessFramebuffer                               bool
+	_                                                  [3]byte
+	UniformBufferStandardLayout                        bool
+	_                                                  [3]byte
+	ShaderSubgroupExtendedTypes                        bool
+	_                                                  [3]byte
+	SeparateDepthStencilLayouts                        bool
+	_                                                  [3]byte
+	HostQueryReset                                     bool
+	_                                                  [3]byte
+	TimelineSemaphore                                  bool
+	_                                                  [3]byte
+	BufferDeviceAddress                                bool
+	_                                                  [3]byte
+	BufferDeviceAddressCaptureReplay                   bool
+	_                                                  [3]byte
+	BufferDeviceAddressMultiDevice                     bool
+	_                                                  [3]byte
+	VulkanMemoryModel                                  bool
+	_                                                  [3]byte
+	VulkanMemoryModelDeviceScope                       bool
+	_                                                  [3]byte
+	VulkanMemoryModelAvailabilityVisibilityChains      bool
+	_                                                  [3]byte
+	ShaderOutputViewportIndex                          bool
+	_                                                  [3]byte
+	ShaderOutputLayer                                  bool
+	_                                                  [3]byte
+	SubgroupBroadcastDynamicID                         bool
+	_                                                  [3]byte
+}
+
+func GetPhysicalDeviceFeatures(physicalDevice PhysicalDevice) (PhysicalDeviceFeatures2, error) {
+	var features PhysicalDeviceFeatures2
+	var _features11 = (*PhysicalDeviceVulkan11Features)(C.calloc(1, (C.size_t)(unsafe.Sizeof(PhysicalDeviceVulkan11Features{}))))
+	var _features12 = (*PhysicalDeviceVulkan12Features)(C.calloc(1, (C.size_t)(unsafe.Sizeof(PhysicalDeviceVulkan12Features{}))))
+	defer C.free(unsafe.Pointer(_features12))
+	defer C.free(unsafe.Pointer(_features11))
+	features.Type = 1000059000
+	features.Next = uintptr(unsafe.Pointer(_features11))
+	_features11.Type = 49
+	_features11.Next = uintptr(unsafe.Pointer(_features12))
+	_features12.Type = C.VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES // 51
+
+	C.vkGetPhysicalDeviceFeatures2(
+		(C.VkPhysicalDevice)(unsafe.Pointer(physicalDevice)),
+		(*C.VkPhysicalDeviceFeatures2)(unsafe.Pointer(&features)),
+	)
+	features12 := &PhysicalDeviceVulkan12Features{}
+	*features12 = *_features12
+	features11 := &PhysicalDeviceVulkan11Features{}
+	*features11 = *_features11
+	features11.Next = uintptr(unsafe.Pointer(features12))
+	features.Next = uintptr(unsafe.Pointer(features11))
+	return features, nil
+}
+
 type FormatProperties struct {
 	LinearTilingFeatures  FormatFeatureFlags
 	OptimalTilingFeatures FormatFeatureFlags
