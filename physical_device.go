@@ -434,3 +434,59 @@ func GetPhysicalDeviceSurfaceCapabilities(physicalDevice PhysicalDevice, surface
 	}
 	return capabilities, nil
 }
+
+type FormatProperties struct {
+	LinearTilingFeatures  FormatFeatureFlags
+	OptimalTilingFeatures FormatFeatureFlags
+	BufferFeatures        FormatFeatureFlags
+}
+
+type FormatFeatureFlags = FormatFeatureFlagBits
+
+type FormatFeatureFlagBits uint32
+
+const (
+	FormatFeatureSampledImageBit FormatFeatureFlagBits = 1 << iota
+	FormatFeatureStorageImageBit
+	FormatFeatureStorageImageAtomicBit
+	FormatFeatureUniformTexelBufferBit
+	FormatFeatureStorageTexelBufferBit
+	FormatFeatureStorageTexelBufferAtomicBit
+	FormatFeatureVertexBufferBit
+	FormatFeatureColorAttachmentBit
+	FormatFeatureColorAttachmentBlendBit
+	FormatFeatureDepthStencilAttachmentBit
+	FormatFeatureBlitSrcBit
+	FormatFeatureBlitDstBit
+	FormatFeatureSampledImageFilterLinearBit
+	FormatFeatureSampledImageFilterCubicBitImg
+	FormatFeatureTransferSrcBit
+	FormatFeatureTransferDstBit
+	FormatFeatureSampledImageFilterMinMaxBit
+	FormatFeatureMidpointChromaSamplesBit
+	FormatFeatureSampledImageYCBCRConversionLinearFilterBit
+	FormatFeatureSampledImageYCBCRConversionSeparateReconstructionFilterBit
+	FormatFeatureSampledImageYCBCRConversionChromeReconstructionExplicitBit
+	FormatFeatureSampledImageYCBCRConversionChromaReconstructionExplicitForceableBit
+	FormatFeatureDisjointBit
+	FormatFeatureCositedChromaSamplesBit
+)
+
+const (
+	FormatFeatureFragmentDensityMapBitExt FormatFeatureFlagBits = 1 << (iota + 24)
+	FormatFeatureVideoDecodeOutputBitKhr
+	FormatFeatureVideoDecodeDPBBitKhr
+	FormatFeatureVideoEncodeInputBitKhr
+	FormatFeatureVideoEncodeDPBBitKhr
+	FormatFeatureAccelerationStructureVertexBufferBitKhr
+	FormatFeatureFragmentShadingRateAttachmentBitKhr
+)
+
+func GetPhysicalDeviceFormatProperties(physicalDevice PhysicalDevice, format Format) (properties FormatProperties) {
+	C.vkGetPhysicalDeviceFormatProperties(
+		(C.VkPhysicalDevice)(unsafe.Pointer(physicalDevice)),
+		(C.VkFormat)(format),
+		(*C.VkFormatProperties)(unsafe.Pointer(&properties)),
+	)
+	return properties
+}
