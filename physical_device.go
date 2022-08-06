@@ -414,6 +414,22 @@ func GetPhysicalDeviceSurfacePresentModes(physicalDevice PhysicalDevice, surface
 	return modes[:count:count], nil
 }
 
+type SurfaceTransformFlags = SurfaceTransformFlagBits
+
+type SurfaceTransformFlagBits uint32
+
+const (
+	SurfaceTransformIdentityBit SurfaceTransformFlagBits = 1 << iota
+	SurfaceTransformRotate90Bit
+	SurfaceTransformRotate180Bit
+	SurfaceTransformRotate270Bit
+	SurfaceTransformHorizontalMirrorBit
+	SurfaceTransformHorizontalMirrorRotate90Bit
+	SurfaceTransformHorizontalMirrorRotate180BIt
+	SurfaceTransformHorizontalMirrorRotate270Bit
+	SurfaceTransformInheritBit
+)
+
 type SurfaceCapabilities struct {
 	MinImageCount           uint32
 	MaxImageCount           uint32
@@ -421,9 +437,9 @@ type SurfaceCapabilities struct {
 	MinImageExtent          Extent2D
 	MaxImageExtent          Extent2D
 	MaxImageArrayLayers     uint32
-	SupportedTransforms     C.VkSurfaceTransformFlagsKHR
-	CurrentTransform        C.VkSurfaceTransformFlagBitsKHR
-	SupportedCompositeAlpha C.VkCompositeAlphaFlagsKHR
+	SupportedTransforms     SurfaceTransformFlags
+	CurrentTransform        SurfaceTransformFlagBits
+	SupportedCompositeAlpha CompositeAlphaFlags
 	SupportedUsageFlags     ImageUsageFlags
 }
 
