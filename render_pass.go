@@ -143,10 +143,12 @@ func CreateRenderPass(device Device, createInfo RenderPassCreateInfo, allocator 
 				ColorAttachmentCount:    uint32(len(subpass.ColorAttachments)),
 				PreserveAttachmentCount: uint32(len(subpass.PreserveAttachments)),
 			}
-			sp := C.malloc(C.size_t(unsafe.Sizeof(AttachmentReference{})))
-			ps = append(ps, sp)
-			*(*AttachmentReference)(sp) = subpass.DepthStencilAttachment
-			_subpass.DepthStencilAttachment = (*AttachmentReference)(sp)
+			if subpass.DepthStencilAttachment != nil {
+				sp := C.malloc(C.size_t(unsafe.Sizeof(AttachmentReference{})))
+				ps = append(ps, sp)
+				*(*AttachmentReference)(sp) = *subpass.DepthStencilAttachment
+				_subpass.DepthStencilAttachment = (*AttachmentReference)(sp)
+			}
 			if _subpass.InputAttachmentCount > 0 {
 				sp := C.malloc(C.size_t(uintptr(_subpass.InputAttachmentCount) * unsafe.Sizeof(AttachmentReference{})))
 				ps = append(ps, sp)

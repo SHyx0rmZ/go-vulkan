@@ -6,6 +6,6 @@ type SubpassDescription struct {
 	InputAttachments       []AttachmentReference
 	ColorAttachments       []AttachmentReference
 	ResolveAttachments     []AttachmentReference
-	DepthStencilAttachment AttachmentReference
+	DepthStencilAttachment *AttachmentReference
 	PreserveAttachments    []uint32
 }
