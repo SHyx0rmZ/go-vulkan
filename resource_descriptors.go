@@ -200,12 +200,12 @@ const (
 // DescriptorPoolCreateInfo - Structure specifying parameters of a newly created descriptor pool
 //
 // Members
-// - Type is the type of this structure.
-// - Next is 0 or a pointer to an extension-specific structure.
-// - Flags is a bitmask of DescriptorPoolCreateFlagBits specifying certain supported operations on the pool.
-// - MaxSets is the maximum number of descriptor sets that can be allocated from the pool.
-// - PoolSizes is a slice of DescriptorPoolSize structures, each containing a descriptor type and number of
-//   descriptors of that type to be allocated in the pool.
+//   - Type is the type of this structure.
+//   - Next is 0 or a pointer to an extension-specific structure.
+//   - Flags is a bitmask of DescriptorPoolCreateFlagBits specifying certain supported operations on the pool.
+//   - MaxSets is the maximum number of descriptor sets that can be allocated from the pool.
+//   - PoolSizes is a slice of DescriptorPoolSize structures, each containing a descriptor type and number of
+//     descriptors of that type to be allocated in the pool.
 //
 // If multiple DescriptorPoolSize structures appear in the PoolSizes slice then the pool will be created with
 // enough storage for the total number of descriptors of each type.
@@ -279,15 +279,17 @@ type descriptorPoolCreateInfo struct {
 // DescriptorPoolSize - Structure specifying descriptor pool size.
 //
 // Members
-// - Type is the type of descriptor.
-// - DescriptorCount is the number of descriptors of that type to allocate. If type is
-//   DescriptorTypeInlineUniformBlock then descriptorCount is the number of bytes to allocate for descriptors of
-//   this type.
+//   - Type is the type of descriptor.
+//   - DescriptorCount is the number of descriptors of that type to allocate. If type is
+//     DescriptorTypeInlineUniformBlock then descriptorCount is the number of bytes to allocate for descriptors of
+//     this type.
 //
 // Note: When creating a descriptor pool that will contain descriptors for combined image
-//       samplers of multi-planar formats, an application needs to account for non-trivial
-//       descriptor consumption when choosing the descriptorCount value, as indicated by
-//       SamplerYcbcrConversionImageFormatProperties.combinedImageSamplerDescriptorCount.
+//
+//	samplers of multi-planar formats, an application needs to account for non-trivial
+//	descriptor consumption when choosing the descriptorCount value, as indicated by
+//	SamplerYcbcrConversionImageFormatProperties.combinedImageSamplerDescriptorCount.
+//
 // Valid Usage
 // - DescriptorCount must be greater than 0
 // - If type is DescriptorTypeInlineUniformBlock then descriptorCount must be a multiple of 4
@@ -302,11 +304,11 @@ type DescriptorPoolSize struct {
 // CreateDescriptorPool - Creates a descriptor pool object.
 //
 // Parameters
-// - device is the logical device that creates the descriptor pool.
-// - createInfo is a pointer to an instance of the VkDescriptorPoolCreateInfo structure specifying the state of the
-//   descriptor pool object.
-// - allocator controls host memory allocation as described in the Memory Allocation chapter.
-// - pDescriptorPool points to a VkDescriptorPool handle in which the resulting descriptor pool object is returned. (TODO)
+//   - device is the logical device that creates the descriptor pool.
+//   - createInfo is a pointer to an instance of the VkDescriptorPoolCreateInfo structure specifying the state of the
+//     descriptor pool object.
+//   - allocator controls host memory allocation as described in the Memory Allocation chapter.
+//   - pDescriptorPool points to a VkDescriptorPool handle in which the resulting descriptor pool object is returned. (TODO)
 //
 // allocator controls host memory allocation as described in the Memory Allocation chapter.
 // The created descriptor pool is returned in pDescriptorPool. (TODO)
@@ -320,6 +322,7 @@ type DescriptorPoolSize struct {
 // Return Codes
 // - On success, this command returns
 //   - Success
+//
 // - On failure, this command returns
 //   - ErrorOutOfHostMemory
 //   - ErrorOutOfDeviceMemory
@@ -351,11 +354,11 @@ func CreateDescriptorPool(device Device, createInfo DescriptorPoolCreateInfo, al
 // Descriptor sets allocated from a given pool do not need to be freed before destroying that descriptor pool.
 //
 // Valid Usage
-// - All submitted commands that refer to descriptorPool (via any allocated descriptor sets) must have completed
-//   execution
-// - If AllocationCallbacks were provided when descriptorPool was created, a compatible set of callbacks must be
-//   provided here
-// - If no AllocationCallbacks were provided when descriptorPool was created, allocator must be nil
+//   - All submitted commands that refer to descriptorPool (via any allocated descriptor sets) must have completed
+//     execution
+//   - If AllocationCallbacks were provided when descriptorPool was created, a compatible set of callbacks must be
+//     provided here
+//   - If no AllocationCallbacks were provided when descriptorPool was created, allocator must be nil
 //
 // Valid Usage (Implicit)
 // - device must be a valid Device handle

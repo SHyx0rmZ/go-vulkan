@@ -285,22 +285,27 @@ func FreeMemory(device Device, memory DeviceMemory, allocator *AllocationCallbac
 // MapMemory - Map a memory object into application address space.
 //
 // Parameters
-// - device is the logical device that owns the memory.
-// - memory is the DeviceMemory object to be mapped.
-// - offset is a zero-based byte offset from the beginning of the memory object.
-// - size is the size of the memory range to map, or WholeSize to map from offset to the end of the allocation.
-//   flags is reserved for future use.
 //
-// - ppData points to a pointer in which is returned a host-accessible pointer to the beginning of the mapped range.
-//   This pointer minus offset must be aligned to at least VkPhysicalDeviceLimits::minMemoryMapAlignment. (TODO)
+//   - device is the logical device that owns the memory.
+//
+//   - memory is the DeviceMemory object to be mapped.
+//
+//   - offset is a zero-based byte offset from the beginning of the memory object.
+//
+//   - size is the size of the memory range to map, or WholeSize to map from offset to the end of the allocation.
+//     flags is reserved for future use.
+//
+//   - ppData points to a pointer in which is returned a host-accessible pointer to the beginning of the mapped range.
+//     This pointer minus offset must be aligned to at least VkPhysicalDeviceLimits::minMemoryMapAlignment. (TODO)
 //
 // After a successful call to MapMemory the memory object memory is considered to be currently host mapped. It is an
 // application error to call MapMemory on a memory object that is already host mapped.
 //
 // Note: MapMemory will fail if the implementation is unable to allocate an appropriately sized contiguous virtual
-//       address range, e.g. due to virtual address space fragmentation or platform limits. In such cases, MapMemory
-//       must return ErrorMemoryMapFailed. The application can improve the likelihood of success by reducing the size
-//       of the mapped range and/or removing unneeded mappings using UnmapMemory.
+//
+//	address range, e.g. due to virtual address space fragmentation or platform limits. In such cases, MapMemory
+//	must return ErrorMemoryMapFailed. The application can improve the likelihood of success by reducing the size
+//	of the mapped range and/or removing unneeded mappings using UnmapMemory.
 //
 // MapMemory does not check whether the device memory is currently in use before returning the host-accessible pointer.
 // The application must guarantee that any previously submitted command that writes to this range has completed before
@@ -315,8 +320,9 @@ func FreeMemory(device Device, memory DeviceMemory, allocator *AllocationCallbac
 // access to that memory range.
 //
 // Note: It is important for the application developer to become meticulously familiar with all of the mechanisms
-//       described in the chapter on Synchronization and Cache Control as they are crucial to maintaining memory access
-//       ordering.
+//
+//	described in the chapter on Synchronization and Cache Control as they are crucial to maintaining memory access
+//	ordering.
 //
 // Valid Usage
 // - memory must not be currently host mapped
@@ -339,6 +345,7 @@ func FreeMemory(device Device, memory DeviceMemory, allocator *AllocationCallbac
 // Return Codes
 // - On success, this command returns
 //   - Success
+//
 // - On failure, this command returns
 //   - ErrorOutOfHostMemory
 //   - ErrorOutOfDeviceMemory
