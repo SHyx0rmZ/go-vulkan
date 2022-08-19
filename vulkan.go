@@ -390,3 +390,32 @@ func DestroyShaderModule(device Device, shaderModule ShaderModule, allocator *Al
 		(*C.VkAllocationCallbacks)(unsafe.Pointer(allocator)),
 	)
 }
+
+type structureHeader struct {
+	Type StructureType
+	Next unsafe.Pointer
+}
+
+func chain[chainable interface {
+	init(*chainable)
+	alloc() (chainable, unsafe.Pointer)
+	copy(chainable)
+}](f func(), elems ...chainable) {
+	if len(elems) == 0 {
+		f()
+		return
+	}
+
+	for idx := range elems[1:] {
+		defer elems[idx].init(&elems[idx+1])
+	}
+	for idx, e := range elems[1:] {
+		iface, ptr := e.alloc()
+		defer C.free(ptr)
+		defer e.copy(iface)
+		elems[idx].init((*chainable)(ptr))
+	}
+	elems[len(elems)-1].init(nil)
+
+	f()
+}

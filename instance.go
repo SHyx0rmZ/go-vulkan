@@ -425,9 +425,25 @@ type PhysicalDeviceFeatures struct {
 	_                                       [3]byte
 }
 
+func (f *PhysicalDeviceFeatures2) init(i *PhysicalDeviceFeaturesInterface) {
+	f.Type = StructureTypePhysicalDeviceFeatures2
+	if i != nil {
+		f.Next = i
+	}
+}
+
+func (f *PhysicalDeviceFeatures2) alloc() (PhysicalDeviceFeaturesInterface, unsafe.Pointer) {
+	ptr := C.calloc(1, (C.size_t)(unsafe.Sizeof(*f)))
+	return (*PhysicalDeviceFeatures2)(ptr), ptr
+}
+
+func (f *PhysicalDeviceFeatures2) copy(i PhysicalDeviceFeaturesInterface) {
+	*f = *(i.(*PhysicalDeviceFeatures2))
+}
+
 type PhysicalDeviceFeatures2 struct {
 	Type StructureType
-	Next uintptr
+	Next *PhysicalDeviceFeaturesInterface
 	PhysicalDeviceFeatures
 }
 

@@ -265,12 +265,34 @@ func CreateDevice(physicalDevice PhysicalDevice, info DeviceCreateInfo, allocato
 }
 
 type PhysicalDeviceProperties2KHR struct {
-	Type C.VkStructureType
-	Next *PhysicalDeviceProperties2KHR
+	Type StructureType
+	Next *PhysicalDevicePropertiesInterface
 	PhysicalDeviceProperties
 }
 
 type PhysicalDeviceProperties2 PhysicalDeviceProperties2KHR
+
+type PhysicalDevicePropertiesInterface interface {
+	init(*PhysicalDevicePropertiesInterface)
+	alloc() (PhysicalDevicePropertiesInterface, unsafe.Pointer)
+	copy(PhysicalDevicePropertiesInterface)
+}
+
+func (p *PhysicalDeviceProperties2) init(i *PhysicalDevicePropertiesInterface) {
+	p.Type = StructureTypePhysicalDeviceProperties2
+	if i != nil {
+		p.Next = i
+	}
+}
+
+func (p *PhysicalDeviceProperties2) alloc() (PhysicalDevicePropertiesInterface, unsafe.Pointer) {
+	ptr := C.calloc(1, (C.size_t)(unsafe.Sizeof(*p)))
+	return (*PhysicalDeviceProperties2)(ptr), ptr
+}
+
+func (p *PhysicalDeviceProperties2) copy(i PhysicalDevicePropertiesInterface) {
+	*p = *(i.(*PhysicalDeviceProperties2))
+}
 
 type PhysicalDeviceName [MaxPhysicalDeviceNameSize]byte
 
@@ -335,14 +357,14 @@ type PhysicalDeviceProperties struct {
 	SparseProperties  C.VkPhysicalDeviceSparseProperties
 }
 
-func GetPhysicalDeviceProperties2(physicalDevice PhysicalDevice) PhysicalDeviceProperties2 {
-	properties := PhysicalDeviceProperties2{
-		Type: (C.VkStructureType)(StructureTypePhysicalDeviceProperties2),
-	}
-	C.vkGetPhysicalDeviceProperties2(
-		*(*C.VkPhysicalDevice)(unsafe.Pointer(&physicalDevice)),
-		(*C.VkPhysicalDeviceProperties2)(unsafe.Pointer(&properties)),
-	)
+func GetPhysicalDeviceProperties2(physicalDevice PhysicalDevice, next ...PhysicalDevicePropertiesInterface) PhysicalDeviceProperties2 {
+	var properties PhysicalDeviceProperties2
+	chain(func() {
+		C.vkGetPhysicalDeviceProperties2(
+			*(*C.VkPhysicalDevice)(unsafe.Pointer(&physicalDevice)),
+			(*C.VkPhysicalDeviceProperties2)(unsafe.Pointer(&properties)),
+		)
+	}, append([]PhysicalDevicePropertiesInterface{&properties}, next...)...)
 	return properties
 }
 
@@ -456,9 +478,15 @@ func GetPhysicalDeviceSurfaceCapabilities(physicalDevice PhysicalDevice, surface
 	return capabilities, nil
 }
 
+type PhysicalDeviceFeaturesInterface interface {
+	init(*PhysicalDeviceFeaturesInterface)
+	alloc() (PhysicalDeviceFeaturesInterface, unsafe.Pointer)
+	copy(PhysicalDeviceFeaturesInterface)
+}
+
 type PhysicalDeviceVulkan11Features struct {
 	Type                               StructureType
-	Next                               uintptr
+	Next                               *PhysicalDeviceFeaturesInterface
 	StorageBuffer16BitAccess           bool
 	_                                  [3]byte
 	UniformAndStorageBuffer16BitAccess bool
@@ -485,9 +513,25 @@ type PhysicalDeviceVulkan11Features struct {
 	_                                  [3]byte
 }
 
+func (f *PhysicalDeviceVulkan11Features) init(i *PhysicalDeviceFeaturesInterface) {
+	f.Type = StructureTypePhysicalDeviceVulkan11Features
+	if i != nil {
+		f.Next = i
+	}
+}
+
+func (f *PhysicalDeviceVulkan11Features) alloc() (PhysicalDeviceFeaturesInterface, unsafe.Pointer) {
+	ptr := C.calloc(1, (C.size_t)(unsafe.Sizeof(*f)))
+	return (*PhysicalDeviceVulkan11Features)(ptr), ptr
+}
+
+func (f *PhysicalDeviceVulkan11Features) copy(i PhysicalDeviceFeaturesInterface) {
+	*f = *(i.(*PhysicalDeviceVulkan11Features))
+}
+
 type PhysicalDeviceVulkan12Features struct {
 	Type                                               StructureType
-	Next                                               uintptr
+	Next                                               *PhysicalDeviceFeaturesInterface
 	SamplerMirrorClampToEdge                           bool
 	_                                                  [3]byte
 	DrawIndirectCount                                  bool
@@ -584,28 +628,81 @@ type PhysicalDeviceVulkan12Features struct {
 	_                                                  [3]byte
 }
 
-func GetPhysicalDeviceFeatures(physicalDevice PhysicalDevice) (PhysicalDeviceFeatures2, error) {
-	var features PhysicalDeviceFeatures2
-	var _features11 = (*PhysicalDeviceVulkan11Features)(C.calloc(1, (C.size_t)(unsafe.Sizeof(PhysicalDeviceVulkan11Features{}))))
-	var _features12 = (*PhysicalDeviceVulkan12Features)(C.calloc(1, (C.size_t)(unsafe.Sizeof(PhysicalDeviceVulkan12Features{}))))
-	defer C.free(unsafe.Pointer(_features12))
-	defer C.free(unsafe.Pointer(_features11))
-	features.Type = 1000059000
-	features.Next = uintptr(unsafe.Pointer(_features11))
-	_features11.Type = 49
-	_features11.Next = uintptr(unsafe.Pointer(_features12))
-	_features12.Type = C.VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES // 51
+func (f *PhysicalDeviceVulkan12Features) init(i *PhysicalDeviceFeaturesInterface) {
+	f.Type = StructureTypePhysicalDeviceVulkan12Features
+	if i != nil {
+		f.Next = i
+	}
+}
 
-	C.vkGetPhysicalDeviceFeatures2(
-		(C.VkPhysicalDevice)(unsafe.Pointer(physicalDevice)),
-		(*C.VkPhysicalDeviceFeatures2)(unsafe.Pointer(&features)),
-	)
-	features12 := &PhysicalDeviceVulkan12Features{}
-	*features12 = *_features12
-	features11 := &PhysicalDeviceVulkan11Features{}
-	*features11 = *_features11
-	features11.Next = uintptr(unsafe.Pointer(features12))
-	features.Next = uintptr(unsafe.Pointer(features11))
+func (f *PhysicalDeviceVulkan12Features) alloc() (PhysicalDeviceFeaturesInterface, unsafe.Pointer) {
+	ptr := C.calloc(1, (C.size_t)(unsafe.Sizeof(*f)))
+	return (*PhysicalDeviceVulkan12Features)(ptr), ptr
+}
+
+func (f *PhysicalDeviceVulkan12Features) copy(i PhysicalDeviceFeaturesInterface) {
+	*f = *(i.(*PhysicalDeviceVulkan12Features))
+}
+
+type PhysicalDeviceVulkan13Features struct {
+	Type                                               StructureType
+	Next                                               *PhysicalDeviceFeaturesInterface
+	RobustImageAccess                                  bool
+	_                                                  [3]byte
+	InlineUniformBlock                                 bool
+	_                                                  [3]byte
+	DescriptorBindingInlineUniformBlockUpdateAfterBind bool
+	_                                                  [3]byte
+	PipelineCreationCacheControl                       bool
+	_                                                  [3]byte
+	PrivateData                                        bool
+	_                                                  [3]byte
+	ShaderDemoteToHelperInvocation                     bool
+	_                                                  [3]byte
+	ShaderTerminateInvocation                          bool
+	_                                                  [3]byte
+	SubgroupSizeControl                                bool
+	_                                                  [3]byte
+	ComputeFullSubgroups                               bool
+	_                                                  [3]byte
+	Synchronization2                                   bool
+	_                                                  [3]byte
+	TextureCompressionASTCHDR                          bool
+	_                                                  [3]byte
+	ShaderZeroInitializeWorkgroupMemory                bool
+	_                                                  [3]byte
+	DynamicRendering                                   bool
+	_                                                  [3]byte
+	ShaderIntegerDotProduct                            bool
+	_                                                  [3]byte
+	Maintenance4                                       bool
+	_                                                  [3]byte
+}
+
+func (f *PhysicalDeviceVulkan13Features) init(i *PhysicalDeviceFeaturesInterface) {
+	f.Type = StructureTypePhysicalDeviceVulkan13Features
+	if i != nil {
+		f.Next = i
+	}
+}
+
+func (f *PhysicalDeviceVulkan13Features) alloc() (PhysicalDeviceFeaturesInterface, unsafe.Pointer) {
+	ptr := C.calloc(1, (C.size_t)(unsafe.Sizeof(*f)))
+	return (*PhysicalDeviceVulkan13Features)(ptr), ptr
+}
+
+func (f *PhysicalDeviceVulkan13Features) copy(i PhysicalDeviceFeaturesInterface) {
+	*f = *(i.(*PhysicalDeviceVulkan13Features))
+}
+
+func GetPhysicalDeviceFeatures(physicalDevice PhysicalDevice, next ...PhysicalDeviceFeaturesInterface) (PhysicalDeviceFeatures2, error) {
+	var features PhysicalDeviceFeatures2
+	chain(func() {
+		C.vkGetPhysicalDeviceFeatures2(
+			(C.VkPhysicalDevice)(*(*C.VkPhysicalDevice)(unsafe.Pointer(&physicalDevice))),
+			(*C.VkPhysicalDeviceFeatures2)(unsafe.Pointer(&features)),
+		)
+	}, append([]PhysicalDeviceFeaturesInterface{&features}, next...)...)
 	return features, nil
 }
 

@@ -55,6 +55,12 @@ const (
 	StructureTypeMemoryBarrier
 	StructureTypeLoaderInstanceCreateInfo
 	StructureTypeLoaderDeviceCreateInfo
+	StructureTypePhysicalDeviceVulkan11Features
+	StructureTypePhysicalDeviceVulkan11Properties
+	StructureTypePhysicalDeviceVulkan12Features
+	StructureTypePhysicalDeviceVulkan12Properties
+	StructureTypePhysicalDeviceVulkan13Features
+	StructureTypePhysicalDeviceVulkan13Properties
 )
 
 const (
