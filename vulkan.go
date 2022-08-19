@@ -409,13 +409,15 @@ func chain[chainable interface {
 	for idx := range elems[1:] {
 		defer elems[idx].init(&elems[idx+1])
 	}
-	for idx, e := range elems[1:] {
+	var ip = elems[0]
+	for _, e := range elems[1:] {
 		iface, ptr := e.alloc()
 		defer C.free(ptr)
 		defer e.copy(iface)
-		elems[idx].init((*chainable)(ptr))
+		ip.init((*chainable)(ptr))
+		ip = iface
 	}
-	elems[len(elems)-1].init(nil)
+	ip.init(nil)
 
 	f()
 }
