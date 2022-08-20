@@ -1,7 +1,7 @@
 package vulkan
 
 type SampleCountFlagBits uint32
-type SampleCountFlags SampleCountFlagBits
+type SampleCountFlags = SampleCountFlagBits
 
 const (
 	SampleCount1Bit SampleCountFlagBits = 1 << iota

@@ -27,6 +27,15 @@ func VersionPatch(v Version) uint {
 const (
 	APIVersion10 Version = 1<<22 | 0<<12 | 0
 	APIVersion11 Version = 1<<22 | 1<<12 | 0
+	APIVersion12 Version = 1<<22 | 2<<12 | 0
+	APIVersion13 Version = 1<<22 | 3<<12 | 0
 
 	HeaderVersion = 114
 )
+
+type ConformanceVersion struct {
+	Major    uint8
+	Minor    uint8
+	SubMinor uint8
+	Patch    uint8
+}

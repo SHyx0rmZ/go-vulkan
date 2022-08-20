@@ -573,8 +573,7 @@ func EnumeratePhysicalDevices(instance Instance) ([]PhysicalDevice, error) {
 		(*C.VkPhysicalDevice)(unsafe.Pointer(&devices[0])),
 	)
 	for _, device := range devices {
-		var properties PhysicalDeviceProperties
-		C.vkGetPhysicalDeviceProperties((C.VkPhysicalDevice)(unsafe.Pointer(device)), (*C.VkPhysicalDeviceProperties)(unsafe.Pointer(&properties)))
+		properties := GetPhysicalDeviceProperties2(device)
 		fmt.Println("- physical device found:")
 		name := string(properties.DeviceName[:])
 		if off := bytes.IndexByte(properties.DeviceName[:], 0); off != -1 {

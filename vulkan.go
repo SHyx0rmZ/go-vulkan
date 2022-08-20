@@ -30,6 +30,8 @@ const (
 	MaxMemoryHeaps            = 16
 	MaxExtensionNameSize      = 256
 	MaxDescriptionSize        = 256
+	MaxDriverNameSize         = 256
+	MaxDriverInfoSize         = 256
 )
 
 // 1.1

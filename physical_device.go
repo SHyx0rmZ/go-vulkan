@@ -294,6 +294,310 @@ func (p *PhysicalDeviceProperties2) copy(i PhysicalDevicePropertiesInterface) {
 	*p = *(i.(*PhysicalDeviceProperties2))
 }
 
+type SubgroupFeatureFlags = SubgroupFeatureFlagBits
+type SubgroupFeatureFlagBits uint32
+
+const (
+	SubgroupFeatureBasicBit SubgroupFeatureFlagBits = 1 << iota
+	SubgroupFeatureVoteBit
+	SubgroupFeatureArithmeticBit
+	SubgroupFeatureBallotBit
+	SubgroupFeatureShuffleBit
+	SubgroupFeatureShuffleRelativeBit
+	SubgroupFeatureClusteredBit
+	SubgroupFeatureQuadBit
+	SubgroupFeaturePartitionedBitNV
+)
+
+type PointClippingBehavior uint32
+
+const (
+	PointClippingBehaviorAllClipPanes PointClippingBehavior = iota
+	PointClippingBehaviorUserClipPlanesOnly
+)
+
+type PhysicalDeviceVulkan11Properties struct {
+	Type                              StructureType
+	Next                              *PhysicalDevicePropertiesInterface
+	DeviceUUID                        [UUIDSize]byte
+	DriverUUID                        [UUIDSize]byte
+	DeviceLUID                        [LUIDSize]byte
+	DeviceNodeMask                    uint32
+	DeviceLUIDValid                   bool
+	_                                 [3]byte
+	SubgroupSize                      uint32
+	SubgroupSupportedStages           ShaderStageFlags
+	SubgroupSupportedOperations       SubgroupFeatureFlags
+	SubgroupQuadOperationsInAllStages bool
+	_                                 [3]byte
+	PointClippingBehavior             PointClippingBehavior
+	MaxMultiviewViewCount             uint32
+	MaxMultiviewInstanceIndex         uint32
+	ProtectedNoFault                  bool
+	_                                 [3]byte
+	MaxPerSetDescriptors              uint32
+	MaxMemoryAllocationSize           DeviceSize
+}
+
+func (p *PhysicalDeviceVulkan11Properties) init(i *PhysicalDevicePropertiesInterface) {
+	p.Type = StructureTypePhysicalDeviceVulkan11Properties
+	if i != nil {
+		p.Next = i
+	}
+}
+
+func (p *PhysicalDeviceVulkan11Properties) alloc() (PhysicalDevicePropertiesInterface, unsafe.Pointer) {
+	ptr := C.calloc(1, (C.size_t)(unsafe.Sizeof(*p)))
+	return (*PhysicalDeviceVulkan11Properties)(ptr), ptr
+}
+
+func (p *PhysicalDeviceVulkan11Properties) copy(i PhysicalDevicePropertiesInterface) {
+	*p = *(i.(*PhysicalDeviceVulkan11Properties))
+}
+
+type DriverID uint32
+
+const (
+	DriverIDAMDProprietary DriverID = iota + 1
+	DriverIDAMDOpenSource
+	DriverIDMesaRADV
+	DriverIDNVIDIAProprietary
+	DriverIDIntelProprietaryWindows
+	DriverIDIntelOpenSourceMesa
+	DriverIDImaginationProprietary
+	DriverIDQualcommProprietary
+	DriverIDARMProprietary
+	DriverIDGoogleSwiftShader
+	DriverIDGGPProprietary
+	DriverIDBroadcomProprietary
+	DriverIDMesaLLVMPipe
+	DriverIDMoltenVK
+	DriverIDCoreAVIProprietary
+	DriverIDJuiceProprietary
+	DriverIDVeriSiliconProprietary
+	DriverIDMesaTurnip
+	DriverIDMesaV3DV
+	DriverIDMesaPanVk
+	DriverIDSamsungProprietary
+	DriverIDMesaVenus
+)
+
+type ShaderFloatControlsIndependence uint32
+
+const (
+	ShaderFloatControlsIndependence32BitOnly ShaderFloatControlsIndependence = iota
+	ShaderFloatControlsIndependenceAll
+	ShaderFloatControlsIndependenceNone
+)
+
+type ResolveModeFlags = ResolveModeFlagBits
+type ResolveModeFlagBits uint32
+
+const (
+	ResolveModeNone          ResolveModeFlagBits = 0
+	ResolveModeSampleZeroBit ResolveModeFlagBits = 1 << (iota - 1)
+	ResolveModeAverageBit
+	ResolveModeMinBit
+	ResolveModeMaxBit
+)
+
+type PhysicalDeviceVulkan12Properties struct {
+	Type                                                 StructureType
+	Next                                                 *PhysicalDevicePropertiesInterface
+	DriverID                                             DriverID
+	DriverName                                           [MaxDriverNameSize]byte
+	DriverInfo                                           [MaxDriverInfoSize]byte
+	ConformanceVersion                                   ConformanceVersion
+	DenormBehaviorIndependence                           ShaderFloatControlsIndependence
+	RoundingBehaviorIndependence                         ShaderFloatControlsIndependence
+	ShaderSignedZeroInfNaNPreserveFloat16                bool
+	_                                                    [3]byte
+	ShaderSignedZeroInfNaNPreserveFloat32                bool
+	_                                                    [3]byte
+	ShaderSignedZeroInfNaNPreserveFloat64                bool
+	_                                                    [3]byte
+	ShaderDenormPreserveFloat16                          bool
+	_                                                    [3]byte
+	ShaderDenormPreserveFloat32                          bool
+	_                                                    [3]byte
+	ShaderDenormPreserveFloat64                          bool
+	_                                                    [3]byte
+	ShaderDenormFlushToZeroFloat16                       bool
+	_                                                    [3]byte
+	ShaderDenormFlushToZeroFloat32                       bool
+	_                                                    [3]byte
+	ShaderDenormFlushToZeroFloat64                       bool
+	_                                                    [3]byte
+	ShaderRoundingModeRTEFloat16                         bool
+	_                                                    [3]byte
+	ShaderRoundingModeRTEFloat32                         bool
+	_                                                    [3]byte
+	ShaderRoundingModeRTEFloat64                         bool
+	_                                                    [3]byte
+	ShaderRoundingModeRTZFloat16                         bool
+	_                                                    [3]byte
+	ShaderRoundingModeRTZFloat32                         bool
+	_                                                    [3]byte
+	ShaderRoundingModeRTZFloat64                         bool
+	_                                                    [3]byte
+	MaxUpdateAfterBindingDescriptorsInAllPools           uint32
+	ShaderUniformBufferArrayNonUniformIndexingNative     bool
+	_                                                    [3]byte
+	ShaderSampledImageArrayNonUniformIndexingNative      bool
+	_                                                    [3]byte
+	ShaderStorageBufferArrayNonUniformIndexingNative     bool
+	_                                                    [3]byte
+	ShaderStorageImageArrayNonUniformIndexingNative      bool
+	_                                                    [3]byte
+	ShaderInputAttachmentArrayNonUniformIndexingNative   bool
+	_                                                    [3]byte
+	RobustBufferAccessUpdateAfterBind                    bool
+	_                                                    [3]byte
+	QuadDivergentImplicitLOD                             bool
+	_                                                    [3]byte
+	MaxPerStageDescriptorUpdateAfterBindSamplers         uint32
+	MaxPerStageDescriptorUpdateAfterBindUniformBuffers   uint32
+	MaxPerStageDescriptorUpdateAfterBindStorageBuffers   uint32
+	MaxPerStageDescriptorUpdateAfterBindSampledImages    uint32
+	MaxPerStageDescriptorUpdateAfterBindStorageImages    uint32
+	MaxPerStageDescriptorUpdateAfterBindInputAttachments uint32
+	MaxPerStageDescriptorUpdateAfterBindResources        uint32
+	MaxDescriptorSetUpdateAfterBindSamplers              uint32
+	MaxDescriptorSetUpdateAfterBindUniformBuffers        uint32
+	MaxDescriptorSetUpdateAfterBindUniformBuffersDynamic uint32
+	MaxDescriptorSetUpdateAfterBindStorageBuffers        uint32
+	MaxDescriptorSetUpdateAfterBindStorageBuffersDynamic uint32
+	MaxDescriptorSetUpdateAfterBindSampledImages         uint32
+	MaxDescriptorSetUpdateAfterBindStorageImages         uint32
+	MaxDescriptorSetUpdateAfterBindInputAttachments      uint32
+	SupportedDepthResolveModes                           ResolveModeFlags
+	SupportedStencilResolveModes                         ResolveModeFlags
+	IndependentResolveNone                               bool
+	_                                                    [3]byte
+	IndependentResolve                                   bool
+	_                                                    [3]byte
+	FilterMinmaxSingleComponentFormats                   bool
+	_                                                    [3]byte
+	FilterMimmaxImageComponentMapping                    bool
+	_                                                    [3]byte
+	MaxTimelineSemaphoreValueDifference                  uint64
+	FramebufferIntegerColorSampleCounts                  SampleCountFlags
+}
+
+func (p *PhysicalDeviceVulkan12Properties) init(i *PhysicalDevicePropertiesInterface) {
+	p.Type = StructureTypePhysicalDeviceVulkan12Properties
+	if i != nil {
+		p.Next = i
+	}
+}
+
+func (p *PhysicalDeviceVulkan12Properties) alloc() (PhysicalDevicePropertiesInterface, unsafe.Pointer) {
+	ptr := C.calloc(1, (C.size_t)(unsafe.Sizeof(*p)))
+	return (*PhysicalDeviceVulkan12Properties)(ptr), ptr
+}
+
+func (p *PhysicalDeviceVulkan12Properties) copy(i PhysicalDevicePropertiesInterface) {
+	*p = *(i.(*PhysicalDeviceVulkan12Properties))
+}
+
+type PhysicalDeviceVulkan13Properties struct {
+	Type                                                                          StructureType
+	Next                                                                          *PhysicalDevicePropertiesInterface
+	MinSubgroupSize                                                               uint32
+	MaxSubgroupSize                                                               uint32
+	MaxComputeWorkgroupSubgroups                                                  uint32
+	RequiredSubgroupSizeStages                                                    ShaderStageFlags
+	MaxInlineUniformBlockSize                                                     uint32
+	MaxPerStageDescriptorInlineUniformBlocks                                      uint32
+	MaxPerStageDescriptorUpdateAfterBindInlineUniformBlocks                       uint32
+	MaxDescriptorSetInlineUniformBlocks                                           uint32
+	MaxDescriptorSetUpdateAfterBindInlineUniformBlocks                            uint32
+	MaxInlineUniformTotalSize                                                     uint32
+	IntegerDotProduct8BitUnsignedAccelerated                                      bool
+	_                                                                             [3]byte
+	IntegerDotProduct8BitSignedAccelerated                                        bool
+	_                                                                             [3]byte
+	IntegerDotProduct8BitMixedSignednessAccelerated                               bool
+	_                                                                             [3]byte
+	IntegerDotProduct4x8BitPackedUnsignedAccelerated                              bool
+	_                                                                             [3]byte
+	IntegerDotProduct4x8BitPackedSignedAccelerated                                bool
+	_                                                                             [3]byte
+	IntegerDotProduct4x8BitPackedMixedSignednessAccelerated                       bool
+	_                                                                             [3]byte
+	IntegerDotProduct16BitUnsignedAccelerated                                     bool
+	_                                                                             [3]byte
+	IntegerDotProduct16BitSignedAccelerated                                       bool
+	_                                                                             [3]byte
+	IntegerDotProduct16BitMixedSignednessAccelerated                              bool
+	_                                                                             [3]byte
+	IntegerDotProduct32BitUnsignedAccelerated                                     bool
+	_                                                                             [3]byte
+	IntegerDotProduct32BitSignedAccelerated                                       bool
+	_                                                                             [3]byte
+	IntegerDotProduct32BitMixedSignednessAccelerated                              bool
+	_                                                                             [3]byte
+	IntegerDotProduct64BitUnsignedAccelerated                                     bool
+	_                                                                             [3]byte
+	IntegerDotProduct64BitSignedAccelerated                                       bool
+	_                                                                             [3]byte
+	IntegerDotProduct64BitMixedSignednessAccelerated                              bool
+	_                                                                             [3]byte
+	IntegerDotProductAccumulatingSaturating8BitUnsignedAccelerated                bool
+	_                                                                             [3]byte
+	IntegerDotProductAccumulatingSaturating8BitSignedAccelerated                  bool
+	_                                                                             [3]byte
+	IntegerDotProductAccumulatingSaturating8BitMixedSignednessAccelerated         bool
+	_                                                                             [3]byte
+	IntegerDotProductAccumulatingSaturating4x8BitPackedUnsignedAccelerated        bool
+	_                                                                             [3]byte
+	IntegerDotProductAccumulatingSaturating4x8BitPackedSignedAccelerated          bool
+	_                                                                             [3]byte
+	IntegerDotProductAccumulatingSaturating4x8BitPackedMixedSignednessAccelerated bool
+	_                                                                             [3]byte
+	IntegerDotProductAccumulatingSaturating16BitUnsignedAccelerated               bool
+	_                                                                             [3]byte
+	IntegerDotProductAccumulatingSaturating16BitSignedAccelerated                 bool
+	_                                                                             [3]byte
+	IntegerDotProductAccumulatingSaturating16BitMixedSignednessAccelerated        bool
+	_                                                                             [3]byte
+	IntegerDotProductAccumulatingSaturating32BitUnsignedAccelerated               bool
+	_                                                                             [3]byte
+	IntegerDotProductAccumulatingSaturating32BitSignedAccelerated                 bool
+	_                                                                             [3]byte
+	IntegerDotProductAccumulatingSaturating32BitMixedSignednessAccelerated        bool
+	_                                                                             [3]byte
+	IntegerDotProductAccumulatingSaturating64BitUnsignedAccelerated               bool
+	_                                                                             [3]byte
+	IntegerDotProductAccumulatingSaturating64BitSignedAccelerated                 bool
+	_                                                                             [3]byte
+	IntegerDotProductAccumulatingSaturating64BitMixedSignednessAccelerated        bool
+	_                                                                             [3]byte
+	StorageTexelBufferOffsetAlignmentBytes                                        DeviceSize
+	StorageTexelBufferOffsetSingleTexelAlignment                                  bool
+	_                                                                             [3]byte
+	UniformTexelBufferOffsetAlignmentBytes                                        DeviceSize
+	UniformTexelBufferOffsetSingleTexelAlignment                                  bool
+	_                                                                             [3]byte
+	MaxBufferSize                                                                 DeviceSize
+}
+
+func (p *PhysicalDeviceVulkan13Properties) init(i *PhysicalDevicePropertiesInterface) {
+	p.Type = StructureTypePhysicalDeviceVulkan13Properties
+	if i != nil {
+		p.Next = i
+	}
+}
+
+func (p *PhysicalDeviceVulkan13Properties) alloc() (PhysicalDevicePropertiesInterface, unsafe.Pointer) {
+	ptr := C.calloc(1, (C.size_t)(unsafe.Sizeof(*p)))
+	return (*PhysicalDeviceVulkan13Properties)(ptr), ptr
+}
+
+func (p *PhysicalDeviceVulkan13Properties) copy(i PhysicalDevicePropertiesInterface) {
+	*p = *(i.(*PhysicalDeviceVulkan13Properties))
+}
+
 type PhysicalDeviceName [MaxPhysicalDeviceNameSize]byte
 
 func (x PhysicalDeviceName) String() string {
