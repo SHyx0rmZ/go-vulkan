@@ -205,11 +205,40 @@ func EnumerateDeviceExtensionProperties(physicalDevice PhysicalDevice, layerName
 	return properties[:count:count], nil
 }
 
-func CreateDevice(physicalDevice PhysicalDevice, info DeviceCreateInfo, allocator *AllocationCallbacks) (Device, error) {
+type DeviceCreateInfoInterface interface {
+	init(i *DeviceCreateInfoInterface)
+	alloc() (DeviceCreateInfoInterface, unsafe.Pointer)
+	copy(i DeviceCreateInfoInterface)
+}
+
+type PhysicalDeviceProtectedMemoryFeatures struct {
+	Type            StructureType
+	Next            *DeviceCreateInfoInterface
+	ProtectedMemory bool
+	_               [3]byte
+}
+
+func (f *PhysicalDeviceProtectedMemoryFeatures) init(i *DeviceCreateInfoInterface) {
+	f.Type = StructureTypePhysicalDeviceProtectedMemoryFeatures
+	if i != nil {
+		f.Next = i
+	}
+}
+
+func (f *PhysicalDeviceProtectedMemoryFeatures) alloc() (DeviceCreateInfoInterface, unsafe.Pointer) {
+	ptr := C.calloc(1, C.size_t(unsafe.Sizeof(*f)))
+	return (*PhysicalDeviceProtectedMemoryFeatures)(ptr), ptr
+}
+
+func (f *PhysicalDeviceProtectedMemoryFeatures) copy(i DeviceCreateInfoInterface) {
+	*f = *(i.(*PhysicalDeviceProtectedMemoryFeatures))
+}
+
+func CreateDevice(physicalDevice PhysicalDevice, info DeviceCreateInfo, allocator *AllocationCallbacks, next ...DeviceCreateInfoInterface) (Device, error) {
 	var device Device
 	_info := deviceCreateInfo{
 		Type:                  info.Type,
-		Next:                  info.Next,
+		Next:                  (*DeviceCreateInfoInterface)(unsafe.Pointer(info.Next)),
 		Flags:                 info.Flags,
 		QueueCreateInfoCount:  uint32(len(info.QueueCreateInfos)),
 		EnabledLayerCount:     uint32(len(info.EnabledLayers)),
@@ -252,12 +281,15 @@ func CreateDevice(physicalDevice PhysicalDevice, info DeviceCreateInfo, allocato
 	}
 	defer fillNames(info.EnabledLayers, &_info.EnabledLayerCount, &_info.EnabledLayerNames).Free()
 	defer fillNames(info.EnabledExtensions, &_info.EnabledExtensionCount, &_info.EnabledExtensionNames).Free()
-	result := Result(C.vkCreateDevice(
-		(C.VkPhysicalDevice)(unsafe.Pointer(physicalDevice)),
-		(*C.VkDeviceCreateInfo)(unsafe.Pointer(&_info)),
-		(*C.VkAllocationCallbacks)(unsafe.Pointer(allocator)),
-		(*C.VkDevice)(unsafe.Pointer(&device)),
-	))
+	var result Result
+	chain(func() {
+		result = Result(C.vkCreateDevice(
+			(C.VkPhysicalDevice)(unsafe.Pointer(physicalDevice)),
+			(*C.VkDeviceCreateInfo)(unsafe.Pointer(&_info)),
+			(*C.VkAllocationCallbacks)(unsafe.Pointer(allocator)),
+			(*C.VkDevice)(unsafe.Pointer(&device)),
+		))
+	}, append([]DeviceCreateInfoInterface{&_info}, next...)...)
 	if result != Success {
 		return NullHandle, result
 	}

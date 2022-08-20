@@ -398,6 +398,14 @@ type structureHeader struct {
 	Next unsafe.Pointer
 }
 
+func NextChainInterface[chainable interface {
+	init(*chainable)
+	alloc() (chainable, unsafe.Pointer)
+	copy(chainable)
+}](v chainable) *chainable {
+	return &v
+}
+
 func chain[chainable interface {
 	init(*chainable)
 	alloc() (chainable, unsafe.Pointer)
@@ -414,6 +422,7 @@ func chain[chainable interface {
 	var ip = elems[0]
 	for _, e := range elems[1:] {
 		iface, ptr := e.alloc()
+		iface.copy(e) // todo: honor next chains
 		defer C.free(ptr)
 		defer e.copy(iface)
 		ip.init((*chainable)(ptr))

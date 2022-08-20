@@ -449,7 +449,7 @@ type PhysicalDeviceFeatures2 struct {
 
 type DeviceCreateInfo struct {
 	Type              StructureType
-	Next              uintptr
+	Next              *DeviceCreateInfoInterface
 	Flags             DeviceCreateFlags
 	QueueCreateInfos  []DeviceQueueCreateInfo
 	EnabledLayers     []string
@@ -459,7 +459,7 @@ type DeviceCreateInfo struct {
 
 type deviceCreateInfo struct {
 	Type                  StructureType
-	Next                  uintptr
+	Next                  *DeviceCreateInfoInterface
 	Flags                 DeviceCreateFlags
 	QueueCreateInfoCount  uint32
 	QueueCreateInfos      *deviceQueueCreateInfo
@@ -468,6 +468,22 @@ type deviceCreateInfo struct {
 	EnabledExtensionCount uint32
 	EnabledExtensionNames *C.char
 	EnabledFeatures       *PhysicalDeviceFeatures
+}
+
+func (info *deviceCreateInfo) init(i *DeviceCreateInfoInterface) {
+	info.Type = StructureTypeDeviceCreateInfo
+	if i != nil {
+		info.Next = i
+	}
+}
+
+func (info *deviceCreateInfo) alloc() (DeviceCreateInfoInterface, unsafe.Pointer) {
+	ptr := C.calloc(1, (C.size_t)(unsafe.Sizeof(*info)))
+	return (*deviceCreateInfo)(ptr), ptr
+}
+
+func (info *deviceCreateInfo) copy(i DeviceCreateInfoInterface) {
+	*info = *(i.(*deviceCreateInfo))
 }
 
 type DeviceQueueCreateInfo struct {
