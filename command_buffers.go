@@ -115,7 +115,14 @@ func AllocateCommandBuffers(device Device, allocateInfo CommandBufferAllocateInf
 }
 
 func ResetCommandBuffer(commandBuffer CommandBuffer, flags CommandBufferResetFlags) error {
-	return _not_implemented
+	result := Result(C.vkResetCommandBuffer(
+		*(*C.VkCommandBuffer)(unsafe.Pointer(&commandBuffer)),
+		(C.VkCommandBufferResetFlags)(flags),
+	))
+	if result != Success {
+		return result
+	}
+	return nil
 }
 
 func FreeCommandBuffers(device Device, commandPool CommandPool, commandBuffers []CommandBuffer) {
