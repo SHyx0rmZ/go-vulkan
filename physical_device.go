@@ -1097,3 +1097,28 @@ func GetPhysicalDeviceFormatProperties(physicalDevice PhysicalDevice, format For
 	)
 	return properties
 }
+
+type ImageFormatProperties struct {
+	MaxExtent       Extent3D
+	MaxMipLevels    uint32
+	MaxArrayLayers  uint32
+	SampleCounts    SampleCountFlags
+	MaxResourceSize DeviceSize
+}
+
+func GetPhysicalDeviceImageFormatProperties(physicalDevice PhysicalDevice, format Format, typ ImageType, tiling ImageTiling, usage ImageUsageFlags, flags ImageCreateFlags) (ImageFormatProperties, error) {
+	var properties ImageFormatProperties
+	result := Result(C.vkGetPhysicalDeviceImageFormatProperties(
+		(C.VkPhysicalDevice)(unsafe.Pointer(physicalDevice)),
+		(C.VkFormat)(format),
+		(C.VkImageType)(typ),
+		(C.VkImageTiling)(tiling),
+		(C.VkImageUsageFlags)(usage),
+		(C.VkImageCreateFlags)(flags),
+		(*C.VkImageFormatProperties)(unsafe.Pointer(&properties)),
+	))
+	if result != Success {
+		return ImageFormatProperties{}, result
+	}
+	return properties, nil
+}
