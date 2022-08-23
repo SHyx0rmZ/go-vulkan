@@ -258,7 +258,16 @@ func CmdBindVertexBuffers(commandBuffer CommandBuffer, firstBinding uint32, buff
 	)
 }
 
-func CmdBindIndexBuffer(commandBuffer CommandBuffer, buffer Buffer, offset DeviceSize, indexType uint32) {
+type IndexType uint32
+
+const (
+	IndexTypeUint16 IndexType = iota
+	IndexTypeUint32
+	IndexTypeNone  IndexType = 1000165000
+	IndexTypeUint8 IndexType = 1000265000
+)
+
+func CmdBindIndexBuffer(commandBuffer CommandBuffer, buffer Buffer, offset DeviceSize, indexType IndexType) {
 	C.vkCmdBindIndexBuffer(
 		(C.VkCommandBuffer)(unsafe.Pointer(commandBuffer)),
 		(C.VkBuffer)(unsafe.Pointer(buffer)),
