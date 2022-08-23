@@ -481,11 +481,9 @@ func BindBufferMemory(device Device, buffer Buffer, memory DeviceMemory, offset 
 }
 
 func Memcpy(dst unsafe.Pointer, src unsafe.Pointer, size uintptr) {
-	C.memcpy(
-		dst,
-		src,
-		C.size_t(size),
-	)
+	dstS := unsafe.Slice((*byte)(dst), size)
+	srcS := unsafe.Slice((*byte)(src), size)
+	copy(dstS, srcS)
 }
 
 func Memset(dst unsafe.Pointer, val byte, size uintptr) {
