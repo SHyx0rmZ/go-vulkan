@@ -95,3 +95,14 @@ func CmdClearAttachments(commandBuffer CommandBuffer, clearAttachments []ClearAt
 		(*C.VkClearRect)(unsafe.Pointer(&rects[0])),
 	)
 }
+
+func CmdPushConstants(commandBuffer CommandBuffer, layout PipelineLayout, stageFlags ShaderStageFlags, offset, size uint32, values unsafe.Pointer) {
+	C.vkCmdPushConstants(
+		*(*C.VkCommandBuffer)(unsafe.Pointer(&commandBuffer)),
+		*(*C.VkPipelineLayout)(unsafe.Pointer(&layout)),
+		(C.VkShaderStageFlags)(stageFlags),
+		(C.uint32_t)(offset),
+		(C.uint32_t)(size),
+		values,
+	)
+}
