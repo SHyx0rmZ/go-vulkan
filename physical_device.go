@@ -253,16 +253,19 @@ func CreateDevice(physicalDevice PhysicalDevice, info DeviceCreateInfo, allocato
 		}
 		p := C.malloc(C.size_t(len(info.QueueCreateInfos))*C.size_t(sizeOfDeviceQueueCreateInfo) + C.size_t(l))
 		var o uintptr
-		for _, info := range info.QueueCreateInfos {
-			*(*deviceQueueCreateInfo)(unsafe.Add(p, o)) = deviceQueueCreateInfo{
+		qci := unsafe.Slice((*deviceQueueCreateInfo)(p), len(info.QueueCreateInfos))
+		for i, info := range info.QueueCreateInfos {
+			qci[i] = deviceQueueCreateInfo{
 				Type:             info.Type,
 				Next:             info.Next,
 				Flags:            info.Flags,
 				QueueFamilyIndex: info.QueueFamilyIndex,
 				QueueCount:       uint32(len(info.QueuePriorities)),
-				QueuePriorities:  (*float32)(unsafe.Add(p, o+sizeOfDeviceQueueCreateInfo)),
 			}
 			o += sizeOfDeviceQueueCreateInfo
+		}
+		for i, info := range info.QueueCreateInfos {
+			qci[i].QueuePriorities = (*float32)(unsafe.Add(p, o))
 			for _, priority := range info.QueuePriorities {
 				*(*float32)(unsafe.Add(p, o)) = priority
 				o += sizeOfFloat32

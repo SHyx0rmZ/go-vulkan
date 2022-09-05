@@ -202,10 +202,7 @@ func (info *BufferCreateInfo) C(_info *bufferCreateInfo) freeFunc {
 		QueueFamilyIndices:    nil,
 	}
 	if _info.QueueFamilyIndexCount > 0 {
-		p := C.malloc(C.size_t(uintptr(_info.QueueFamilyIndexCount) * unsafe.Sizeof(uint32(0))))
-		for i, index := range info.QueueFamilyIndices {
-			*(*uint32)(unsafe.Pointer(uintptr(p) + uintptr(i)*unsafe.Sizeof(uint32(0)))) = index
-		}
+		p := copySliceToC(&_info.QueueFamilyIndices, info.QueueFamilyIndices)
 		return freeFunc(func() {
 			C.free(p)
 		})
