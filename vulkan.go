@@ -456,6 +456,8 @@ func copySliceToC[T any](ptr **T, slice []T) unsafe.Pointer {
 	var t T
 	p := C.malloc(C.size_t(uintptr(len(slice)) * unsafe.Sizeof(t)))
 	copy(unsafe.Slice((*T)(p), len(slice)), slice)
-	*ptr = (*T)(p)
+	if ptr != nil {
+		*ptr = (*T)(p)
+	}
 	return p
 }
