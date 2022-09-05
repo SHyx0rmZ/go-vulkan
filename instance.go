@@ -3,8 +3,6 @@ package vulkan
 // #cgo linux freebsd darwin LDFLAGS: -lvulkan
 // #cgo windows LDFLAGS: -lvulkan-1
 // #include <stdlib.h>
-// #define VK_KHR_SURFACE 1
-// #define VK_KHR_SWAPCHAIN 1
 // #include <vulkan/vulkan.h>
 // void (*_f)(VkPhysicalDevice device, VkPhysicalDeviceProperties2KHR *properties);
 // void doInvoke(VkPhysicalDevice device, VkPhysicalDeviceProperties2KHR *properties) {
@@ -425,19 +423,19 @@ type PhysicalDeviceFeatures struct {
 	_                                       [3]byte
 }
 
-func (f *PhysicalDeviceFeatures2) init(i *PhysicalDeviceFeaturesInterface) {
+func (f *PhysicalDeviceFeatures2) pdfiInit(i *PhysicalDeviceFeaturesInterface) {
 	f.Type = StructureTypePhysicalDeviceFeatures2
 	if i != nil {
 		f.Next = i
 	}
 }
 
-func (f *PhysicalDeviceFeatures2) alloc() (PhysicalDeviceFeaturesInterface, unsafe.Pointer) {
+func (f *PhysicalDeviceFeatures2) pdfiAlloc() (PhysicalDeviceFeaturesInterface, unsafe.Pointer) {
 	ptr := C.calloc(1, (C.size_t)(unsafe.Sizeof(*f)))
 	return (*PhysicalDeviceFeatures2)(ptr), ptr
 }
 
-func (f *PhysicalDeviceFeatures2) copy(i PhysicalDeviceFeaturesInterface) {
+func (f *PhysicalDeviceFeatures2) pdfiCopy(i PhysicalDeviceFeaturesInterface) {
 	*f = *(i.(*PhysicalDeviceFeatures2))
 }
 
@@ -470,19 +468,19 @@ type deviceCreateInfo struct {
 	EnabledFeatures       *PhysicalDeviceFeatures
 }
 
-func (info *deviceCreateInfo) init(i *DeviceCreateInfoInterface) {
+func (info *deviceCreateInfo) dciiInit(i *DeviceCreateInfoInterface) {
 	info.Type = StructureTypeDeviceCreateInfo
 	if i != nil {
 		info.Next = i
 	}
 }
 
-func (info *deviceCreateInfo) alloc() (DeviceCreateInfoInterface, unsafe.Pointer) {
+func (info *deviceCreateInfo) dciiAlloc() (DeviceCreateInfoInterface, unsafe.Pointer) {
 	ptr := C.calloc(1, (C.size_t)(unsafe.Sizeof(*info)))
 	return (*deviceCreateInfo)(ptr), ptr
 }
 
-func (info *deviceCreateInfo) copy(i DeviceCreateInfoInterface) {
+func (info *deviceCreateInfo) dciiCopy(i DeviceCreateInfoInterface) {
 	*info = *(i.(*deviceCreateInfo))
 }
 

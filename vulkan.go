@@ -411,24 +411,39 @@ func chain[chainable interface {
 	alloc() (chainable, unsafe.Pointer)
 	copy(chainable)
 }](f func(), elems ...chainable) {
+	chain2[chainable, func(chainable, *chainable), func(chainable) (chainable, unsafe.Pointer), func(chainable, chainable)](chainable.init, chainable.alloc, chainable.copy, f, elems...)
+}
+
+func chain2[
+	chainable interface{},
+	initFunc func(chainable, *chainable),
+	allocFunc func(chainable) (chainable, unsafe.Pointer),
+	copyFunc func(chainable, chainable),
+](
+	init initFunc,
+	alloc allocFunc,
+	copy copyFunc,
+	f func(),
+	elems ...chainable,
+) {
 	if len(elems) == 0 {
 		f()
 		return
 	}
 
 	for idx := range elems[1:] {
-		defer elems[idx].init(&elems[idx+1])
+		defer init(elems[idx], &elems[idx+1])
 	}
 	var ip = elems[0]
 	for _, e := range elems[1:] {
-		iface, ptr := e.alloc()
-		iface.copy(e) // todo: honor next chains
+		iface, ptr := alloc(e)
+		copy(iface, e) // todo: honor next chains
 		defer C.free(ptr)
-		defer e.copy(iface)
-		ip.init((*chainable)(ptr))
+		defer copy(e, iface)
+		init(ip, (*chainable)(ptr))
 		ip = iface
 	}
-	ip.init(nil)
+	init(ip, nil)
 
 	f()
 }
