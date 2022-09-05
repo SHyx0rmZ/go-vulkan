@@ -115,7 +115,7 @@ type SubmitInfo2 struct {
 
 type A = SubmitInfo
 
-func (info SubmitInfo2) C(_info *submitInfo2) {
+func (info SubmitInfo2) C(_info *submitInfo2) freeFunc {
 	*_info = submitInfo2{
 		Type:                     info.Type,
 		Next:                     info.Next,
@@ -124,14 +124,20 @@ func (info SubmitInfo2) C(_info *submitInfo2) {
 		CommandBufferInfoCount:   uint32(len(info.CommandBufferInfos)),
 		SignalSemaphoreInfoCount: uint32(len(info.SignalSemaphoreInfos)),
 	}
+	var ps []unsafe.Pointer
 	if len(info.WaitSemaphoreInfos) > 0 {
-		_info.WaitSemaphoreInfoPtr = &info.WaitSemaphoreInfos[0]
+		ps = append(ps, copySliceToC(&_info.WaitSemaphoreInfoPtr, info.WaitSemaphoreInfos))
 	}
 	if len(info.CommandBufferInfos) > 0 {
-		_info.CommandBufferInfoPtr = &info.CommandBufferInfos[0]
+		ps = append(ps, copySliceToC(&_info.CommandBufferInfoPtr, info.CommandBufferInfos))
 	}
 	if len(info.SignalSemaphoreInfos) > 0 {
-		_info.SignalSemaphoreInfoPtr = &info.SignalSemaphoreInfos[0]
+		ps = append(ps, copySliceToC(&_info.SignalSemaphoreInfoPtr, info.SignalSemaphoreInfos))
+	}
+	return func() {
+		for i := len(ps); i > 0; i-- {
+			C.free(ps[i-1])
+		}
 	}
 }
 
@@ -385,10 +391,15 @@ func CmdWriteTimestamp2(commandBuffer CommandBuffer, stage PipelineStageFlags2, 
 	)
 }
 
-func QueueSubmit2(queue Queue, submits []SubmitInfo2, fence Fence) error {
+func QueueSubmit2(queue Queue, submits []SubmitInfo2, fence Fence) (freeFunc, error) {
 	var submitPtr unsafe.Pointer
+	var fs []freeFunc
 	if len(submits) > 0 {
-		submitPtr = unsafe.Pointer(&submits[0])
+		submitPtr = C.malloc(C.size_t(uintptr(len(submits)) * unsafe.Sizeof(submitInfo2{})))
+		_submits := unsafe.Slice((*submitInfo2)(submitPtr), len(submits))
+		for i := range submits {
+			fs = append(fs, submits[i].C(&_submits[i]))
+		}
 	}
 	result := Result(C.vkQueueSubmit2(
 		*(*C.VkQueue)(unsafe.Pointer(&queue)),
@@ -397,9 +408,17 @@ func QueueSubmit2(queue Queue, submits []SubmitInfo2, fence Fence) error {
 		*(*C.VkFence)(unsafe.Pointer(&fence)),
 	))
 	if result != Success {
-		return result
+		return func() {
+			for _, f := range fs {
+				f()
+			}
+		}, result
 	}
-	return nil
+	return func() {
+		for _, f := range fs {
+			f()
+		}
+	}, nil
 }
 
 //func CmdWriteBufferMarker2AMD(commandBuffer CommandBuffer, stage PipelineStageFlags2, dstBuffer Buffer, dstOffset DeviceSize, marker uint32) {
