@@ -11,6 +11,8 @@ import (
 
 var _not_implemented = errors.New("not implemented")
 
+type QueryPool uintptr
+
 type DeviceSize uint64
 
 const (
@@ -446,4 +448,14 @@ func chain2[
 	init(ip, nil)
 
 	f()
+}
+
+// copySliceToC creates a new copy of slice backed by C memory and sets *ptr
+// to its address. It also returns the address, so it can be freed later.
+func copySliceToC[T any](ptr **T, slice []T) unsafe.Pointer {
+	var t T
+	p := C.malloc(C.size_t(uintptr(len(slice)) * unsafe.Sizeof(t)))
+	copy(unsafe.Slice((*T)(p), len(slice)), slice)
+	*ptr = (*T)(p)
+	return p
 }
