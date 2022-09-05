@@ -828,7 +828,7 @@ type PhysicalDeviceFeaturesInterface interface {
 
 type PhysicalDeviceVulkan11Features struct {
 	Type                               StructureType
-	Next                               *PhysicalDeviceFeaturesInterface
+	Next                               *any
 	StorageBuffer16BitAccess           bool
 	_                                  [3]byte
 	UniformAndStorageBuffer16BitAccess bool
@@ -855,16 +855,32 @@ type PhysicalDeviceVulkan11Features struct {
 	_                                  [3]byte
 }
 
+func (f *PhysicalDeviceVulkan11Features) dciiInit(i *DeviceCreateInfoInterface) {
+	f.Type = StructureTypePhysicalDeviceVulkan11Features
+	if i != nil {
+		f.Next = (*any)(unsafe.Pointer(i))
+	}
+}
+
 func (f *PhysicalDeviceVulkan11Features) pdfiInit(i *PhysicalDeviceFeaturesInterface) {
 	f.Type = StructureTypePhysicalDeviceVulkan11Features
 	if i != nil {
-		f.Next = i
+		f.Next = (*any)(unsafe.Pointer(i))
 	}
+}
+
+func (f *PhysicalDeviceVulkan11Features) dciiAlloc() (DeviceCreateInfoInterface, unsafe.Pointer) {
+	ptr := C.calloc(1, (C.size_t)(unsafe.Sizeof(*f)))
+	return (*PhysicalDeviceVulkan11Features)(ptr), ptr
 }
 
 func (f *PhysicalDeviceVulkan11Features) pdfiAlloc() (PhysicalDeviceFeaturesInterface, unsafe.Pointer) {
 	ptr := C.calloc(1, (C.size_t)(unsafe.Sizeof(*f)))
 	return (*PhysicalDeviceVulkan11Features)(ptr), ptr
+}
+
+func (f *PhysicalDeviceVulkan11Features) dciiCopy(i DeviceCreateInfoInterface) {
+	*f = *(i.(*PhysicalDeviceVulkan11Features))
 }
 
 func (f *PhysicalDeviceVulkan11Features) pdfiCopy(i PhysicalDeviceFeaturesInterface) {
@@ -873,7 +889,7 @@ func (f *PhysicalDeviceVulkan11Features) pdfiCopy(i PhysicalDeviceFeaturesInterf
 
 type PhysicalDeviceVulkan12Features struct {
 	Type                                               StructureType
-	Next                                               *PhysicalDeviceFeaturesInterface
+	Next                                               *any
 	SamplerMirrorClampToEdge                           bool
 	_                                                  [3]byte
 	DrawIndirectCount                                  bool
@@ -970,16 +986,32 @@ type PhysicalDeviceVulkan12Features struct {
 	_                                                  [3]byte
 }
 
+func (f *PhysicalDeviceVulkan12Features) dciiInit(i *DeviceCreateInfoInterface) {
+	f.Type = StructureTypePhysicalDeviceVulkan12Features
+	if i != nil {
+		f.Next = (*any)(unsafe.Pointer(i))
+	}
+}
+
 func (f *PhysicalDeviceVulkan12Features) pdfiInit(i *PhysicalDeviceFeaturesInterface) {
 	f.Type = StructureTypePhysicalDeviceVulkan12Features
 	if i != nil {
-		f.Next = i
+		f.Next = (*any)(unsafe.Pointer(i))
 	}
+}
+
+func (f *PhysicalDeviceVulkan12Features) dciiAlloc() (DeviceCreateInfoInterface, unsafe.Pointer) {
+	ptr := C.calloc(1, (C.size_t)(unsafe.Sizeof(*f)))
+	return (*PhysicalDeviceVulkan12Features)(ptr), ptr
 }
 
 func (f *PhysicalDeviceVulkan12Features) pdfiAlloc() (PhysicalDeviceFeaturesInterface, unsafe.Pointer) {
 	ptr := C.calloc(1, (C.size_t)(unsafe.Sizeof(*f)))
 	return (*PhysicalDeviceVulkan12Features)(ptr), ptr
+}
+
+func (f *PhysicalDeviceVulkan12Features) dciiCopy(i DeviceCreateInfoInterface) {
+	*f = *(i.(*PhysicalDeviceVulkan12Features))
 }
 
 func (f *PhysicalDeviceVulkan12Features) pdfiCopy(i PhysicalDeviceFeaturesInterface) {
@@ -988,7 +1020,7 @@ func (f *PhysicalDeviceVulkan12Features) pdfiCopy(i PhysicalDeviceFeaturesInterf
 
 type PhysicalDeviceVulkan13Features struct {
 	Type                                               StructureType
-	Next                                               *PhysicalDeviceFeaturesInterface
+	Next                                               *any
 	RobustImageAccess                                  bool
 	_                                                  [3]byte
 	InlineUniformBlock                                 bool
@@ -1021,16 +1053,32 @@ type PhysicalDeviceVulkan13Features struct {
 	_                                                  [3]byte
 }
 
+func (f *PhysicalDeviceVulkan13Features) dciiInit(i *DeviceCreateInfoInterface) {
+	f.Type = StructureTypePhysicalDeviceVulkan13Features
+	if i != nil {
+		f.Next = (*any)(unsafe.Pointer(i))
+	}
+}
+
 func (f *PhysicalDeviceVulkan13Features) pdfiInit(i *PhysicalDeviceFeaturesInterface) {
 	f.Type = StructureTypePhysicalDeviceVulkan13Features
 	if i != nil {
-		f.Next = i
+		f.Next = (*any)(unsafe.Pointer(i))
 	}
+}
+
+func (f *PhysicalDeviceVulkan13Features) dciiAlloc() (DeviceCreateInfoInterface, unsafe.Pointer) {
+	ptr := C.calloc(1, (C.size_t)(unsafe.Sizeof(*f)))
+	return (*PhysicalDeviceVulkan13Features)(ptr), ptr
 }
 
 func (f *PhysicalDeviceVulkan13Features) pdfiAlloc() (PhysicalDeviceFeaturesInterface, unsafe.Pointer) {
 	ptr := C.calloc(1, (C.size_t)(unsafe.Sizeof(*f)))
 	return (*PhysicalDeviceVulkan13Features)(ptr), ptr
+}
+
+func (f *PhysicalDeviceVulkan13Features) dciiCopy(i DeviceCreateInfoInterface) {
+	*f = *(i.(*PhysicalDeviceVulkan13Features))
 }
 
 func (f *PhysicalDeviceVulkan13Features) pdfiCopy(i PhysicalDeviceFeaturesInterface) {
