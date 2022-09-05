@@ -484,6 +484,79 @@ func (info *deviceCreateInfo) dciiCopy(i DeviceCreateInfoInterface) {
 	*info = *(i.(*deviceCreateInfo))
 }
 
+type DeviceGroupDeviceCreateInfo struct {
+	Type            StructureType
+	Next            *DeviceCreateInfoInterface
+	PhysicalDevices []PhysicalDevice
+
+	free freeFunc
+}
+
+func (info *DeviceGroupDeviceCreateInfo) C(_info *deviceGroupDeviceCreateInfo) freeFunc {
+	var physicalDevicePtr unsafe.Pointer
+	if len(info.PhysicalDevices) > 0 {
+		physicalDevicePtr = copySliceToC(nil, info.PhysicalDevices)
+	}
+	*_info = deviceGroupDeviceCreateInfo{
+		Type:                info.Type,
+		Next:                info.Next,
+		PhysicalDeviceCount: uint32(len(info.PhysicalDevices)),
+		PhysicalDevicePtr:   (*PhysicalDevice)(physicalDevicePtr),
+	}
+	f := func() {
+		C.free(physicalDevicePtr)
+	}
+	info.free = f
+	return f
+}
+
+func (info *DeviceGroupDeviceCreateInfo) dciiInit(i *DeviceCreateInfoInterface) {
+	info.Type = StructureTypeDeviceGroupDeviceCreateInfo
+	if i != nil {
+		info.Next = i
+	}
+}
+
+func (info *DeviceGroupDeviceCreateInfo) dciiAlloc() (DeviceCreateInfoInterface, unsafe.Pointer) {
+	ptr := C.calloc(1, (C.size_t)(unsafe.Sizeof(deviceGroupDeviceCreateInfo{})))
+	return (*deviceGroupDeviceCreateInfo)(ptr), ptr
+}
+
+func (info *DeviceGroupDeviceCreateInfo) dciiCopy(i DeviceCreateInfoInterface) {
+	_info := i.(*deviceGroupDeviceCreateInfo)
+	physicalDevices := make([]PhysicalDevice, _info.PhysicalDeviceCount)
+	copy(physicalDevices, unsafe.Slice(_info.PhysicalDevicePtr, _info.PhysicalDeviceCount))
+	defer info.free()
+	*info = DeviceGroupDeviceCreateInfo{
+		Type:            _info.Type,
+		Next:            _info.Next,
+		PhysicalDevices: physicalDevices,
+	}
+}
+
+type deviceGroupDeviceCreateInfo struct {
+	Type                StructureType
+	Next                *DeviceCreateInfoInterface
+	PhysicalDeviceCount uint32
+	PhysicalDevicePtr   *PhysicalDevice
+}
+
+func (info *deviceGroupDeviceCreateInfo) dciiInit(i *DeviceCreateInfoInterface) {
+	info.Type = StructureTypeDeviceGroupDeviceCreateInfo
+	if i != nil {
+		info.Next = i
+	}
+}
+
+func (info *deviceGroupDeviceCreateInfo) dciiAlloc() (DeviceCreateInfoInterface, unsafe.Pointer) {
+	ptr := C.calloc(1, (C.size_t)(unsafe.Sizeof(*info)))
+	return (*deviceGroupDeviceCreateInfo)(ptr), ptr
+}
+
+func (info *deviceGroupDeviceCreateInfo) dciiCopy(i DeviceCreateInfoInterface) {
+	i.(*DeviceGroupDeviceCreateInfo).C(info)
+}
+
 type DeviceQueueCreateInfo struct {
 	Type             StructureType
 	Next             uintptr
