@@ -1037,6 +1037,45 @@ func (f *PhysicalDeviceVulkan13Features) pdfiCopy(i PhysicalDeviceFeaturesInterf
 	*f = *(i.(*PhysicalDeviceVulkan13Features))
 }
 
+type PhysicalDeviceShaderDrawParametersFeatures struct {
+	Type                 StructureType
+	Next                 *any
+	ShaderDrawParameters bool
+	_                    [3]byte
+}
+
+func (f *PhysicalDeviceShaderDrawParametersFeatures) dciiInit(i *DeviceCreateInfoInterface) {
+	f.Type = StructureTypePhysicalDeviceShaderDrawParametersFeatures
+	if i != nil {
+		f.Next = (*any)(unsafe.Pointer(i))
+	}
+}
+
+func (f *PhysicalDeviceShaderDrawParametersFeatures) pdfiInit(i *PhysicalDeviceFeaturesInterface) {
+	f.Type = StructureTypePhysicalDeviceShaderDrawParametersFeatures
+	if i != nil {
+		f.Next = (*any)(unsafe.Pointer(i))
+	}
+}
+
+func (f *PhysicalDeviceShaderDrawParametersFeatures) dciiAlloc() (DeviceCreateInfoInterface, unsafe.Pointer) {
+	ptr := C.calloc(1, (C.size_t)(unsafe.Sizeof(*f)))
+	return (*PhysicalDeviceShaderDrawParametersFeatures)(ptr), ptr
+}
+
+func (f *PhysicalDeviceShaderDrawParametersFeatures) pdfiAlloc() (PhysicalDeviceFeaturesInterface, unsafe.Pointer) {
+	ptr := C.calloc(1, (C.size_t)(unsafe.Sizeof(*f)))
+	return (*PhysicalDeviceShaderDrawParametersFeatures)(ptr), ptr
+}
+
+func (f *PhysicalDeviceShaderDrawParametersFeatures) dciiCopy(i DeviceCreateInfoInterface) {
+	*f = *(i.(*PhysicalDeviceShaderDrawParametersFeatures))
+}
+
+func (f *PhysicalDeviceShaderDrawParametersFeatures) pdfiCopy(i PhysicalDeviceFeaturesInterface) {
+	*f = *(i.(*PhysicalDeviceShaderDrawParametersFeatures))
+}
+
 func GetPhysicalDeviceFeatures(physicalDevice PhysicalDevice, next ...PhysicalDeviceFeaturesInterface) (PhysicalDeviceFeatures2, error) {
 	var features PhysicalDeviceFeatures2
 	chain2(
