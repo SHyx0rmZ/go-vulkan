@@ -27,6 +27,50 @@ func CmdDrawIndexed(commandBuffer CommandBuffer, indexCount, instanceCount, firs
 	)
 }
 
+func CmdDrawIndirect(commandBuffer CommandBuffer, buffer Buffer, offset DeviceSize, drawCount, stride uint32) {
+	C.vkCmdDrawIndirect(
+		*(*C.VkCommandBuffer)(unsafe.Pointer(&commandBuffer)),
+		*(*C.VkBuffer)(unsafe.Pointer(&buffer)),
+		(C.VkDeviceSize)(offset),
+		(C.uint32_t)(drawCount),
+		(C.uint32_t)(stride),
+	)
+}
+
+func CmdDrawIndexedIndirect(commandBuffer CommandBuffer, buffer Buffer, offset DeviceSize, drawCount, stride uint32) {
+	C.vkCmdDrawIndexedIndirect(
+		*(*C.VkCommandBuffer)(unsafe.Pointer(&commandBuffer)),
+		*(*C.VkBuffer)(unsafe.Pointer(&buffer)),
+		(C.VkDeviceSize)(offset),
+		(C.uint32_t)(drawCount),
+		(C.uint32_t)(stride),
+	)
+}
+
+func CmdDrawIndirectCount(commandBuffer CommandBuffer, buffer Buffer, offset DeviceSize, countBuffer Buffer, countBufferOffset DeviceSize, maxDrawCount, stride uint32) {
+	C.vkCmdDrawIndirectCount(
+		*(*C.VkCommandBuffer)(unsafe.Pointer(&commandBuffer)),
+		*(*C.VkBuffer)(unsafe.Pointer(&buffer)),
+		(C.VkDeviceSize)(offset),
+		*(*C.VkBuffer)(unsafe.Pointer(&countBuffer)),
+		(C.VkDeviceSize)(countBufferOffset),
+		(C.uint32_t)(maxDrawCount),
+		(C.uint32_t)(stride),
+	)
+}
+
+func CmdDrawIndexedIndirectCount(commandBuffer CommandBuffer, buffer Buffer, offset DeviceSize, countBuffer Buffer, countBufferOffset DeviceSize, maxDrawCount, stride uint32) {
+	C.vkCmdDrawIndexedIndirectCount(
+		*(*C.VkCommandBuffer)(unsafe.Pointer(&commandBuffer)),
+		*(*C.VkBuffer)(unsafe.Pointer(&buffer)),
+		(C.VkDeviceSize)(offset),
+		*(*C.VkBuffer)(unsafe.Pointer(&countBuffer)),
+		(C.VkDeviceSize)(countBufferOffset),
+		(C.uint32_t)(maxDrawCount),
+		(C.uint32_t)(stride),
+	)
+}
+
 func CmdDispatch(commandBuffer CommandBuffer, groupCountX, groupCountY, groupCountZ uint32) {
 	C.vkCmdDispatch(
 		(C.VkCommandBuffer)(unsafe.Pointer(commandBuffer)),
