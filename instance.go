@@ -683,7 +683,8 @@ func EnumeratePhysicalDevices(instance Instance) ([]PhysicalDevice, error) {
 		(*C.VkPhysicalDevice)(unsafe.Pointer(&devices[0])),
 	)
 	for _, device := range devices {
-		properties := GetPhysicalDeviceProperties2(device)
+		var pp12 PhysicalDeviceVulkan12Properties
+		properties := GetPhysicalDeviceProperties2(device, &pp12)
 		fmt.Println("- physical device found:")
 		name := string(properties.DeviceName[:])
 		if off := bytes.IndexByte(properties.DeviceName[:], 0); off != -1 {
@@ -708,8 +709,13 @@ func EnumeratePhysicalDevices(instance Instance) ([]PhysicalDevice, error) {
 			properties.PipelineCacheUUID[14],
 			properties.PipelineCacheUUID[15],
 		)
+		driver := string(pp12.DriverName[:])
+		if off := bytes.IndexByte(pp12.DriverName[:], 0); off != -1 {
+			driver = string(pp12.DriverName[:off])
+		}
 		fmt.Println("  name:", name)
 		fmt.Println("  uuid:", uuid)
+		fmt.Println("  drvr:", driver)
 	}
 	return devices, nil
 }
