@@ -28,22 +28,22 @@ func DestroyDevice(device Device, allocator *AllocationCallbacks) {
 func CreateSwapchain(device Device, info SwapchainCreateInfo, surface Surface, allocator *AllocationCallbacks) (Swapchain, error) {
 	var swapchain Swapchain
 	info = SwapchainCreateInfo{
-		Type:                  StructureTypeSwapchainCreateInfoKHR,
+		Type:                  info.Type,
 		Surface:               surface,
 		MinImageCount:         info.MinImageCount,
 		Format:                info.Format,
 		PresentMode:           info.PresentMode,
 		ImageColorSpace:       info.ImageColorSpace,
 		ImageExtent:           info.ImageExtent,
-		ImageArrayLayers:      1,
-		ImageUsage:            ImageUsageColorAttachmentBit,
-		ImageSharingMode:      SharingModeExclusive,
-		QueueFamilyIndexCount: 0,
-		QueueFamilyIndices:    nil,
-		PreTransform:          1,
+		ImageArrayLayers:      info.ImageArrayLayers,
+		ImageUsage:            info.ImageUsage,
+		ImageSharingMode:      info.ImageSharingMode,
+		QueueFamilyIndexCount: info.QueueFamilyIndexCount,
+		QueueFamilyIndices:    info.QueueFamilyIndices,
+		PreTransform:          info.PreTransform,
 		CompositeAlpha:        info.CompositeAlpha,
-		Clipped:               true,
-		OldSwapchain:          NullHandle,
+		Clipped:               info.Clipped,
+		OldSwapchain:          info.OldSwapchain,
 	}
 	//p := C.malloc(4)
 	//*(*uint32)(p) = 0
