@@ -55,16 +55,16 @@ const (
 	QueryPipelineStatisticComputeShaderInvocations
 )
 
-type CommandBufferInheritanceInfo struct{
-	Type StructureType
-	Next uintptr
-	RenderPass RenderPass
-	Subpass uint32
-	Framebuffer Framebuffer
+type CommandBufferInheritanceInfo struct {
+	Type                 StructureType
+	Next                 uintptr
+	RenderPass           RenderPass
+	Subpass              uint32
+	Framebuffer          Framebuffer
 	OcclusionQueryEnable bool
-	_ [3]byte
-	QueryFlags QueryControlFlags
-	PipelineStatistics QueryPipelineStatisticFlags
+	_                    [3]byte
+	QueryFlags           QueryControlFlags
+	PipelineStatistics   QueryPipelineStatisticFlags
 }
 
 type SubmitInfo struct {

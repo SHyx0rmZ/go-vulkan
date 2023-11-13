@@ -50,15 +50,15 @@ type MemoryBarrier struct {
 }
 
 type BufferMemoryBarrier struct {
-	Type StructureType
-	Next uintptr
-	SrcAccessMask AccessFlags
-	DstAccessMask AccessFlags
+	Type                StructureType
+	Next                uintptr
+	SrcAccessMask       AccessFlags
+	DstAccessMask       AccessFlags
 	SrcFamilyQueueIndex uint32
 	DstFamilyQueueIndex uint32
-	Buffer Buffer
-	Offset DeviceSize
-	Size DeviceSize
+	Buffer              Buffer
+	Offset              DeviceSize
+	Size                DeviceSize
 }
 
 type ImageMemoryBarrier struct {
