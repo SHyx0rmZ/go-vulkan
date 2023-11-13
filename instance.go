@@ -13,11 +13,13 @@ import (
 	"bytes"
 	"fmt"
 	"unsafe"
+
+	"code.witches.io/go/vulkan/ext"
 )
 
-type CreateInfo struct {
-	Type              StructureType
-	Next              *CreateInfo
+type InstanceCreateInfo struct {
+	Type              StructureType // todo: get rid of this, it can automatically be added by the C conversion
+	Next              ext.InstanceCreateInfoNext
 	Flags             C.VkInstanceCreateFlags
 	ApplicationInfo   *ApplicationInfo
 	EnabledLayers     []string
@@ -26,7 +28,7 @@ type CreateInfo struct {
 
 type createInfo struct {
 	Type                  StructureType
-	Next                  *createInfo
+	Next                  unsafe.Pointer
 	Flags                 C.VkInstanceCreateFlags
 	ApplicationInfo       *applicationInfo
 	EnabledLayerCount     uint32
@@ -125,7 +127,22 @@ func EnumerateInstanceVersion() (Version, error) {
 	return version, nil
 }
 
-func CreateInstance(info CreateInfo, allocator *AllocationCallbacks) (Instance, error) {
+type instanceCreateInfoNext interface {
+	instanceCreateInfoNext() (unsafe.Pointer, freeFunc)
+}
+
+type DebugReportCallbackCreateInfoEXT struct {
+}
+
+type DebugUtilsMessengerCreateInfoEXT struct{}
+
+type DirectDriverLoadingListLUNARG struct{}
+
+type ExportMetalObjectCreateInfoEXT struct{}
+
+type ValidationFlagsEXT struct{} // deprecated
+
+func CreateInstance(info InstanceCreateInfo, allocator *AllocationCallbacks) (Instance, error) {
 	var count uint32
 	result := C.vkEnumerateInstanceLayerProperties((*C.uint32_t)(unsafe.Pointer(&count)), nil)
 	if result != C.VK_SUCCESS {
@@ -147,9 +164,16 @@ func CreateInstance(info CreateInfo, allocator *AllocationCallbacks) (Instance, 
 			description = string(layer.Description[:off])
 		}
 
-		fmt.Println(name)
+		fmt.Println(name, Version(layer.ImplementationVersion))
 		fmt.Println(description)
 		fmt.Println()
+	}
+
+	var nextPtr unsafe.Pointer
+	if info.Next != nil {
+		var nextPtrFree freeFunc
+		nextPtr, nextPtrFree = info.Next.C()
+		defer nextPtrFree()
 	}
 
 	_appInfo := (*applicationInfo)(C.malloc(C.size_t(unsafe.Sizeof(applicationInfo{}))))
@@ -157,8 +181,8 @@ func CreateInstance(info CreateInfo, allocator *AllocationCallbacks) (Instance, 
 	defer info.ApplicationInfo.C(_appInfo).Free()
 	var instance Instance
 	_info := createInfo{
-		Type: info.Type,
-		//Next:                  nil, // todo
+		Type:                  info.Type,
+		Next:                  nextPtr, // todo
 		Flags:                 info.Flags,
 		ApplicationInfo:       _appInfo,
 		EnabledLayerCount:     uint32(len(info.EnabledLayers)),
@@ -168,7 +192,6 @@ func CreateInstance(info CreateInfo, allocator *AllocationCallbacks) (Instance, 
 	}
 	defer fillNames(info.EnabledLayers, &_info.EnabledLayerCount, &_info.EnabledLayerNames).Free()
 	defer fillNames(info.EnabledExtensions, &_info.EnabledExtensionCount, &_info.EnabledExtensionNames).Free()
-	_info.Next = (*createInfo)(unsafe.Pointer(uintptr(0)))
 	result = C.vkCreateInstance(
 		(*C.VkInstanceCreateInfo)(unsafe.Pointer(&_info)),
 		(*C.VkAllocationCallbacks)(allocator),
