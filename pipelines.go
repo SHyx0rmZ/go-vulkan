@@ -4,7 +4,6 @@ package vulkan
 // #include <stdlib.h>
 import "C"
 import (
-	"fmt"
 	"unsafe"
 )
 
@@ -90,7 +89,6 @@ func (info *PipelineShaderStageCreateInfo) C(_info *pipelineShaderStageCreateInf
 		Module: info.Module,
 		Name:   C.CString(info.Name),
 	}
-	fmt.Printf("%q @ %#v\n", info.Name, _info.Name)
 	if len(info.SpecializationInfo.Data) > 0 || len(info.SpecializationInfo.MapEntries) > 0 {
 		panic("ikohasdoa ")
 	}
