@@ -12,6 +12,7 @@ import "C"
 import (
 	"bytes"
 	"fmt"
+	"strings"
 	"unsafe"
 
 	"code.witches.io/go/vulkan/ext"
@@ -198,6 +199,44 @@ func CreateInstance(info InstanceCreateInfo, allocator *AllocationCallbacks) (In
 		(*C.VkInstance)(unsafe.Pointer(&instance)),
 	)
 	if result != C.VK_SUCCESS {
+		if result == C.VK_ERROR_LAYER_NOT_PRESENT {
+			layers, err := EnumerateInstanceLayerProperties()
+			if err != nil {
+				return 0, Result(result)
+			}
+			requestedLayers := make(map[string]struct{}, len(info.EnabledLayers))
+			for _, layer := range info.EnabledLayers {
+				requestedLayers[layer] = struct{}{}
+			}
+			for _, layer := range layers {
+				delete(requestedLayers, layer.LayerName.String())
+			}
+			missingLayers := make([]string, 0, len(requestedLayers))
+			for layer := range requestedLayers {
+				missingLayers = append(missingLayers, layer)
+			}
+			return 0, fmt.Errorf("%w: %s", Result(result), strings.Join(missingLayers, ", "))
+		}
+		if result == C.VK_ERROR_EXTENSION_NOT_PRESENT {
+			requestedExtensions := make(map[string]struct{}, len(info.EnabledExtensions))
+			for _, extension := range info.EnabledExtensions {
+				requestedExtensions[extension] = struct{}{}
+			}
+			for _, layer := range append([]string{""}, info.EnabledLayers...) {
+				extensions, err := EnumerateInstanceExtensionProperties(layer)
+				if err != nil {
+					return 0, Result(result)
+				}
+				for _, extension := range extensions {
+					delete(requestedExtensions, extension.ExtensionName.String())
+				}
+			}
+			missingExtensions := make([]string, 0, len(requestedExtensions))
+			for extension := range requestedExtensions {
+				missingExtensions = append(missingExtensions, extension)
+			}
+			return 0, fmt.Errorf("%w: %s", Result(result), strings.Join(missingExtensions, ", "))
+		}
 		return 0, Result(result)
 	}
 	return instance, nil
