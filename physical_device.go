@@ -1173,10 +1173,10 @@ const (
 	FormatFeatureTransferDstBit
 	FormatFeatureSampledImageFilterMinMaxBit
 	FormatFeatureMidpointChromaSamplesBit
-	FormatFeatureSampledImageYCBCRConversionLinearFilterBit
-	FormatFeatureSampledImageYCBCRConversionSeparateReconstructionFilterBit
-	FormatFeatureSampledImageYCBCRConversionChromeReconstructionExplicitBit
-	FormatFeatureSampledImageYCBCRConversionChromaReconstructionExplicitForceableBit
+	FormatFeatureSampledImageYCbCbConversionLinearFilterBit
+	FormatFeatureSampledImageYCbCbConversionSeparateReconstructionFilterBit
+	FormatFeatureSampledImageYCbCbConversionChromeReconstructionExplicitBit
+	FormatFeatureSampledImageYCbCbConversionChromaReconstructionExplicitForceableBit
 	FormatFeatureDisjointBit
 	FormatFeatureCositedChromaSamplesBit
 )
@@ -1191,6 +1191,56 @@ const (
 	FormatFeatureFragmentShadingRateAttachmentBitKhr
 )
 
+type FormatFeatureFlags2 = FormatFeatureFlagBits2
+
+type FormatFeatureFlagBits2 uint64
+
+const (
+	FormatFeature2SampledImageBit FormatFeatureFlagBits2 = 1 << iota
+	FormatFeatures2StorageImageBit
+	FormatFeatures2StorageImageAtomicBit
+	FormatFeatures2UniformTexelBufferBit
+	FormatFeatures2StorageTexelBufferBit
+	FormatFeatures2StorageTexelBufferAtomicBit
+	FormatFeatures2VertexBufferBit
+	FormatFeatures2ColorAttachmentBit
+	FormatFeatures2ColorAttachmentBlendBit
+	FormatFeatures2DepthStencilAttachmentBit
+	FormatFeatures2BlitSrcBit
+	FormatFeatures2BlitDstBit
+	FormatFeatures2SampledImageFilterLinearBit
+	FormatFeatures2SampledImageFilterCubicBit
+	FormatFeatures2TransferSrcBit
+	FormatFeatures2TransferDstBit
+	FormatFeatures2SampledImageFilterMinMaxBit
+	FormatFeatures2MidpointChromaSamplesBit
+	FormatFeatures2SampledImageYCbCrConversionLinearFilterBit
+	FormatFeatures2SampledImageYCbCrConversionSeparateReconstructionFilterBit
+	FormatFeatures2SampledImageYCbCrConversionChromaReconstructionExplicitBit
+	FormatFeatures2SampledImageYCbCrConversionChromaReconstructionExplicitForceableBit
+	FormatFeatures2DisjointBit
+	FormatFeatures2CositedChromaSamplesBit
+	FormatFeatures2FragmentDensityMapBitEXT
+	FormatFeatures2VideoDecodeOutputBitKHR
+	FormatFeatures2VideoDecodeDBPBBitKHR
+	FormatFeatures2VideoEncodeInputBitKHR
+	FormatFeatures2VideoEncodeDPBBitKHR
+	FormatFeatures2AccelerationStructureVertexBufferBitKHR
+	FormatFeatures2FragmentShadingRateAttachmentBitKHR
+	FormatFeatures2StorageReadWithoutFormatBit
+	FormatFeatures2StorageWriteWithoutFormatBit
+	FormatFeatures2SampledImageDepthComparisonBit
+	FormatFeatures2WeightImageBitQCOM
+	FormatFeatures2WeightSampledImageBitQCOM
+	FormatFeatures2BlockMatchingBitQCOM
+	FormatFeatures2BoxFilterSampledBitQCOM
+	FormatFeatures2LinearColorAttachmentBitNV
+	FormatFeatures2OpticalFlowImageBitNV FormatFeatureFlagBits2 = 1 << (iota + 1)
+	FormatFeatures2OpticalFlowVectorBitNV
+	FormatFeatures2OpticalFlowCostBitNV
+	FormatFeatures2HostImageTransferBitEXT FormatFeatureFlagBits2 = 1 << (iota + 1)
+)
+
 func GetPhysicalDeviceFormatProperties(physicalDevice PhysicalDevice, format Format) (properties FormatProperties) {
 	C.vkGetPhysicalDeviceFormatProperties(
 		(C.VkPhysicalDevice)(unsafe.Pointer(physicalDevice)),
@@ -1198,6 +1248,80 @@ func GetPhysicalDeviceFormatProperties(physicalDevice PhysicalDevice, format For
 		(*C.VkFormatProperties)(unsafe.Pointer(&properties)),
 	)
 	return properties
+}
+
+type FormatProperties2 struct {
+	Type             StructureType
+	Next             *PhysicalDeviceFormatPropertiesInterface
+	FormatProperties FormatProperties
+}
+
+func (p *FormatProperties2) pdfpiInit(i *PhysicalDeviceFormatPropertiesInterface) {
+	p.Type = StructureTypeFormatProperties2
+	if i != nil {
+		p.Next = i
+	}
+}
+
+func (p *FormatProperties2) pdfpiAlloc() (PhysicalDeviceFormatPropertiesInterface, unsafe.Pointer) {
+	ptr := C.calloc(1, (C.size_t)(unsafe.Sizeof(*p)))
+	return (*FormatProperties2)(ptr), ptr
+}
+
+func (p *FormatProperties2) pdfpiCopy(i PhysicalDeviceFormatPropertiesInterface) {
+	*p = *(i.(*FormatProperties2))
+}
+
+type FormatProperties3 struct {
+	Type                  StructureType
+	Next                  *PhysicalDeviceFormatPropertiesInterface
+	LinearTilingFeatures  FormatFeatureFlags2
+	OptimalTilingFeatures FormatFeatureFlags2
+	BufferFeatures        FormatFeatureFlags2
+}
+
+func (p *FormatProperties3) pdfpiInit(i *PhysicalDeviceFormatPropertiesInterface) {
+	p.Type = StructureTypeFormatProperties3
+	if i != nil {
+		p.Next = i
+	}
+}
+
+func (p *FormatProperties3) pdfpiAlloc() (PhysicalDeviceFormatPropertiesInterface, unsafe.Pointer) {
+	ptr := C.calloc(1, (C.size_t)(unsafe.Sizeof(*p)))
+	return (*FormatProperties3)(ptr), ptr
+}
+
+func (p *FormatProperties3) pdfpiCopy(i PhysicalDeviceFormatPropertiesInterface) {
+	*p = *(i.(*FormatProperties3))
+}
+
+type (
+	p *FormatProperties3
+)
+
+func GetPhysicalDeviceFormatProperties2(physicalDevice PhysicalDevice, format Format, next ...PhysicalDeviceFormatPropertiesInterface) FormatProperties2 {
+	var properties FormatProperties2
+	chain2(
+		PhysicalDeviceFormatPropertiesInterface.pdfpiInit,
+		PhysicalDeviceFormatPropertiesInterface.pdfpiAlloc,
+		PhysicalDeviceFormatPropertiesInterface.pdfpiCopy,
+		func() {
+			C.vkGetPhysicalDeviceFormatProperties2(
+				*(*C.VkPhysicalDevice)(unsafe.Pointer(&physicalDevice)),
+				(C.VkFormat)(format),
+				(*C.VkFormatProperties2)(unsafe.Pointer(&properties)),
+			)
+		},
+		append([]PhysicalDeviceFormatPropertiesInterface{&properties}, next...)...,
+	)
+	return properties
+}
+
+type PhysicalDeviceFormatPropertiesInterface interface {
+	pdfpiInit(*PhysicalDeviceFormatPropertiesInterface)
+	pdfpiAlloc() (PhysicalDeviceFormatPropertiesInterface, unsafe.Pointer)
+	pdfpiCopy(PhysicalDeviceFormatPropertiesInterface)
 }
 
 type ImageFormatProperties struct {
