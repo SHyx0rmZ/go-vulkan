@@ -115,8 +115,3 @@ func CmdCopyBuffer2(commandBuffer CommandBuffer, info CopyBufferInfo2) {
 		(*C.VkCopyBufferInfo2)(unsafe.Pointer(&_info)),
 	)
 }
-
-const (
-	StructureTypeCopyBufferInfo2 StructureType = 1000337000
-	StructureTypeBufferCopy2     StructureType = 1000337006
-)

@@ -327,21 +327,13 @@ const (
 )
 
 const (
-	AccessNone                                          AccessFlagBits        = 0
-	EventCreateDeviceOnlyBit                            EventCreateFlags      = 1
-	ImageLayoutReadOnlyOptimal                          ImageLayout           = 1000314000
-	ImageLayoutAttachmentOptimal                        ImageLayout           = 1000314001
-	PipelineStageNone                                   PipelineStageFlagBits = 0
-	StructureTypeBufferMemoryBarrier2                   StructureType         = 1000314001
-	StructureTypeCommandBufferSubmitInfo                StructureType         = 1000314006
-	StructureTypeDependencyInfo                         StructureType         = 1000314003
-	StructureTypeImageMemoryBarrier2                    StructureType         = 1000314002
-	StructureTypeMemoryBarrier2                         StructureType         = 1000314000
-	StructureTypePhysicalDeviceSynchronization2Features StructureType         = 1000314007
-	StructureTypeSemaphoreSubmitInfo                    StructureType         = 1000314005
-	StructureTypeSubmitInfo2                            StructureType         = 1000314004
-	StructureTypeQueueFamilyCheckpointProperties2NV     StructureType         = 1000314008
-	StructureTypeCheckpointData2NV                      StructureType         = 1000314009
+	AccessNone                                      AccessFlagBits        = 0
+	EventCreateDeviceOnlyBit                        EventCreateFlags      = 1
+	ImageLayoutReadOnlyOptimal                      ImageLayout           = 1000314000
+	ImageLayoutAttachmentOptimal                    ImageLayout           = 1000314001
+	PipelineStageNone                               PipelineStageFlagBits = 0
+	StructureTypeQueueFamilyCheckpointProperties2NV StructureType         = 1000314008
+	StructureTypeCheckpointData2NV                  StructureType         = 1000314009
 )
 
 func CmdPipelineBarrier2(commandBuffer CommandBuffer, info DependencyInfo) {

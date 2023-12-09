@@ -59,8 +59,6 @@ const (
 	StructureTypePhysicalDeviceVulkan11Properties
 	StructureTypePhysicalDeviceVulkan12Features
 	StructureTypePhysicalDeviceVulkan12Properties
-	StructureTypePhysicalDeviceVulkan13Features
-	StructureTypePhysicalDeviceVulkan13Properties
 )
 
 const (
@@ -454,4 +452,59 @@ const (
 	StructureTypePhysicalDeviceMaintenance3PropertiesKHR            = StructureTypePhysicalDeviceMaintenance3Properties
 	StructureTypeDescriptorSetLayoutSupportKHR                      = StructureTypeDescriptorSetLayoutSupport
 	StructureTypePhysicalDeviceBufferAddressFeaturesEXT             = StructureTypePhysicalDeviceBufferDeviceAddressFeaturesEXT
+)
+
+const (
+	StructureTypePhysicalDeviceVulkan13Features                       StructureType = 53
+	StructureTypePhysicalDeviceVulkan13Properties                     StructureType = 54
+	StructureTypePipelineCreationFeedbackCreateInfo                   StructureType = 1000192000
+	StructureTypePhysicalDeviceShaderTerminateInvocationFeatures      StructureType = 1000215000
+	StructureTypePhysicalDeviceToolProperties                         StructureType = 1000245000
+	StructureTypePhysicalDeviceShaderDemoteToHelperInvocationFeatures StructureType = 1000276000
+	StructureTypePhysicalDevicePrivateDataFeatures                    StructureType = 1000295000
+	StructureTypeDevicePrivateDataCreateInfo                          StructureType = 1000295001
+	StructureTypePrivateDataSlotCreateInfo                            StructureType = 1000295002
+	StructureTypePhysicalDevicePipelineCreationCacheControlFeatures   StructureType = 1000297000
+	StructureTypeMemoryBarrier2                                       StructureType = 1000314000
+	StructureTypeBufferMemoryBarrier2                                 StructureType = 1000314001
+	StructureTypeImageMemoryBarrier2                                  StructureType = 1000314002
+	StructureTypeDependencyInfo                                       StructureType = 1000314003
+	StructureTypeSubmitInfo2                                          StructureType = 1000314004
+	StructureTypeSemaphoreSubmitInfo                                  StructureType = 1000314005
+	StructureTypeCommandBufferSubmitInfo                              StructureType = 1000314006
+	StructureTypePhysicalDeviceSynchronization2Features               StructureType = 1000314007
+	StructureTypePhysicalDeviceZeroInitializeWorkgroupMemoryFeatures  StructureType = 1000325000
+	StructureTypePhysicalDeviceImageRobustnessFeatures                StructureType = 1000335000
+	StructureTypeCopyBufferInfo2                                      StructureType = 1000337000
+	StructureTypeCopyImageInfo2                                       StructureType = 1000337001
+	StructureTypeCopyBufferToImageInfo2                               StructureType = 1000337002
+	StructureTypeCopyImageToBufferInfo2                               StructureType = 1000337003
+	StructureTypeBlitImageInfo2                                       StructureType = 1000337004
+	StructureTypeResolveImageInfo2                                    StructureType = 1000337005
+	StructureTypeBufferCopy2                                          StructureType = 1000337006
+	StructureTypeImageCopy2                                           StructureType = 1000337007
+	StructureTypeImageBlit2                                           StructureType = 1000337008
+	StructureTypeBufferImageCopy2                                     StructureType = 1000337009
+	StructureTypeImageResolve2                                        StructureType = 1000337010
+	StructureTypePhysicalDeviceSubgroupSizeControlProperties          StructureType = 1000225000
+	StructureTypePipelineShaderStageRequiredSubgroupSizeCreateInfo    StructureType = 1000225001
+	StructureTypePhysicalDeviceSubgroupSizeControlFeatures            StructureType = 1000225002
+	StructureTypePhysicalDeviceInlineUniformBlockFeatures             StructureType = 1000138000
+	StructureTypePhysicalDeviceInlineUniformBlockProperties           StructureType = 1000138001
+	StructureTypeWriteDescriptorSetInlineUniformBlock                 StructureType = 1000138002
+	StructureTypeDescriptorPoolInlineUniformBlockCreateInfo           StructureType = 1000138003
+	StructureTypePhysicalDeviceTextureCompressionAstcHdrFeatures      StructureType = 1000066000
+	StructureTypeRenderingInfo                                        StructureType = 1000044000
+	StructureTypeRenderingAttachmentInfo                              StructureType = 1000044001
+	StructureTypePipelineRenderingCreateInfo                          StructureType = 1000044002
+	StructureTypePhysicalDeviceDynamicRenderingFeatures               StructureType = 1000044003
+	StructureTypeCommandBufferInheritanceRenderingInfo                StructureType = 1000044004
+	StructureTypePhysicalDeviceShaderIntegerDotProductFeatures        StructureType = 1000280000
+	StructureTypePhysicalDeviceShaderIntegerDotProductProperties      StructureType = 1000280001
+	StructureTypePhysicalDeviceTexelBufferAlignmentProperties         StructureType = 1000281001
+	StructureTypeFormatProperties3                                    StructureType = 1000360000
+	StructureTypePhysicalDeviceMaintenance4Features                   StructureType = 1000413000
+	StructureTypePhysicalDeviceMaintenance4Properties                 StructureType = 1000413001
+	StructureTypeDeviceBufferMemoryRequirements                       StructureType = 1000413002
+	StructureTypeDeviceImageMemoryRequirements                        StructureType = 1000413003
 )
