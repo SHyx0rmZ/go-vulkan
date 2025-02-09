@@ -249,13 +249,13 @@ func (i Instance) Destroy() {
 }
 
 func DestroyInstance(instance Instance) {
-	C.vkDestroyInstance((C.VkInstance)(unsafe.Pointer(instance)), nil)
+	C.vkDestroyInstance(*(*C.VkInstance)(unsafe.Pointer(&instance)), nil)
 }
 
 type Surface uintptr
 
 func (i Instance) DestroySurface(surface Surface) {
-	C.vkDestroySurfaceKHR((C.VkInstance)(unsafe.Pointer(i)), (C.VkSurfaceKHR)(unsafe.Pointer(surface)), nil)
+	C.vkDestroySurfaceKHR(*(*C.VkInstance)(unsafe.Pointer(&i)), *(*C.VkSurfaceKHR)(unsafe.Pointer(&surface)), nil)
 }
 
 type PhysicalDevice uintptr
@@ -327,7 +327,7 @@ func (info *PresentInfo) C(_info *presentInfo) freeFunc {
 		p := C.malloc(C.size_t(uintptr(_info.WaitSemaphoreCount) * unsafe.Sizeof(Semaphore(0))))
 		ps = append(ps, p)
 		for i, semaphore := range info.WaitSemaphores {
-			*(*Semaphore)(unsafe.Pointer(uintptr(p) + uintptr(i)*unsafe.Sizeof(Semaphore(0)))) = semaphore
+			*(*Semaphore)(unsafe.Add(p, uintptr(i)*unsafe.Sizeof(Semaphore(0)))) = semaphore
 		}
 		_info.WaitSemaphores = (*Semaphore)(p)
 	}
@@ -335,7 +335,7 @@ func (info *PresentInfo) C(_info *presentInfo) freeFunc {
 		p := C.malloc(C.size_t(uintptr(_info.SwapchainCount) * unsafe.Sizeof(Swapchain(0))))
 		ps = append(ps, p)
 		for i, swapchain := range info.Swapchains {
-			*(*Swapchain)(unsafe.Pointer(uintptr(p) + uintptr(i)*unsafe.Sizeof(Swapchain(0)))) = swapchain
+			*(*Swapchain)(unsafe.Add(p, uintptr(i)*unsafe.Sizeof(Swapchain(0)))) = swapchain
 		}
 		_info.Swapchains = (*Swapchain)(p)
 	}
@@ -343,7 +343,7 @@ func (info *PresentInfo) C(_info *presentInfo) freeFunc {
 		p := C.malloc(C.size_t(uintptr(_info.SwapchainCount) * unsafe.Sizeof(uint32(0))))
 		ps = append(ps, p)
 		for i, imageIndex := range info.ImageIndices {
-			*(*uint32)(unsafe.Pointer(uintptr(p) + uintptr(i)*unsafe.Sizeof(uint32(0)))) = imageIndex
+			*(*uint32)(unsafe.Add(p, uintptr(i)*unsafe.Sizeof(uint32(0)))) = imageIndex
 		}
 		_info.ImageIndices = (*uint32)(p)
 	}
@@ -673,7 +673,7 @@ func EnumeratePhysicalDeviceGroups(instance Instance) ([]PhysicalDeviceGroupProp
 	//var count uint32
 	count := uint32(0)
 	result := Result(C.vkEnumeratePhysicalDeviceGroups(
-		(C.VkInstance)(unsafe.Pointer(instance)),
+		*(*C.VkInstance)(unsafe.Pointer(&instance)),
 		(*C.uint32_t)(unsafe.Pointer(&count)),
 		nil,
 	))
@@ -685,7 +685,7 @@ func EnumeratePhysicalDeviceGroups(instance Instance) ([]PhysicalDeviceGroupProp
 		_groups[i].Type = StructureTypePhysicalDeviceGroupProperties
 	}
 	result = Result(C.vkEnumeratePhysicalDeviceGroups(
-		(C.VkInstance)(unsafe.Pointer(instance)),
+		*(*C.VkInstance)(unsafe.Pointer(&instance)),
 		(*C.uint32_t)(unsafe.Pointer(&count)),
 		(*C.VkPhysicalDeviceGroupProperties)(unsafe.Pointer(&_groups[0])),
 	))
@@ -708,7 +708,7 @@ func EnumeratePhysicalDevices(instance Instance) ([]PhysicalDevice, error) {
 	var count C.uint32_t //asd768687
 	fmt.Println(unsafe.Sizeof(PhysicalDeviceProperties2KHR{}))
 	result := C.vkEnumeratePhysicalDevices(
-		(C.VkInstance)(unsafe.Pointer(instance)),
+		*(*C.VkInstance)(unsafe.Pointer(&instance)),
 		&count,
 		nil,
 	)
@@ -717,7 +717,7 @@ func EnumeratePhysicalDevices(instance Instance) ([]PhysicalDevice, error) {
 	}
 	devices := make([]PhysicalDevice, count)
 	result = C.vkEnumeratePhysicalDevices(
-		(C.VkInstance)(unsafe.Pointer(instance)),
+		*(*C.VkInstance)(unsafe.Pointer(&instance)),
 		&count,
 		(*C.VkPhysicalDevice)(unsafe.Pointer(&devices[0])),
 	)
@@ -762,7 +762,7 @@ func EnumeratePhysicalDevices(instance Instance) ([]PhysicalDevice, error) {
 func GetPhysicalDeviceProperties(physicalDevice PhysicalDevice) PhysicalDeviceProperties {
 	var properties PhysicalDeviceProperties
 	C.vkGetPhysicalDeviceProperties(
-		(C.VkPhysicalDevice)(unsafe.Pointer(physicalDevice)),
+		*(*C.VkPhysicalDevice)(unsafe.Pointer(&physicalDevice)),
 		(*C.VkPhysicalDeviceProperties)(unsafe.Pointer(&properties)),
 	)
 	return properties
@@ -774,9 +774,9 @@ func GetPhysicalDeviceSurfaceSupport(physicalDevice PhysicalDevice, queueFamilyI
 		_ [3]byte
 	}
 	result := Result(C.vkGetPhysicalDeviceSurfaceSupportKHR(
-		(C.VkPhysicalDevice)(unsafe.Pointer(physicalDevice)),
+		*(*C.VkPhysicalDevice)(unsafe.Pointer(&physicalDevice)),
 		(C.uint32_t)(queueFamilyIndex),
-		(C.VkSurfaceKHR)(unsafe.Pointer(surface)),
+		*(*C.VkSurfaceKHR)(unsafe.Pointer(&surface)),
 		(*C.VkBool32)(unsafe.Pointer(&supported.bool)),
 	))
 	if result != Success {
@@ -787,7 +787,12 @@ func GetPhysicalDeviceSurfaceSupport(physicalDevice PhysicalDevice, queueFamilyI
 
 func (d PhysicalDevice) GetSurfaceSupport(queueFamilyIndex uint32, surface Surface) (bool, error) {
 	var supported uint32
-	result := C.vkGetPhysicalDeviceSurfaceSupportKHR((C.VkPhysicalDevice)(unsafe.Pointer(d)), (C.uint32_t)(queueFamilyIndex), (C.VkSurfaceKHR)(unsafe.Pointer(surface)), (*C.VkBool32)(unsafe.Pointer(&supported)))
+	result := C.vkGetPhysicalDeviceSurfaceSupportKHR(
+		*(*C.VkPhysicalDevice)(unsafe.Pointer(&d)),
+		(C.uint32_t)(queueFamilyIndex),
+		*(*C.VkSurfaceKHR)(unsafe.Pointer(&surface)),
+		(*C.VkBool32)(unsafe.Pointer(&supported)),
+	)
 	if result != C.VK_SUCCESS {
 		return false, fmt.Errorf("surface support error")
 	}
@@ -796,8 +801,8 @@ func (d PhysicalDevice) GetSurfaceSupport(queueFamilyIndex uint32, surface Surfa
 
 func DestroySurface(instance Instance, surface Surface, allocator *AllocationCallbacks) {
 	C.vkDestroySurfaceKHR(
-		(C.VkInstance)(unsafe.Pointer(instance)),
-		(C.VkSurfaceKHR)(unsafe.Pointer(surface)),
+		*(*C.VkInstance)(unsafe.Pointer(&instance)),
+		*(*C.VkSurfaceKHR)(unsafe.Pointer(&surface)),
 		(*C.VkAllocationCallbacks)(unsafe.Pointer(allocator)),
 	)
 }

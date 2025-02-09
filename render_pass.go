@@ -81,7 +81,7 @@ func (info *RenderPassBeginInfo) C(_info *renderPassBeginInfo) freeFunc {
 				*(*uint32)(unsafe.Pointer(&_clearValue.Color[2])) = color[2]
 				*(*uint32)(unsafe.Pointer(&_clearValue.Color[3])) = color[3]
 			}
-			*(*clearValue)(unsafe.Pointer(uintptr(p) + uintptr(i)*unsafe.Sizeof(clearValue{}))) = _clearValue
+			*(*clearValue)(unsafe.Add(p, uintptr(i)*unsafe.Sizeof(clearValue{}))) = _clearValue
 		}
 		_info.ClearValues = (*clearValue)(p)
 		return freeFunc(func() {
@@ -122,7 +122,7 @@ func CreateRenderPass(device Device, createInfo RenderPassCreateInfo, allocator 
 		p := C.malloc(C.size_t(uintptr(_createInfo.AttachmentCount) * unsafe.Sizeof(AttachmentDescription{})))
 		defer C.free(p)
 		for i, attachment := range createInfo.Attachments {
-			*(*AttachmentDescription)(unsafe.Pointer(uintptr(p) + uintptr(i)*unsafe.Sizeof(AttachmentDescription{}))) = attachment
+			*(*AttachmentDescription)(unsafe.Add(p, uintptr(i)*unsafe.Sizeof(AttachmentDescription{}))) = attachment
 		}
 		_createInfo.Attachments = (*AttachmentDescription)(p)
 	}
@@ -153,7 +153,7 @@ func CreateRenderPass(device Device, createInfo RenderPassCreateInfo, allocator 
 				sp := C.malloc(C.size_t(uintptr(_subpass.InputAttachmentCount) * unsafe.Sizeof(AttachmentReference{})))
 				ps = append(ps, sp)
 				for i, reference := range subpass.InputAttachments {
-					*(*AttachmentReference)(unsafe.Pointer(uintptr(sp) + uintptr(i)*unsafe.Sizeof(AttachmentReference{}))) = reference
+					*(*AttachmentReference)(unsafe.Add(sp, uintptr(i)*unsafe.Sizeof(AttachmentReference{}))) = reference
 				}
 				_subpass.InputAttachments = (*AttachmentReference)(sp)
 			}
@@ -161,7 +161,7 @@ func CreateRenderPass(device Device, createInfo RenderPassCreateInfo, allocator 
 				sp := C.malloc(C.size_t(uintptr(_subpass.ColorAttachmentCount) * unsafe.Sizeof(AttachmentReference{})))
 				ps = append(ps, sp)
 				for i, reference := range subpass.ColorAttachments {
-					*(*AttachmentReference)(unsafe.Pointer(uintptr(sp) + uintptr(i)*unsafe.Sizeof(AttachmentReference{}))) = reference
+					*(*AttachmentReference)(unsafe.Add(sp, uintptr(i)*unsafe.Sizeof(AttachmentReference{}))) = reference
 				}
 				_subpass.ColorAttachments = (*AttachmentReference)(sp)
 				if len(subpass.ResolveAttachments) != 0 && len(subpass.ResolveAttachments) != len(subpass.ColorAttachments) {
@@ -172,7 +172,7 @@ func CreateRenderPass(device Device, createInfo RenderPassCreateInfo, allocator 
 					sp := C.malloc(C.size_t(uintptr(_subpass.ColorAttachmentCount) * unsafe.Sizeof(AttachmentReference{})))
 					ps = append(ps, sp)
 					for i, reference := range subpass.ResolveAttachments {
-						*(*AttachmentReference)(unsafe.Pointer(uintptr(sp) + uintptr(i)*unsafe.Sizeof(AttachmentReference{}))) = reference
+						*(*AttachmentReference)(unsafe.Add(sp, uintptr(i)*unsafe.Sizeof(AttachmentReference{}))) = reference
 					}
 					_subpass.ResolveAttachments = (*AttachmentReference)(sp)
 				}
@@ -181,11 +181,11 @@ func CreateRenderPass(device Device, createInfo RenderPassCreateInfo, allocator 
 				sp := C.malloc(C.size_t(uintptr(_subpass.PreserveAttachmentCount) * unsafe.Sizeof(uint32(0))))
 				ps = append(ps, sp)
 				for i, attachment := range subpass.PreserveAttachments {
-					*(*uint32)(unsafe.Pointer(uintptr(sp) + uintptr(i)*unsafe.Sizeof(uint32(0)))) = attachment
+					*(*uint32)(unsafe.Add(sp, uintptr(i)*unsafe.Sizeof(uint32(0)))) = attachment
 				}
 				_subpass.PreserveAttachments = (*uint32)(sp)
 			}
-			*(*subpassDescription)(unsafe.Pointer(uintptr(p) + uintptr(i)*unsafe.Sizeof(subpassDescription{}))) = _subpass
+			*(*subpassDescription)(unsafe.Add(p, uintptr(i)*unsafe.Sizeof(subpassDescription{}))) = _subpass
 		}
 		_createInfo.Subpasses = (*subpassDescription)(p)
 	}
@@ -193,12 +193,12 @@ func CreateRenderPass(device Device, createInfo RenderPassCreateInfo, allocator 
 		p := C.malloc(C.size_t(uintptr(_createInfo.DependencyCount) * unsafe.Sizeof(SubpassDependency{})))
 		defer C.free(p)
 		for i, dependency := range createInfo.Dependencies {
-			*(*SubpassDependency)(unsafe.Pointer(uintptr(p) + uintptr(i)*unsafe.Sizeof(SubpassDependency{}))) = dependency
+			*(*SubpassDependency)(unsafe.Add(p, uintptr(i)*unsafe.Sizeof(SubpassDependency{}))) = dependency
 		}
 		_createInfo.Dependencies = (*SubpassDependency)(p)
 	}
 	result := Result(C.vkCreateRenderPass(
-		(C.VkDevice)(unsafe.Pointer(device)),
+		*(*C.VkDevice)(unsafe.Pointer(&device)),
 		(*C.VkRenderPassCreateInfo)(unsafe.Pointer(&_createInfo)),
 		(*C.VkAllocationCallbacks)(unsafe.Pointer(allocator)),
 		(*C.VkRenderPass)(unsafe.Pointer(&renderPass)),
@@ -211,8 +211,8 @@ func CreateRenderPass(device Device, createInfo RenderPassCreateInfo, allocator 
 
 func DestroyRenderPass(device Device, renderPass RenderPass, allocator *AllocationCallbacks) {
 	C.vkDestroyRenderPass(
-		(C.VkDevice)(unsafe.Pointer(device)),
-		(C.VkRenderPass)(unsafe.Pointer(renderPass)),
+		*(*C.VkDevice)(unsafe.Pointer(&device)),
+		*(*C.VkRenderPass)(unsafe.Pointer(&renderPass)),
 		(*C.VkAllocationCallbacks)(unsafe.Pointer(allocator)),
 	)
 }
@@ -233,12 +233,12 @@ func CreateFramebuffer(device Device, createInfo FramebufferCreateInfo, allocato
 		p := C.malloc(C.size_t(uintptr(_createInfo.AttachmentCount) * unsafe.Sizeof(ImageView(0))))
 		defer C.free(p)
 		for i, attachment := range createInfo.Attachments {
-			*(*ImageView)(unsafe.Pointer(uintptr(p) + uintptr(i)*unsafe.Sizeof(ImageView(0)))) = attachment
+			*(*ImageView)(unsafe.Add(p, uintptr(i)*unsafe.Sizeof(ImageView(0)))) = attachment
 		}
 		_createInfo.Attachments = (*ImageView)(p)
 	}
 	result := Result(C.vkCreateFramebuffer(
-		(C.VkDevice)(unsafe.Pointer(device)),
+		*(*C.VkDevice)(unsafe.Pointer(&device)),
 		(*C.VkFramebufferCreateInfo)(unsafe.Pointer(&_createInfo)),
 		(*C.VkAllocationCallbacks)(unsafe.Pointer(allocator)),
 		(*C.VkFramebuffer)(unsafe.Pointer(&framebuffer)),
@@ -251,8 +251,8 @@ func CreateFramebuffer(device Device, createInfo FramebufferCreateInfo, allocato
 
 func DestroyFramebuffer(device Device, framebuffer Framebuffer, allocator *AllocationCallbacks) {
 	C.vkDestroyFramebuffer(
-		(C.VkDevice)(unsafe.Pointer(device)),
-		(C.VkFramebuffer)(unsafe.Pointer(framebuffer)),
+		*(*C.VkDevice)(unsafe.Pointer(&device)),
+		*(*C.VkFramebuffer)(unsafe.Pointer(&framebuffer)),
 		(*C.VkAllocationCallbacks)(unsafe.Pointer(allocator)),
 	)
 }
@@ -262,7 +262,7 @@ func CmdBeginRenderPass(commandBuffer CommandBuffer, beginInfo RenderPassBeginIn
 	beginInfo.C(&_beginInfo)
 	//defer beginInfo.C(&_beginInfo).Free()
 	C.vkCmdBeginRenderPass(
-		(C.VkCommandBuffer)(unsafe.Pointer(commandBuffer)),
+		*(*C.VkCommandBuffer)(unsafe.Pointer(&commandBuffer)),
 		(*C.VkRenderPassBeginInfo)(unsafe.Pointer(&_beginInfo)),
 		(C.VkSubpassContents)(contents),
 	)
@@ -271,8 +271,8 @@ func CmdBeginRenderPass(commandBuffer CommandBuffer, beginInfo RenderPassBeginIn
 func GetRenderAreaGranularity(device Device, renderPass RenderPass) Extent2D {
 	var granularity Extent2D
 	C.vkGetRenderAreaGranularity(
-		(C.VkDevice)(unsafe.Pointer(device)),
-		(C.VkRenderPass)(unsafe.Pointer(renderPass)),
+		*(*C.VkDevice)(unsafe.Pointer(&device)),
+		*(*C.VkRenderPass)(unsafe.Pointer(&renderPass)),
 		(*C.VkExtent2D)(unsafe.Pointer(&granularity)),
 	)
 	return granularity
@@ -280,13 +280,13 @@ func GetRenderAreaGranularity(device Device, renderPass RenderPass) Extent2D {
 
 func CmdNextSubpass(commandBuffer CommandBuffer, contents SubpassContents) {
 	C.vkCmdNextSubpass(
-		(C.VkCommandBuffer)(unsafe.Pointer(commandBuffer)),
+		*(*C.VkCommandBuffer)(unsafe.Pointer(&commandBuffer)),
 		(C.VkSubpassContents)(contents),
 	)
 }
 
 func CmdEndRenderPass(commandBuffer CommandBuffer) {
 	C.vkCmdEndRenderPass(
-		(C.VkCommandBuffer)(unsafe.Pointer(commandBuffer)),
+		*(*C.VkCommandBuffer)(unsafe.Pointer(&commandBuffer)),
 	)
 }

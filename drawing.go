@@ -8,7 +8,7 @@ import (
 
 func CmdDraw(commandBuffer CommandBuffer, vertexCount, instanceCount, firstVertex, firstInstance uint32) {
 	C.vkCmdDraw(
-		(C.VkCommandBuffer)(unsafe.Pointer(commandBuffer)),
+		*(*C.VkCommandBuffer)(unsafe.Pointer(&commandBuffer)),
 		(C.uint32_t)(vertexCount),
 		(C.uint32_t)(instanceCount),
 		(C.uint32_t)(firstVertex),
@@ -18,7 +18,7 @@ func CmdDraw(commandBuffer CommandBuffer, vertexCount, instanceCount, firstVerte
 
 func CmdDrawIndexed(commandBuffer CommandBuffer, indexCount, instanceCount, firstIndex uint32, vertexOffset int32, firstInstance uint32) {
 	C.vkCmdDrawIndexed(
-		(C.VkCommandBuffer)(unsafe.Pointer(commandBuffer)),
+		*(*C.VkCommandBuffer)(unsafe.Pointer(&commandBuffer)),
 		(C.uint32_t)(indexCount),
 		(C.uint32_t)(instanceCount),
 		(C.uint32_t)(firstIndex),
@@ -73,7 +73,7 @@ func CmdDrawIndexedIndirectCount(commandBuffer CommandBuffer, buffer Buffer, off
 
 func CmdDispatch(commandBuffer CommandBuffer, groupCountX, groupCountY, groupCountZ uint32) {
 	C.vkCmdDispatch(
-		(C.VkCommandBuffer)(unsafe.Pointer(commandBuffer)),
+		*(*C.VkCommandBuffer)(unsafe.Pointer(&commandBuffer)),
 		(C.uint32_t)(groupCountX),
 		(C.uint32_t)(groupCountY),
 		(C.uint32_t)(groupCountZ),
@@ -82,15 +82,15 @@ func CmdDispatch(commandBuffer CommandBuffer, groupCountX, groupCountY, groupCou
 
 func CmdDispatchIndirect(commandBuffer CommandBuffer, buffer Buffer, offset DeviceSize) {
 	C.vkCmdDispatchIndirect(
-		(C.VkCommandBuffer)(unsafe.Pointer(commandBuffer)),
-		(C.VkBuffer)(unsafe.Pointer(buffer)),
+		*(*C.VkCommandBuffer)(unsafe.Pointer(&commandBuffer)),
+		*(*C.VkBuffer)(unsafe.Pointer(&buffer)),
 		(C.VkDeviceSize)(offset),
 	)
 }
 
 func CmdDispatchBase(commandBuffer CommandBuffer, baseGroupX, baseGroupY, baseGroupZ, groupCountX, groupCountY, groupCountZ uint32) {
 	C.vkCmdDispatchBase(
-		(C.VkCommandBuffer)(unsafe.Pointer(commandBuffer)),
+		*(*C.VkCommandBuffer)(unsafe.Pointer(&commandBuffer)),
 		(C.uint32_t)(baseGroupX),
 		(C.uint32_t)(baseGroupY),
 		(C.uint32_t)(baseGroupZ),
@@ -132,7 +132,7 @@ func CmdClearAttachments(commandBuffer CommandBuffer, clearAttachments []ClearAt
 		}
 	}
 	C.vkCmdClearAttachments(
-		(C.VkCommandBuffer)(unsafe.Pointer(commandBuffer)),
+		*(*C.VkCommandBuffer)(unsafe.Pointer(&commandBuffer)),
 		(C.uint32_t)(len(clearAttachments)),
 		(*C.VkClearAttachment)(unsafe.Pointer(&_clearAttachments[0])),
 		(C.uint32_t)(len(rects)),

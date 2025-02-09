@@ -265,7 +265,7 @@ const (
 func CreateImageView(device Device, createInfo ImageViewCreateInfo, allocator *AllocationCallbacks) (ImageView, error) {
 	var view ImageView
 	result := C.vkCreateImageView(
-		(C.VkDevice)(unsafe.Pointer(device)),
+		*(*C.VkDevice)(unsafe.Pointer(&device)),
 		(*C.VkImageViewCreateInfo)(unsafe.Pointer(&createInfo)),
 		(*C.VkAllocationCallbacks)(unsafe.Pointer(allocator)),
 		(*C.VkImageView)(unsafe.Pointer(&view)),
@@ -278,8 +278,8 @@ func CreateImageView(device Device, createInfo ImageViewCreateInfo, allocator *A
 
 func DestroyImageView(device Device, imageView ImageView, allocator *AllocationCallbacks) {
 	C.vkDestroyImageView(
-		(C.VkDevice)(unsafe.Pointer(device)),
-		(C.VkImageView)(unsafe.Pointer(imageView)),
+		*(*C.VkDevice)(unsafe.Pointer(&device)),
+		*(*C.VkImageView)(unsafe.Pointer(&imageView)),
 		(*C.VkAllocationCallbacks)(unsafe.Pointer(allocator)),
 	)
 }
@@ -376,7 +376,7 @@ func CreateShaderModule(device Device, createInfo ShaderModuleCreateInfo, alloca
 	var _createInfo shaderModuleCreateInfo
 	defer createInfo.C(&_createInfo).Free()
 	result := Result(C.vkCreateShaderModule(
-		(C.VkDevice)(unsafe.Pointer(device)),
+		*(*C.VkDevice)(unsafe.Pointer(&device)),
 		(*C.VkShaderModuleCreateInfo)(unsafe.Pointer(&_createInfo)),
 		(*C.VkAllocationCallbacks)(unsafe.Pointer(allocator)),
 		(*C.VkShaderModule)(unsafe.Pointer(&shaderModule)),
@@ -389,8 +389,8 @@ func CreateShaderModule(device Device, createInfo ShaderModuleCreateInfo, alloca
 
 func DestroyShaderModule(device Device, shaderModule ShaderModule, allocator *AllocationCallbacks) {
 	C.vkDestroyShaderModule(
-		(C.VkDevice)(unsafe.Pointer(device)),
-		(C.VkShaderModule)(unsafe.Pointer(shaderModule)),
+		*(*C.VkDevice)(unsafe.Pointer(&device)),
+		*(*C.VkShaderModule)(unsafe.Pointer(&shaderModule)),
 		(*C.VkAllocationCallbacks)(unsafe.Pointer(allocator)),
 	)
 }

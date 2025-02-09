@@ -16,7 +16,7 @@ func (q Queue) Present(info PresentInfo) (freeFunc, error) {
 	// fmt.Printf("%+v\n", info)
 	// fmt.Printf("%+v\n", _info)
 	result := Result(C.vkQueuePresentKHR(
-		(C.VkQueue)(unsafe.Pointer(q)),
+		*(*C.VkQueue)(unsafe.Pointer(&q)),
 		(*C.VkPresentInfoKHR)(unsafe.Pointer(&_info)),
 	))
 	if info.Results != nil {

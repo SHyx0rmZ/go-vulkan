@@ -176,7 +176,7 @@ func (info *PipelineVertexInputStateCreateInfo) C(_info *pipelineVertexInputStat
 		p := C.malloc(C.size_t(uintptr(_info.VertexBindingDescriptionCount) * unsafe.Sizeof(VertexInputBindingDescription{})))
 		ps = append(ps, p)
 		for i, description := range info.VertexBindingDescriptions {
-			*(*VertexInputBindingDescription)(unsafe.Pointer(uintptr(p) + uintptr(i)*unsafe.Sizeof(VertexInputBindingDescription{}))) = description
+			*(*VertexInputBindingDescription)(unsafe.Add(p, uintptr(i)*unsafe.Sizeof(VertexInputBindingDescription{}))) = description
 		}
 		_info.VertexBindingDescriptions = (*VertexInputBindingDescription)(p)
 	}
@@ -184,7 +184,7 @@ func (info *PipelineVertexInputStateCreateInfo) C(_info *pipelineVertexInputStat
 		p := C.malloc(C.size_t(uintptr(_info.VertexAttributeDescriptionCount) * unsafe.Sizeof(VertexInputAttributeDescription{})))
 		ps = append(ps, p)
 		for i, description := range info.VertexAttributeDescriptions {
-			*(*VertexInputAttributeDescription)(unsafe.Pointer(uintptr(p) + uintptr(i)*unsafe.Sizeof(VertexInputAttributeDescription{}))) = description
+			*(*VertexInputAttributeDescription)(unsafe.Add(p, uintptr(i)*unsafe.Sizeof(VertexInputAttributeDescription{}))) = description
 		}
 		_info.VertexAttributeDescriptions = (*VertexInputAttributeDescription)(p)
 	}
@@ -277,7 +277,7 @@ func (info *PipelineViewportStateCreateInfo) C(_info *pipelineViewportStateCreat
 		p := C.malloc(C.size_t(uintptr(_info.ViewportCount) * unsafe.Sizeof(Viewport{})))
 		ps = append(ps, p)
 		for i, viewport := range info.Viewports {
-			*(*Viewport)(unsafe.Pointer(uintptr(p) + uintptr(i)*unsafe.Sizeof(Viewport{}))) = viewport
+			*(*Viewport)(unsafe.Add(p, uintptr(i)*unsafe.Sizeof(Viewport{}))) = viewport
 		}
 		_info.Viewports = (*Viewport)(p)
 	}
@@ -285,7 +285,7 @@ func (info *PipelineViewportStateCreateInfo) C(_info *pipelineViewportStateCreat
 		p := C.malloc(C.size_t(uintptr(_info.ScissorCount) * unsafe.Sizeof(Rect2D{})))
 		ps = append(ps, p)
 		for i, scissor := range info.Scissors {
-			*(*Rect2D)(unsafe.Pointer(uintptr(p) + uintptr(i)*unsafe.Sizeof(Rect2D{}))) = scissor
+			*(*Rect2D)(unsafe.Add(p, uintptr(i)*unsafe.Sizeof(Rect2D{}))) = scissor
 		}
 		_info.Scissors = (*Rect2D)(p)
 	}
@@ -474,7 +474,7 @@ func (info *PipelineColorBlendStateCreateInfo) C(_info *pipelineColorBlendStateC
 	if _info.AttachmentCount > 0 {
 		p := C.malloc(C.size_t(uintptr(_info.AttachmentCount) * unsafe.Sizeof(PipelineColorBlendAttachmentState{})))
 		for i, attachment := range info.Attachments {
-			*(*PipelineColorBlendAttachmentState)(unsafe.Pointer(uintptr(p) + uintptr(i)*unsafe.Sizeof(PipelineColorBlendAttachmentState{}))) = attachment
+			*(*PipelineColorBlendAttachmentState)(unsafe.Add(p, uintptr(i)*unsafe.Sizeof(PipelineColorBlendAttachmentState{}))) = attachment
 		}
 		_info.Attachments = (*PipelineColorBlendAttachmentState)(p)
 		return freeFunc(func() {
@@ -591,7 +591,7 @@ func (info *GraphicsPipelineCreateInfo) C(_info *graphicsPipelineCreateInfo) fre
 			C.free(p)
 		}))
 		for i, stage := range info.Stages {
-			fs = append(fs, stage.C((*pipelineShaderStageCreateInfo)(unsafe.Pointer(uintptr(p)+uintptr(i)*unsafe.Sizeof(pipelineShaderStageCreateInfo{})))))
+			fs = append(fs, stage.C((*pipelineShaderStageCreateInfo)(unsafe.Add(p, uintptr(i)*unsafe.Sizeof(pipelineShaderStageCreateInfo{})))))
 		}
 		_info.Stages = (*pipelineShaderStageCreateInfo)(p)
 	}
@@ -725,8 +725,8 @@ func CreateComputePipelines(device Device, pipelineCache PipelineCache, createIn
 		}
 	}()
 	result := Result(C.vkCreateComputePipelines(
-		(C.VkDevice)(unsafe.Pointer(device)),
-		(C.VkPipelineCache)(unsafe.Pointer(pipelineCache)),
+		*(*C.VkDevice)(unsafe.Pointer(&device)),
+		*(*C.VkPipelineCache)(unsafe.Pointer(&pipelineCache)),
 		(C.uint32_t)(len(_createInfos)),
 		(*C.VkComputePipelineCreateInfo)(unsafe.Pointer(&_createInfos[0])),
 		(*C.VkAllocationCallbacks)(unsafe.Pointer(allocator)),
@@ -751,8 +751,8 @@ func CreateGraphicsPipelines(device Device, pipelineCache PipelineCache, createI
 		}
 	}()
 	result := Result(C.vkCreateGraphicsPipelines(
-		(C.VkDevice)(unsafe.Pointer(device)),
-		(C.VkPipelineCache)(unsafe.Pointer(pipelineCache)),
+		*(*C.VkDevice)(unsafe.Pointer(&device)),
+		*(*C.VkPipelineCache)(unsafe.Pointer(&pipelineCache)),
 		(C.uint32_t)(len(_createInfos)),
 		(*C.VkGraphicsPipelineCreateInfo)(unsafe.Pointer(&_createInfos[0])),
 		(*C.VkAllocationCallbacks)(unsafe.Pointer(allocator)),
@@ -766,8 +766,8 @@ func CreateGraphicsPipelines(device Device, pipelineCache PipelineCache, createI
 
 func DestroyPipeline(device Device, pipeline Pipeline, allocator *AllocationCallbacks) {
 	C.vkDestroyPipeline(
-		(C.VkDevice)(unsafe.Pointer(device)),
-		(C.VkPipeline(unsafe.Pointer(pipeline))),
+		*(*C.VkDevice)(unsafe.Pointer(&device)),
+		*(*C.VkPipeline)(unsafe.Pointer(&pipeline)),
 		(*C.VkAllocationCallbacks)(unsafe.Pointer(allocator)),
 	)
 }
@@ -777,7 +777,7 @@ func CreatePipelineCache(device Device, createInfo PipelineCacheCreateInfo, allo
 	var _createInfo pipelineCacheCreateInfo
 	createInfo.C(&_createInfo)
 	result := Result(C.vkCreatePipelineCache(
-		(C.VkDevice)(unsafe.Pointer(device)),
+		*(*C.VkDevice)(unsafe.Pointer(&device)),
 		(*C.VkPipelineCacheCreateInfo)(unsafe.Pointer(&_createInfo)),
 		(*C.VkAllocationCallbacks)(unsafe.Pointer(allocator)),
 		(*C.VkPipelineCache)(unsafe.Pointer(&pipelineCache)),
@@ -790,8 +790,8 @@ func CreatePipelineCache(device Device, createInfo PipelineCacheCreateInfo, allo
 
 func MergePipelineCaches(device Device, dstCache PipelineCache, srcCaches []PipelineCache) error {
 	result := Result(C.vkMergePipelineCaches(
-		(C.VkDevice)(unsafe.Pointer(device)),
-		(C.VkPipelineCache)(unsafe.Pointer(dstCache)),
+		*(*C.VkDevice)(unsafe.Pointer(&device)),
+		*(*C.VkPipelineCache)(unsafe.Pointer(&dstCache)),
 		(C.uint32_t)(len(srcCaches)),
 		(*C.VkPipelineCache)(unsafe.Pointer(&srcCaches[0])),
 	))
@@ -808,8 +808,8 @@ func GetPipelineCacheData(device Device, pipelineCache PipelineCache, data []byt
 		dataPtr = unsafe.Pointer(&data[0])
 	}
 	result := Result(C.vkGetPipelineCacheData(
-		(C.VkDevice)(unsafe.Pointer(device)),
-		(C.VkPipelineCache)(unsafe.Pointer(pipelineCache)),
+		*(*C.VkDevice)(unsafe.Pointer(&device)),
+		*(*C.VkPipelineCache)(unsafe.Pointer(&pipelineCache)),
 		(*C.size_t)(unsafe.Pointer(&size)),
 		dataPtr,
 	))
@@ -821,16 +821,16 @@ func GetPipelineCacheData(device Device, pipelineCache PipelineCache, data []byt
 
 func DestroyPipelineCache(device Device, pipelineCache PipelineCache, allocator *AllocationCallbacks) {
 	C.vkDestroyPipelineCache(
-		(C.VkDevice)(unsafe.Pointer(device)),
-		(C.VkPipelineCache)(unsafe.Pointer(pipelineCache)),
+		*(*C.VkDevice)(unsafe.Pointer(&device)),
+		*(*C.VkPipelineCache)(unsafe.Pointer(&pipelineCache)),
 		(*C.VkAllocationCallbacks)(unsafe.Pointer(allocator)),
 	)
 }
 
 func CmdBindPipeline(commandBuffer CommandBuffer, pipelineBindPoint PipelineBindPoint, pipeline Pipeline) {
 	C.vkCmdBindPipeline(
-		(C.VkCommandBuffer)(unsafe.Pointer(commandBuffer)),
+		*(*C.VkCommandBuffer)(unsafe.Pointer(&commandBuffer)),
 		(C.VkPipelineBindPoint)(pipelineBindPoint),
-		(C.VkPipeline)(unsafe.Pointer(pipeline)),
+		*(*C.VkPipeline)(unsafe.Pointer(&pipeline)),
 	)
 }

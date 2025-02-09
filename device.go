@@ -20,7 +20,7 @@ type Device uintptr
 
 func DestroyDevice(device Device, allocator *AllocationCallbacks) {
 	C.vkDestroyDevice(
-		(C.VkDevice)(unsafe.Pointer(device)),
+		*(*C.VkDevice)(unsafe.Pointer(&device)),
 		(*C.VkAllocationCallbacks)(unsafe.Pointer(allocator)),
 	)
 }
@@ -50,7 +50,7 @@ func CreateSwapchain(device Device, info SwapchainCreateInfo, surface Surface, a
 	//info.QueueFamilyIndices = (*uint32)(p)
 	//defer C.free(p)
 	result := C.vkCreateSwapchainKHR(
-		(C.VkDevice)(unsafe.Pointer(device)),
+		*(*C.VkDevice)(unsafe.Pointer(&device)),
 		(*C.VkSwapchainCreateInfoKHR)(unsafe.Pointer(&info)),
 		(*C.VkAllocationCallbacks)(unsafe.Pointer(allocator)),
 		(*C.VkSwapchainKHR)(unsafe.Pointer(&swapchain)))
@@ -63,8 +63,8 @@ func CreateSwapchain(device Device, info SwapchainCreateInfo, surface Surface, a
 func (d Device) DestroySwapchain(swapchain Swapchain) {
 	str := C.CString("vkDestroySwapchainKHR")
 	defer C.free(unsafe.Pointer(str))
-	C._ptr_vkDestroySwapchainKHR = C.vkGetDeviceProcAddr((C.VkDevice)(unsafe.Pointer(d)), str)
-	C._vkDestroySwapchainKHR((C.VkDevice)(unsafe.Pointer(d)), (C.VkSwapchainKHR)(unsafe.Pointer(swapchain)), nil)
+	C._ptr_vkDestroySwapchainKHR = C.vkGetDeviceProcAddr(*(*C.VkDevice)(unsafe.Pointer(&d)), str)
+	C._vkDestroySwapchainKHR(*(*C.VkDevice)(unsafe.Pointer(&d)), *(*C.VkSwapchainKHR)(unsafe.Pointer(&swapchain)), nil)
 }
 
 func DestroySwapchain(device Device, swapchain Swapchain, allocator *AllocationCallbacks) {
@@ -89,7 +89,7 @@ func (d Device) GetQueue(queueFamilyIndex, queueIndex uint32) Queue {
 		QueueFamilyIndex: queueFamilyIndex,
 		QueueIndex:       queueIndex,
 	}
-	C.vkGetDeviceQueue2((C.VkDevice)(unsafe.Pointer(d)), (*C.VkDeviceQueueInfo2)(unsafe.Pointer(&info)), (*C.VkQueue)(unsafe.Pointer(&queue)))
+	C.vkGetDeviceQueue2(*(*C.VkDevice)(unsafe.Pointer(&d)), (*C.VkDeviceQueueInfo2)(unsafe.Pointer(&info)), (*C.VkQueue)(unsafe.Pointer(&queue)))
 	return queue
 }
 
@@ -120,8 +120,8 @@ type Image uintptr
 func (d Device) GetSwapchainImages(swapchain Swapchain) ([]Image, error) {
 	var count uint32
 	result := Result(C.vkGetSwapchainImagesKHR(
-		(C.VkDevice)(unsafe.Pointer(d)),
-		(C.VkSwapchainKHR)(unsafe.Pointer(swapchain)),
+		*(*C.VkDevice)(unsafe.Pointer(&d)),
+		*(*C.VkSwapchainKHR)(unsafe.Pointer(&swapchain)),
 		(*C.uint32_t)(unsafe.Pointer(&count)),
 		nil,
 	))
@@ -130,8 +130,8 @@ func (d Device) GetSwapchainImages(swapchain Swapchain) ([]Image, error) {
 	}
 	images := make([]Image, count)
 	result = Result(C.vkGetSwapchainImagesKHR(
-		(C.VkDevice)(unsafe.Pointer(d)),
-		(C.VkSwapchainKHR)(unsafe.Pointer(swapchain)),
+		*(*C.VkDevice)(unsafe.Pointer(&d)),
+		*(*C.VkSwapchainKHR)(unsafe.Pointer(&swapchain)),
 		(*C.uint32_t)(unsafe.Pointer(&count)),
 		(*C.VkImage)(unsafe.Pointer(&images[0])),
 	))
@@ -168,7 +168,7 @@ func (d Device) CreateImage() (Image, error) {
 		//InitialLayout:         nil,
 	}
 	result := Result(C.vkCreateImage(
-		(C.VkDevice)(unsafe.Pointer(d)),
+		*(*C.VkDevice)(unsafe.Pointer(&d)),
 		(*C.VkImageCreateInfo)(unsafe.Pointer(&info)),
 		nil,
 		(*C.VkImage)(unsafe.Pointer(&image)),
@@ -182,11 +182,11 @@ func (d Device) CreateImage() (Image, error) {
 func (d Device) AcquireNextImage(swapchain Swapchain, semaphore Semaphore, fence Fence) (uint32, error) {
 	var image uint32
 	result := Result(C.vkAcquireNextImageKHR(
-		(C.VkDevice)(unsafe.Pointer(d)),
-		(C.VkSwapchainKHR)(unsafe.Pointer(swapchain)),
+		*(*C.VkDevice)(unsafe.Pointer(&d)),
+		*(*C.VkSwapchainKHR)(unsafe.Pointer(&swapchain)),
 		C.uint64_t(^uint64(0)),
-		(C.VkSemaphore)(unsafe.Pointer(semaphore)),
-		(C.VkFence)(unsafe.Pointer(fence)),
+		*(*C.VkSemaphore)(unsafe.Pointer(&semaphore)),
+		*(*C.VkFence)(unsafe.Pointer(&fence)),
 		(*C.uint32_t)(unsafe.Pointer(&image)),
 	))
 	if result != Success {
@@ -224,7 +224,7 @@ func (d Device) CreateSemaphore() (Semaphore, error) {
 	}
 	var semaphore Semaphore
 	result := Result(C.vkCreateSemaphore(
-		(C.VkDevice)(unsafe.Pointer(d)),
+		*(*C.VkDevice)(unsafe.Pointer(&d)),
 		(*C.VkSemaphoreCreateInfo)(unsafe.Pointer(&info)),
 		nil,
 		(*C.VkSemaphore)(unsafe.Pointer(&semaphore)),
@@ -236,5 +236,5 @@ func (d Device) CreateSemaphore() (Semaphore, error) {
 }
 
 func (d Device) DestroySemaphore(semaphore Semaphore) {
-	C.vkDestroySemaphore((C.VkDevice)(unsafe.Pointer(d)), (C.VkSemaphore)(unsafe.Pointer(semaphore)), nil)
+	C.vkDestroySemaphore(*(*C.VkDevice)(unsafe.Pointer(&d)), *(*C.VkSemaphore)(unsafe.Pointer(&semaphore)), nil)
 }

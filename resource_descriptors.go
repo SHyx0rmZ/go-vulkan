@@ -33,7 +33,7 @@ func (info *PipelineLayoutCreateInfo) C(_info *pipelineLayoutCreateInfo) freeFun
 		p := C.malloc(C.size_t(uintptr(_info.SetLayoutCount) * unsafe.Sizeof(DescriptorSetLayout(0))))
 		ps = append(ps, p)
 		for i, layout := range info.SetLayouts {
-			*(*DescriptorSetLayout)(unsafe.Pointer(uintptr(p) + uintptr(i)*unsafe.Sizeof(DescriptorSetLayout(0)))) = layout
+			*(*DescriptorSetLayout)(unsafe.Add(p, uintptr(i)*unsafe.Sizeof(DescriptorSetLayout(0)))) = layout
 		}
 		_info.SetLayouts = (*DescriptorSetLayout)(p)
 	}
@@ -41,7 +41,7 @@ func (info *PipelineLayoutCreateInfo) C(_info *pipelineLayoutCreateInfo) freeFun
 		p := C.malloc(C.size_t(uintptr(_info.PushConstantRangeCount) * unsafe.Sizeof(PushConstantRange{})))
 		ps = append(ps, p)
 		for i, pushConstantRange := range info.PushConstantRanges {
-			*(*PushConstantRange)(unsafe.Pointer(uintptr(p) + uintptr(i)*unsafe.Sizeof(PushConstantRange{}))) = pushConstantRange
+			*(*PushConstantRange)(unsafe.Add(p, uintptr(i)*unsafe.Sizeof(PushConstantRange{}))) = pushConstantRange
 		}
 		_info.PushConstantRanges = (*PushConstantRange)(p)
 	}
@@ -75,7 +75,7 @@ func CreatePipelineLayout(device Device, createInfo PipelineLayoutCreateInfo, al
 	var _createInfo pipelineLayoutCreateInfo
 	defer createInfo.C(&_createInfo).Free()
 	result := Result(C.vkCreatePipelineLayout(
-		(C.VkDevice)(unsafe.Pointer(device)),
+		*(*C.VkDevice)(unsafe.Pointer(&device)),
 		(*C.VkPipelineLayoutCreateInfo)(unsafe.Pointer(&_createInfo)),
 		(*C.VkAllocationCallbacks)(unsafe.Pointer(allocator)),
 		(*C.VkPipelineLayout)(unsafe.Pointer(&pipelineLayout)),
@@ -88,8 +88,8 @@ func CreatePipelineLayout(device Device, createInfo PipelineLayoutCreateInfo, al
 
 func DestroyPipelineLayout(device Device, pipelineLayout PipelineLayout, allocator *AllocationCallbacks) {
 	C.vkDestroyPipelineLayout(
-		(C.VkDevice)(unsafe.Pointer(device)),
-		(C.VkPipelineLayout)(unsafe.Pointer(pipelineLayout)),
+		*(*C.VkDevice)(unsafe.Pointer(&device)),
+		*(*C.VkPipelineLayout)(unsafe.Pointer(&pipelineLayout)),
 		(*C.VkAllocationCallbacks)(unsafe.Pointer(allocator)),
 	)
 }
@@ -115,7 +115,7 @@ func (info *DescriptorSetLayoutCreateInfo) C(_info *descriptorSetLayoutCreateInf
 	if _info.BindingCount > 0 {
 		p := C.malloc(C.size_t(uintptr(_info.BindingCount) * unsafe.Sizeof(DescriptorSetLayoutBinding{})))
 		for i, binding := range info.Bindings {
-			*(*DescriptorSetLayoutBinding)(unsafe.Pointer(uintptr(p) + uintptr(i)*unsafe.Sizeof(DescriptorSetLayoutBinding{}))) = binding
+			*(*DescriptorSetLayoutBinding)(unsafe.Add(p, uintptr(i)*unsafe.Sizeof(DescriptorSetLayoutBinding{}))) = binding
 		}
 		_info.Bindings = (*DescriptorSetLayoutBinding)(p)
 		return freeFunc(func() {
@@ -169,7 +169,7 @@ func CreateDescriptorSetLayout(device Device, createInfo DescriptorSetLayoutCrea
 	var _createInfo descriptorSetLayoutCreateInfo
 	defer createInfo.C(&_createInfo).Free()
 	result := Result(C.vkCreateDescriptorSetLayout(
-		(C.VkDevice)(unsafe.Pointer(device)),
+		*(*C.VkDevice)(unsafe.Pointer(&device)),
 		(*C.VkDescriptorSetLayoutCreateInfo)(unsafe.Pointer(&_createInfo)),
 		(*C.VkAllocationCallbacks)(unsafe.Pointer(allocator)),
 		(*C.VkDescriptorSetLayout)(unsafe.Pointer(&layout)),
@@ -182,8 +182,8 @@ func CreateDescriptorSetLayout(device Device, createInfo DescriptorSetLayoutCrea
 
 func DestroyDescriptorSetLayout(device Device, layout DescriptorSetLayout, allocator *AllocationCallbacks) {
 	C.vkDestroyDescriptorSetLayout(
-		(C.VkDevice)(unsafe.Pointer(device)),
-		(C.VkDescriptorSetLayout)(unsafe.Pointer(layout)),
+		*(*C.VkDevice)(unsafe.Pointer(&device)),
+		*(*C.VkDescriptorSetLayout)(unsafe.Pointer(&layout)),
 		(*C.VkAllocationCallbacks)(unsafe.Pointer(allocator)),
 	)
 }
@@ -257,7 +257,7 @@ func (info *DescriptorPoolCreateInfo) C(_info *descriptorPoolCreateInfo) freeFun
 	if _info.PoolSizeCount > 0 {
 		p := C.malloc(C.size_t(uintptr(_info.PoolSizeCount) * unsafe.Sizeof(DescriptorPoolSize{})))
 		for i, size := range info.PoolSizes {
-			*(*DescriptorPoolSize)(unsafe.Pointer(uintptr(p) + uintptr(i)*unsafe.Sizeof(DescriptorPoolSize{}))) = size
+			*(*DescriptorPoolSize)(unsafe.Add(p, uintptr(i)*unsafe.Sizeof(DescriptorPoolSize{}))) = size
 		}
 		_info.PoolSizes = (*DescriptorPoolSize)(p)
 		return freeFunc(func() {
@@ -332,7 +332,7 @@ func CreateDescriptorPool(device Device, createInfo DescriptorPoolCreateInfo, al
 	var _createInfo descriptorPoolCreateInfo
 	defer createInfo.C(&_createInfo).Free()
 	result := Result(C.vkCreateDescriptorPool(
-		(C.VkDevice)(unsafe.Pointer(device)),
+		*(*C.VkDevice)(unsafe.Pointer(&device)),
 		(*C.VkDescriptorPoolCreateInfo)(unsafe.Pointer(&_createInfo)),
 		(*C.VkAllocationCallbacks)(unsafe.Pointer(allocator)),
 		(*C.VkDescriptorPool)(unsafe.Pointer(&pool)),
@@ -370,8 +370,8 @@ func CreateDescriptorPool(device Device, createInfo DescriptorPoolCreateInfo, al
 // - Host access to descriptorPool must be externally synchronized
 func DestroyDescriptorPool(device Device, descriptorPool DescriptorPool, allocator *AllocationCallbacks) {
 	C.vkDestroyDescriptorPool(
-		(C.VkDevice)(unsafe.Pointer(device)),
-		(C.VkDescriptorPool)(unsafe.Pointer(descriptorPool)),
+		*(*C.VkDevice)(unsafe.Pointer(&device)),
+		*(*C.VkDescriptorPool)(unsafe.Pointer(&descriptorPool)),
 		(*C.VkAllocationCallbacks)(unsafe.Pointer(allocator)),
 	)
 }
@@ -394,7 +394,7 @@ func (info *DescriptorSetAllocateInfo) C(_info *descriptorAllocateInfo) freeFunc
 	if _info.DescriptorSetCount > 0 {
 		p := C.malloc(C.size_t(uintptr(_info.DescriptorSetCount) * unsafe.Sizeof(DescriptorSetLayout(0))))
 		for i, layout := range info.SetLayouts {
-			*(*DescriptorSetLayout)(unsafe.Pointer(uintptr(p) + uintptr(i)*unsafe.Sizeof(DescriptorSetLayout(0)))) = layout
+			*(*DescriptorSetLayout)(unsafe.Add(p, uintptr(i)*unsafe.Sizeof(DescriptorSetLayout(0)))) = layout
 		}
 		_info.SetLayouts = (*DescriptorSetLayout)(p)
 		return freeFunc(func() {
@@ -419,7 +419,7 @@ func AllocateDescriptorSets(device Device, allocateInfo DescriptorSetAllocateInf
 	var _allocateInfo descriptorAllocateInfo
 	defer allocateInfo.C(&_allocateInfo).Free()
 	result := Result(C.vkAllocateDescriptorSets(
-		(C.VkDevice)(unsafe.Pointer(device)),
+		*(*C.VkDevice)(unsafe.Pointer(&device)),
 		(*C.VkDescriptorSetAllocateInfo)(unsafe.Pointer(&_allocateInfo)),
 		(*C.VkDescriptorSet)(unsafe.Pointer(&sets[0])),
 	))
@@ -431,8 +431,8 @@ func AllocateDescriptorSets(device Device, allocateInfo DescriptorSetAllocateInf
 
 func FreeDescriptorSets(device Device, pool DescriptorPool, sets []DescriptorSet) {
 	C.vkFreeDescriptorSets(
-		(C.VkDevice)(unsafe.Pointer(device)),
-		(C.VkDescriptorPool)(unsafe.Pointer(pool)),
+		*(*C.VkDevice)(unsafe.Pointer(&device)),
+		*(*C.VkDescriptorPool)(unsafe.Pointer(&pool)),
 		(C.uint32_t)(len(sets)),
 		(*C.VkDescriptorSet)(unsafe.Pointer(&sets[0])),
 	)
@@ -469,7 +469,7 @@ func (set *WriteDescriptorSet) C(_set *writeDescriptorSet) freeFunc {
 		p := C.malloc(C.size_t(uintptr(len(set.ImageInfo)) * unsafe.Sizeof(DescriptorImageInfo{})))
 		ps = append(ps, p)
 		for i, info := range set.ImageInfo {
-			*(*DescriptorImageInfo)(unsafe.Pointer(uintptr(p) + uintptr(i)*unsafe.Sizeof(DescriptorImageInfo{}))) = info
+			*(*DescriptorImageInfo)(unsafe.Add(p, uintptr(i)*unsafe.Sizeof(DescriptorImageInfo{}))) = info
 		}
 		_set.ImageInfo = (*DescriptorImageInfo)(p)
 	}
@@ -477,7 +477,7 @@ func (set *WriteDescriptorSet) C(_set *writeDescriptorSet) freeFunc {
 		p := C.malloc(C.size_t(uintptr(len(set.BufferInfo)) * unsafe.Sizeof(DescriptorBufferInfo{})))
 		ps = append(ps, p)
 		for i, info := range set.BufferInfo {
-			*(*DescriptorBufferInfo)(unsafe.Pointer(uintptr(p) + uintptr(i)*unsafe.Sizeof(DescriptorBufferInfo{}))) = info
+			*(*DescriptorBufferInfo)(unsafe.Add(p, uintptr(i)*unsafe.Sizeof(DescriptorBufferInfo{}))) = info
 		}
 		_set.BufferInfo = (*DescriptorBufferInfo)(p)
 	}
@@ -485,7 +485,7 @@ func (set *WriteDescriptorSet) C(_set *writeDescriptorSet) freeFunc {
 		p := C.malloc(C.size_t(uintptr(len(set.BufferInfo)) * unsafe.Sizeof(BufferView(0))))
 		ps = append(ps, p)
 		for i, view := range set.TexelBufferView {
-			*(*BufferView)(unsafe.Pointer(uintptr(p) + uintptr(i)*unsafe.Sizeof(BufferView(0)))) = view
+			*(*BufferView)(unsafe.Add(p, uintptr(i)*unsafe.Sizeof(BufferView(0)))) = view
 		}
 		_set.TexelBufferView = (*BufferView)(p)
 	}
@@ -547,7 +547,7 @@ func UpdateDescriptorSets(device Device, descriptorWrites []WriteDescriptorSet, 
 			C.free(p)
 		}))
 		for i, write := range descriptorWrites {
-			fs = append(fs, write.C((*writeDescriptorSet)(unsafe.Pointer(uintptr(p)+uintptr(i)*unsafe.Sizeof(writeDescriptorSet{})))))
+			fs = append(fs, write.C((*writeDescriptorSet)(unsafe.Add(p, uintptr(i)*unsafe.Sizeof(writeDescriptorSet{})))))
 		}
 		writes = p
 	}
@@ -558,7 +558,7 @@ func UpdateDescriptorSets(device Device, descriptorWrites []WriteDescriptorSet, 
 	fmt.Println(copyCount, "count", copies)
 	fmt.Println(writeCount, "writes", writes)
 	C.vkUpdateDescriptorSets(
-		(C.VkDevice)(unsafe.Pointer(device)),
+		*(*C.VkDevice)(unsafe.Pointer(&device)),
 		(C.uint32_t)(writeCount),
 		(*C.VkWriteDescriptorSet)(writes),
 		(C.uint32_t)(copyCount),
@@ -582,9 +582,9 @@ func CmdBindDescriptorSets(commandBuffer CommandBuffer, pipelineBindPoint Pipeli
 		offsets = unsafe.Pointer(&dynamicOffsets[0])
 	}
 	C.vkCmdBindDescriptorSets(
-		(C.VkCommandBuffer)(unsafe.Pointer(commandBuffer)),
+		*(*C.VkCommandBuffer)(unsafe.Pointer(&commandBuffer)),
 		(C.VkPipelineBindPoint)(pipelineBindPoint),
-		(C.VkPipelineLayout)(unsafe.Pointer(layout)),
+		*(*C.VkPipelineLayout)(unsafe.Pointer(&layout)),
 		(C.uint32_t)(firstSet),
 		(C.uint32_t)(len(descriptorSets)),
 		(*C.VkDescriptorSet)(sets),

@@ -77,7 +77,7 @@ type ImageMemoryBarrier struct {
 func CreateFence(device Device, createInfo FenceCreateInfo, allocator *AllocationCallbacks) (Fence, error) {
 	var fence Fence
 	result := Result(C.vkCreateFence(
-		(C.VkDevice)(unsafe.Pointer(device)),
+		*(*C.VkDevice)(unsafe.Pointer(&device)),
 		(*C.VkFenceCreateInfo)(unsafe.Pointer(&createInfo)),
 		(*C.VkAllocationCallbacks)(unsafe.Pointer(allocator)),
 		(*C.VkFence)(unsafe.Pointer(&fence)),
@@ -90,16 +90,16 @@ func CreateFence(device Device, createInfo FenceCreateInfo, allocator *Allocatio
 
 func DestroyFence(device Device, fence Fence, allocator *AllocationCallbacks) {
 	C.vkDestroyFence(
-		(C.VkDevice)(unsafe.Pointer(device)),
-		(C.VkFence)(unsafe.Pointer(fence)),
+		*(*C.VkDevice)(unsafe.Pointer(&device)),
+		*(*C.VkFence)(unsafe.Pointer(&fence)),
 		(*C.VkAllocationCallbacks)(unsafe.Pointer(allocator)),
 	)
 }
 
 func GetFenceStatus(device Device, fence Fence) error {
 	result := Result(C.vkGetFenceStatus(
-		(C.VkDevice)(unsafe.Pointer(device)),
-		(C.VkFence)(unsafe.Pointer(fence)),
+		*(*C.VkDevice)(unsafe.Pointer(&device)),
+		*(*C.VkFence)(unsafe.Pointer(&fence)),
 	))
 	if result != Success {
 		return result
@@ -109,7 +109,7 @@ func GetFenceStatus(device Device, fence Fence) error {
 
 func ResetFences(device Device, fences []Fence) error {
 	result := Result(C.vkResetFences(
-		(C.VkDevice)(unsafe.Pointer(device)),
+		*(*C.VkDevice)(unsafe.Pointer(&device)),
 		(C.uint32_t)(len(fences)),
 		(*C.VkFence)(unsafe.Pointer(&fences[0])),
 	))
@@ -125,7 +125,7 @@ func WaitForFences(device Device, fences []Fence, waitAll bool, timeout time.Dur
 		_waitAll = C.VK_TRUE
 	}
 	result := Result(C.vkWaitForFences(
-		(C.VkDevice)(unsafe.Pointer(device)),
+		*(*C.VkDevice)(unsafe.Pointer(&device)),
 		(C.uint32_t)(len(fences)),
 		(*C.VkFence)(unsafe.Pointer(&fences[0])),
 		_waitAll,
@@ -140,7 +140,7 @@ func WaitForFences(device Device, fences []Fence, waitAll bool, timeout time.Dur
 func CreateSemaphore(device Device, createInfo SemaphoreCreateInfo, allocator *AllocationCallbacks) (Semaphore, error) {
 	var semaphore Semaphore
 	result := Result(C.vkCreateSemaphore(
-		(C.VkDevice)(unsafe.Pointer(device)),
+		*(*C.VkDevice)(unsafe.Pointer(&device)),
 		(*C.VkSemaphoreCreateInfo)(unsafe.Pointer(&createInfo)),
 		(*C.VkAllocationCallbacks)(unsafe.Pointer(allocator)),
 		(*C.VkSemaphore)(unsafe.Pointer(&semaphore)),
@@ -153,8 +153,8 @@ func CreateSemaphore(device Device, createInfo SemaphoreCreateInfo, allocator *A
 
 func DestroySemaphore(device Device, semaphore Semaphore, allocator *AllocationCallbacks) {
 	C.vkDestroySemaphore(
-		(C.VkDevice)(unsafe.Pointer(device)),
-		(C.VkSemaphore)(unsafe.Pointer(semaphore)),
+		*(*C.VkDevice)(unsafe.Pointer(&device)),
+		*(*C.VkSemaphore)(unsafe.Pointer(&semaphore)),
 		(*C.VkAllocationCallbacks)(unsafe.Pointer(allocator)),
 	)
 }
@@ -162,7 +162,7 @@ func DestroySemaphore(device Device, semaphore Semaphore, allocator *AllocationC
 func CreateEvent(device Device, createInfo EventCreateInfo, allocator *AllocationCallbacks) (Event, error) {
 	var event Event
 	result := Result(C.vkCreateEvent(
-		(C.VkDevice)(unsafe.Pointer(device)),
+		*(*C.VkDevice)(unsafe.Pointer(&device)),
 		(*C.VkEventCreateInfo)(unsafe.Pointer(&createInfo)),
 		(*C.VkAllocationCallbacks)(unsafe.Pointer(allocator)),
 		(*C.VkEvent)(unsafe.Pointer(&event)),
@@ -175,16 +175,16 @@ func CreateEvent(device Device, createInfo EventCreateInfo, allocator *Allocatio
 
 func DestroyEvent(device Device, event Event, allocator *AllocationCallbacks) {
 	C.vkDestroyEvent(
-		(C.VkDevice)(unsafe.Pointer(device)),
-		(C.VkEvent)(unsafe.Pointer(event)),
+		*(*C.VkDevice)(unsafe.Pointer(&device)),
+		*(*C.VkEvent)(unsafe.Pointer(&event)),
 		(*C.VkAllocationCallbacks)(unsafe.Pointer(allocator)),
 	)
 }
 
 func GetEventStatus(device Device, event Event) error {
 	result := Result(C.vkGetEventStatus(
-		(C.VkDevice)(unsafe.Pointer(device)),
-		(C.VkEvent)(unsafe.Pointer(event)),
+		*(*C.VkDevice)(unsafe.Pointer(&device)),
+		*(*C.VkEvent)(unsafe.Pointer(&event)),
 	))
 	if result != Success {
 		return result
@@ -194,8 +194,8 @@ func GetEventStatus(device Device, event Event) error {
 
 func SetEvent(device Device, event Event) error {
 	result := Result(C.vkSetEvent(
-		(C.VkDevice)(unsafe.Pointer(device)),
-		(C.VkEvent)(unsafe.Pointer(event)),
+		*(*C.VkDevice)(unsafe.Pointer(&device)),
+		*(*C.VkEvent)(unsafe.Pointer(&event)),
 	))
 	if result != Success {
 		return result
@@ -205,8 +205,8 @@ func SetEvent(device Device, event Event) error {
 
 func ResetEvent(device Device, event Event) error {
 	result := Result(C.vkResetEvent(
-		(C.VkDevice)(unsafe.Pointer(device)),
-		(C.VkEvent)(unsafe.Pointer(event)),
+		*(*C.VkDevice)(unsafe.Pointer(&device)),
+		*(*C.VkEvent)(unsafe.Pointer(&event)),
 	))
 	if result != Success {
 		return result
@@ -216,23 +216,23 @@ func ResetEvent(device Device, event Event) error {
 
 func CmdSetEvent(commandBuffer CommandBuffer, event Event, stageMask PipelineStageFlags) {
 	C.vkCmdSetEvent(
-		(C.VkCommandBuffer)(unsafe.Pointer(commandBuffer)),
-		(C.VkEvent)(unsafe.Pointer(event)),
+		*(*C.VkCommandBuffer)(unsafe.Pointer(&commandBuffer)),
+		*(*C.VkEvent)(unsafe.Pointer(&event)),
 		(C.VkPipelineStageFlags)(stageMask),
 	)
 }
 
 func CmdResetEvent(commandBuffer CommandBuffer, event Event, stageMask PipelineStageFlags) {
 	C.vkCmdResetEvent(
-		(C.VkCommandBuffer)(unsafe.Pointer(commandBuffer)),
-		(C.VkEvent)(unsafe.Pointer(event)),
+		*(*C.VkCommandBuffer)(unsafe.Pointer(&commandBuffer)),
+		*(*C.VkEvent)(unsafe.Pointer(&event)),
 		(C.VkPipelineStageFlags)(stageMask),
 	)
 }
 
 func CmdWaitEvents(commandBuffer CommandBuffer, events []Event, srcStageMask, dstStageMask PipelineStageFlags, memoryBarriers []MemoryBarrier, bufferMemoryBarriers []BufferMemoryBarrier, imageMemoryBarriers []ImageMemoryBarrier) {
 	C.vkCmdWaitEvents(
-		(C.VkCommandBuffer)(unsafe.Pointer(commandBuffer)),
+		*(*C.VkCommandBuffer)(unsafe.Pointer(&commandBuffer)),
 		(C.uint32_t)(len(events)),
 		(*C.VkEvent)(unsafe.Pointer(&events[0])),
 		(C.VkPipelineStageFlags)(srcStageMask),
@@ -260,7 +260,7 @@ func CmdPipelineBarrier(commandBuffer CommandBuffer, srcStageMask, dstStageMask 
 		imageMemoryBarrierPtr = unsafe.Pointer(&imageMemoryBarriers[0])
 	}
 	C.vkCmdPipelineBarrier(
-		(C.VkCommandBuffer)(unsafe.Pointer(commandBuffer)),
+		*(*C.VkCommandBuffer)(unsafe.Pointer(&commandBuffer)),
 		(C.VkPipelineStageFlags)(srcStageMask),
 		(C.VkPipelineStageFlags)(dstStageMask),
 		(C.VkDependencyFlags)(dependencyFlags),
@@ -275,7 +275,7 @@ func CmdPipelineBarrier(commandBuffer CommandBuffer, srcStageMask, dstStageMask 
 
 func QueueWaitIdle(queue Queue) error {
 	result := Result(C.vkQueueWaitIdle(
-		(C.VkQueue)(unsafe.Pointer(queue)),
+		*(*C.VkQueue)(unsafe.Pointer(&queue)),
 	))
 	if result != Success {
 		return result
@@ -285,7 +285,7 @@ func QueueWaitIdle(queue Queue) error {
 
 func DeviceWaitIdle(device Device) error {
 	result := Result(C.vkDeviceWaitIdle(
-		(C.VkDevice)(unsafe.Pointer(device)),
+		*(*C.VkDevice)(unsafe.Pointer(&device)),
 	))
 	if result != Success {
 		return result

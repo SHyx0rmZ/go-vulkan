@@ -35,13 +35,13 @@ type QueueFamilyProperties2 struct {
 func GetPhysicalDeviceQueueFamilyProperties(physicalDevice PhysicalDevice) []QueueFamilyProperties {
 	var count uint32
 	C.vkGetPhysicalDeviceQueueFamilyProperties(
-		(C.VkPhysicalDevice)(unsafe.Pointer(physicalDevice)),
+		*(*C.VkPhysicalDevice)(unsafe.Pointer(&physicalDevice)),
 		(*C.uint32_t)(unsafe.Pointer(&count)),
 		nil,
 	)
 	queueFamilyProperties := make([]QueueFamilyProperties, count)
 	C.vkGetPhysicalDeviceQueueFamilyProperties(
-		(C.VkPhysicalDevice)(unsafe.Pointer(physicalDevice)),
+		*(*C.VkPhysicalDevice)(unsafe.Pointer(&physicalDevice)),
 		(*C.uint32_t)(unsafe.Pointer(&count)),
 		(*C.VkQueueFamilyProperties)(unsafe.Pointer(&queueFamilyProperties[0])),
 	)
@@ -51,7 +51,7 @@ func GetPhysicalDeviceQueueFamilyProperties(physicalDevice PhysicalDevice) []Que
 func GetPhysicalDeviceQueueFamilyProperties2(physicalDevice PhysicalDevice) []QueueFamilyProperties2 {
 	var count uint32
 	C.vkGetPhysicalDeviceQueueFamilyProperties2(
-		(C.VkPhysicalDevice)(unsafe.Pointer(physicalDevice)),
+		*(*C.VkPhysicalDevice)(unsafe.Pointer(&physicalDevice)),
 		(*C.uint32_t)(unsafe.Pointer(&count)),
 		nil,
 	)
@@ -60,7 +60,7 @@ func GetPhysicalDeviceQueueFamilyProperties2(physicalDevice PhysicalDevice) []Qu
 		queueFamilyProperties[i].Type = StructureTypeQueueFamilyProperties2
 	}
 	C.vkGetPhysicalDeviceQueueFamilyProperties2(
-		(C.VkPhysicalDevice)(unsafe.Pointer(physicalDevice)),
+		*(*C.VkPhysicalDevice)(unsafe.Pointer(&physicalDevice)),
 		(*C.uint32_t)(unsafe.Pointer(&count)),
 		(*C.VkQueueFamilyProperties2)(unsafe.Pointer(&queueFamilyProperties[0])),
 	)
@@ -116,7 +116,7 @@ func EnumerateInstanceLayerProperties() ([]LayerProperties, error) {
 func EnumerateDeviceLayerProperties(physicalDevice PhysicalDevice) ([]LayerProperties, error) {
 	var count uint32
 	result := Result(C.vkEnumerateDeviceLayerProperties(
-		(C.VkPhysicalDevice)(unsafe.Pointer(physicalDevice)),
+		*(*C.VkPhysicalDevice)(unsafe.Pointer(&physicalDevice)),
 		(*C.uint32_t)(unsafe.Pointer(&count)),
 		nil,
 	))
@@ -128,7 +128,7 @@ func EnumerateDeviceLayerProperties(physicalDevice PhysicalDevice) ([]LayerPrope
 	}
 	properties := make([]LayerProperties, count)
 	result = Result(C.vkEnumerateDeviceLayerProperties(
-		(C.VkPhysicalDevice)(unsafe.Pointer(physicalDevice)),
+		*(*C.VkPhysicalDevice)(unsafe.Pointer(&physicalDevice)),
 		(*C.uint32_t)(unsafe.Pointer(&count)),
 		(*C.VkLayerProperties)(unsafe.Pointer(&properties[0])),
 	))
@@ -181,7 +181,7 @@ func EnumerateDeviceExtensionProperties(physicalDevice PhysicalDevice, layerName
 	}
 	var count uint32
 	result := Result(C.vkEnumerateDeviceExtensionProperties(
-		(C.VkPhysicalDevice)(unsafe.Pointer(physicalDevice)),
+		*(*C.VkPhysicalDevice)(unsafe.Pointer(&physicalDevice)),
 		_layerName,
 		(*C.uint32_t)(unsafe.Pointer(&count)),
 		nil,
@@ -291,7 +291,7 @@ func CreateDevice(physicalDevice PhysicalDevice, info DeviceCreateInfo, allocato
 		DeviceCreateInfoInterface.dciiCopy,
 		func() {
 			result = Result(C.vkCreateDevice(
-				(C.VkPhysicalDevice)(unsafe.Pointer(physicalDevice)),
+				*(*C.VkPhysicalDevice)(unsafe.Pointer(&physicalDevice)),
 				(*C.VkDeviceCreateInfo)(unsafe.Pointer(&_info)),
 				(*C.VkAllocationCallbacks)(unsafe.Pointer(allocator)),
 				(*C.VkDevice)(unsafe.Pointer(&device)),
@@ -721,8 +721,8 @@ type SurfaceFormat struct {
 func GetPhysicalDeviceSurfaceFormats(physicalDevice PhysicalDevice, surface Surface) ([]SurfaceFormat, error) {
 	var count uint32
 	result := Result(C.vkGetPhysicalDeviceSurfaceFormatsKHR(
-		(C.VkPhysicalDevice)(unsafe.Pointer(physicalDevice)),
-		(C.VkSurfaceKHR)(unsafe.Pointer(surface)),
+		*(*C.VkPhysicalDevice)(unsafe.Pointer(&physicalDevice)),
+		*(*C.VkSurfaceKHR)(unsafe.Pointer(&surface)),
 		(*C.uint32_t)(unsafe.Pointer(&count)),
 		nil,
 	))
@@ -731,8 +731,8 @@ func GetPhysicalDeviceSurfaceFormats(physicalDevice PhysicalDevice, surface Surf
 	}
 	formats := make([]SurfaceFormat, count)
 	result = Result(C.vkGetPhysicalDeviceSurfaceFormatsKHR(
-		(C.VkPhysicalDevice)(unsafe.Pointer(physicalDevice)),
-		(C.VkSurfaceKHR)(unsafe.Pointer(surface)),
+		*(*C.VkPhysicalDevice)(unsafe.Pointer(&physicalDevice)),
+		*(*C.VkSurfaceKHR)(unsafe.Pointer(&surface)),
 		(*C.uint32_t)(unsafe.Pointer(&count)),
 		(*C.VkSurfaceFormatKHR)(unsafe.Pointer(&formats[0])),
 	))
@@ -760,8 +760,8 @@ const (
 func GetPhysicalDeviceSurfacePresentModes(physicalDevice PhysicalDevice, surface Surface) ([]PresentMode, error) {
 	var count uint32
 	result := Result(C.vkGetPhysicalDeviceSurfacePresentModesKHR(
-		(C.VkPhysicalDevice)(unsafe.Pointer(physicalDevice)),
-		(C.VkSurfaceKHR)(unsafe.Pointer(surface)),
+		*(*C.VkPhysicalDevice)(unsafe.Pointer(&physicalDevice)),
+		*(*C.VkSurfaceKHR)(unsafe.Pointer(&surface)),
 		(*C.uint32_t)(unsafe.Pointer(&count)),
 		nil,
 	))
@@ -770,8 +770,8 @@ func GetPhysicalDeviceSurfacePresentModes(physicalDevice PhysicalDevice, surface
 	}
 	modes := make([]PresentMode, count)
 	result = Result(C.vkGetPhysicalDeviceSurfacePresentModesKHR(
-		(C.VkPhysicalDevice)(unsafe.Pointer(physicalDevice)),
-		(C.VkSurfaceKHR)(unsafe.Pointer(surface)),
+		*(*C.VkPhysicalDevice)(unsafe.Pointer(&physicalDevice)),
+		*(*C.VkSurfaceKHR)(unsafe.Pointer(&surface)),
 		(*C.uint32_t)(unsafe.Pointer(&count)),
 		(*C.VkPresentModeKHR)(unsafe.Pointer(&modes[0])),
 	))
@@ -813,8 +813,8 @@ type SurfaceCapabilities struct {
 func GetPhysicalDeviceSurfaceCapabilities(physicalDevice PhysicalDevice, surface Surface) (SurfaceCapabilities, error) {
 	var capabilities SurfaceCapabilities
 	result := Result(C.vkGetPhysicalDeviceSurfaceCapabilitiesKHR(
-		(C.VkPhysicalDevice)(unsafe.Pointer(physicalDevice)),
-		(C.VkSurfaceKHR)(unsafe.Pointer(surface)),
+		*(*C.VkPhysicalDevice)(unsafe.Pointer(&physicalDevice)),
+		*(*C.VkSurfaceKHR)(unsafe.Pointer(&surface)),
 		(*C.VkSurfaceCapabilitiesKHR)(unsafe.Pointer(&capabilities)),
 	))
 	if result != Success {
@@ -1243,7 +1243,7 @@ const (
 
 func GetPhysicalDeviceFormatProperties(physicalDevice PhysicalDevice, format Format) (properties FormatProperties) {
 	C.vkGetPhysicalDeviceFormatProperties(
-		(C.VkPhysicalDevice)(unsafe.Pointer(physicalDevice)),
+		*(*C.VkPhysicalDevice)(unsafe.Pointer(&physicalDevice)),
 		(C.VkFormat)(format),
 		(*C.VkFormatProperties)(unsafe.Pointer(&properties)),
 	)
@@ -1335,7 +1335,7 @@ type ImageFormatProperties struct {
 func GetPhysicalDeviceImageFormatProperties(physicalDevice PhysicalDevice, format Format, typ ImageType, tiling ImageTiling, usage ImageUsageFlags, flags ImageCreateFlags) (ImageFormatProperties, error) {
 	var properties ImageFormatProperties
 	result := Result(C.vkGetPhysicalDeviceImageFormatProperties(
-		(C.VkPhysicalDevice)(unsafe.Pointer(physicalDevice)),
+		*(*C.VkPhysicalDevice)(unsafe.Pointer(&physicalDevice)),
 		(C.VkFormat)(format),
 		(C.VkImageType)(typ),
 		(C.VkImageTiling)(tiling),
