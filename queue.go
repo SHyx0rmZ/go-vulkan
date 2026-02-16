@@ -9,16 +9,25 @@ import (
 
 type Queue uintptr
 
-func (q Queue) Present(info PresentInfo) (freeFunc, error) {
+func (q Queue) Present(info PresentInfo, next ...PresentInfoInterface) (freeFunc, error) {
 	var _info presentInfo
 	ff := info.C(&_info)
 	// fmt.Println(q)
 	// fmt.Printf("%+v\n", info)
 	// fmt.Printf("%+v\n", _info)
-	result := Result(C.vkQueuePresentKHR(
-		*(*C.VkQueue)(unsafe.Pointer(&q)),
-		(*C.VkPresentInfoKHR)(unsafe.Pointer(&_info)),
-	))
+	var result Result
+	chain2(
+		PresentInfoInterface.piiInit,
+		PresentInfoInterface.piiAlloc,
+		PresentInfoInterface.piiCopy,
+		func() {
+			result = Result(C.vkQueuePresentKHR(
+				*(*C.VkQueue)(unsafe.Pointer(&q)),
+				(*C.VkPresentInfoKHR)(unsafe.Pointer(&_info)),
+			))
+		},
+		append([]PresentInfoInterface{&_info}, next...)...,
+	)
 	if info.Results != nil {
 		for i := range info.Results {
 			result := *(*Result)(unsafe.Pointer(uintptr(unsafe.Pointer(_info.Results)) + uintptr(i)*unsafe.Sizeof(Result(0))))

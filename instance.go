@@ -304,7 +304,7 @@ type Swapchain uintptr
 
 type PresentInfo struct {
 	Type           StructureType
-	Next           uintptr
+	Next           *PresentInfoInterface
 	WaitSemaphores []Semaphore
 	Swapchains     []Swapchain
 	ImageIndices   []uint32
@@ -314,7 +314,7 @@ type PresentInfo struct {
 func (info *PresentInfo) C(_info *presentInfo) freeFunc {
 	*_info = presentInfo{
 		Type:               info.Type,
-		Next:               info.Next,
+		Next:               (*PresentInfoInterface)(unsafe.Pointer(info.Next)),
 		WaitSemaphoreCount: uint32(len(info.WaitSemaphores)),
 		WaitSemaphores:     nil,
 		SwapchainCount:     uint32(len(info.Swapchains)),
@@ -359,15 +359,112 @@ func (info *PresentInfo) C(_info *presentInfo) freeFunc {
 	})
 }
 
+type PresentInfoInterface interface {
+	piiInit(i *PresentInfoInterface)
+	piiAlloc() (PresentInfoInterface, unsafe.Pointer)
+	piiCopy(i PresentInfoInterface)
+}
+
 type presentInfo struct {
 	Type               StructureType
-	Next               uintptr
+	Next               *PresentInfoInterface
 	WaitSemaphoreCount uint32
 	WaitSemaphores     *Semaphore
 	SwapchainCount     uint32
 	Swapchains         *Swapchain
 	ImageIndices       *uint32
 	Results            *Result
+}
+
+func (p *presentInfo) piiInit(i *PresentInfoInterface) {
+	p.Type = StructureTypePresentInfoKHR
+	if i != nil {
+		p.Next = i
+	}
+}
+
+func (p *presentInfo) piiAlloc() (PresentInfoInterface, unsafe.Pointer) {
+	ptr := C.calloc(1, (C.size_t)(unsafe.Sizeof(*p)))
+	return (*presentInfo)(ptr), ptr
+}
+
+func (p *presentInfo) piiCopy(i PresentInfoInterface) {
+	*p = *(i.(*presentInfo))
+}
+
+type SwapchainPresentFenceInfoKHR struct {
+	Type   StructureType
+	Next   *PresentInfoInterface
+	Fences []Fence
+
+	free freeFunc
+}
+
+const StructureTypeSwapchainPresentFenceInfoKHR = StructureType(1000275001)
+
+func (info *SwapchainPresentFenceInfoKHR) C(_info *swapchainPresentFenceInfoKHR) freeFunc {
+	var fencePtr unsafe.Pointer
+	if len(info.Fences) > 0 {
+		fencePtr = copySliceToC(nil, info.Fences)
+	}
+	*_info = swapchainPresentFenceInfoKHR{
+		Type:       info.Type,
+		Next:       info.Next,
+		FenceCount: uint32(len(info.Fences)),
+		Fences:     (*Fence)(fencePtr),
+	}
+	f := func() {
+		C.free(fencePtr)
+	}
+	info.free = f
+	return f
+}
+
+func (info *SwapchainPresentFenceInfoKHR) piiInit(i *PresentInfoInterface) {
+	info.Type = StructureTypeSwapchainPresentFenceInfoKHR
+	if i != nil {
+		info.Next = i
+	}
+}
+
+func (info *SwapchainPresentFenceInfoKHR) piiAlloc() (PresentInfoInterface, unsafe.Pointer) {
+	ptr := C.calloc(1, (C.size_t)(unsafe.Sizeof(swapchainPresentFenceInfoKHR{})))
+	return (*swapchainPresentFenceInfoKHR)(ptr), ptr
+}
+
+func (info *SwapchainPresentFenceInfoKHR) piiCopy(i PresentInfoInterface) {
+	_info := i.(*swapchainPresentFenceInfoKHR)
+	fences := make([]Fence, _info.FenceCount)
+	copy(fences, unsafe.Slice(_info.Fences, _info.FenceCount))
+	defer info.free()
+	*info = SwapchainPresentFenceInfoKHR{
+		Type:   _info.Type,
+		Next:   _info.Next,
+		Fences: fences,
+	}
+}
+
+type swapchainPresentFenceInfoKHR struct {
+	Type       StructureType
+	Next       *PresentInfoInterface
+	FenceCount uint32
+	Fences     *Fence
+}
+
+func (info *swapchainPresentFenceInfoKHR) piiInit(i *PresentInfoInterface) {
+	info.Type = StructureTypeSwapchainPresentFenceInfoKHR
+	if i != nil {
+		info.Next = i
+	}
+}
+
+func (info *swapchainPresentFenceInfoKHR) piiAlloc() (PresentInfoInterface, unsafe.Pointer) {
+	ptr := C.calloc(1, (C.size_t)(unsafe.Sizeof(*info)))
+	return (*swapchainPresentFenceInfoKHR)(ptr), ptr
+}
+
+func (info *swapchainPresentFenceInfoKHR) piiCopy(i PresentInfoInterface) {
+	i.(*SwapchainPresentFenceInfoKHR).C(info)
 }
 
 type DeviceCreateFlags uint32
@@ -551,7 +648,7 @@ type DeviceGroupDeviceCreateInfo struct {
 	Next            *DeviceCreateInfoInterface
 	PhysicalDevices []PhysicalDevice
 
-	free freeFunc
+	free freeFunc // todo
 }
 
 func (info *DeviceGroupDeviceCreateInfo) C(_info *deviceGroupDeviceCreateInfo) freeFunc {
