@@ -272,7 +272,14 @@ const (
 	PrimitiveTopologyPatchList
 )
 
-type PipelineTessellationStateCreateInfo struct{}
+type PipelineTessellationStateCreateFlags uint32
+
+type PipelineTessellationStateCreateInfo struct {
+	Type               StructureType
+	Next               uintptr
+	Flags              PipelineTessellationStateCreateFlags
+	PatchControlPoints uint32
+}
 type PipelineViewportStateCreateFlags uint32
 type PipelineViewportStateCreateInfo struct {
 	Type      StructureType
