@@ -89,10 +89,30 @@ func (info *PipelineShaderStageCreateInfo) C(_info *pipelineShaderStageCreateInf
 		Module: info.Module,
 		Name:   C.CString(info.Name),
 	}
+	var ps []unsafe.Pointer
 	if len(info.SpecializationInfo.Data) > 0 || len(info.SpecializationInfo.MapEntries) > 0 {
-		panic("ikohasdoa ")
+		p := C.malloc(C.size_t(unsafe.Sizeof(specializationInfo{})))
+		_info.SpecializationInfo = (*specializationInfo)(p)
+		ps = append(ps, p)
+		_info.SpecializationInfo.MapEntryCount = uint32(len(info.SpecializationInfo.MapEntries))
+		_info.SpecializationInfo.DataSize = C.size_t(len(info.SpecializationInfo.Data))
+		if len(info.SpecializationInfo.MapEntries) > 0 {
+			p := C.malloc(C.size_t(uintptr(len(info.SpecializationInfo.MapEntries)) * unsafe.Sizeof(SpecializationMapEntry{})))
+			ps = append(ps, p)
+			_info.SpecializationInfo.MapEntries = (*SpecializationMapEntry)(p)
+			copy(unsafe.Slice((*SpecializationMapEntry)(p), len(info.SpecializationInfo.MapEntries)), info.SpecializationInfo.MapEntries)
+		}
+		if len(info.SpecializationInfo.Data) > 0 {
+			p := C.malloc(C.size_t(uintptr(len(info.SpecializationInfo.Data)) * unsafe.Sizeof(byte(0))))
+			ps = append(ps, p)
+			_info.SpecializationInfo.Data = (*byte)(p)
+			copy(unsafe.Slice((*byte)(p), len(info.SpecializationInfo.Data)), info.SpecializationInfo.Data)
+		}
 	}
 	return freeFunc(func() {
+		for i := len(ps); i > 0; i-- {
+			C.free(ps[i-1])
+		}
 		C.free(unsafe.Pointer(_info.Name))
 	})
 }
@@ -122,7 +142,7 @@ type specializationInfo struct {
 type SpecializationMapEntry struct {
 	ConstantID uint32
 	Offset     uint32
-	Size       int
+	Size       uintptr
 }
 
 type PipelineRasterizationStateCreateFlagBits uint32
