@@ -704,12 +704,18 @@ type PhysicalDeviceProperties struct {
 
 func GetPhysicalDeviceProperties2(physicalDevice PhysicalDevice, next ...PhysicalDevicePropertiesInterface) PhysicalDeviceProperties2 {
 	var properties PhysicalDeviceProperties2
-	chain(func() {
-		C.vkGetPhysicalDeviceProperties2(
-			*(*C.VkPhysicalDevice)(unsafe.Pointer(&physicalDevice)),
-			(*C.VkPhysicalDeviceProperties2)(unsafe.Pointer(&properties)),
-		)
-	}, append([]PhysicalDevicePropertiesInterface{&properties}, next...)...)
+	chain2(
+		PhysicalDevicePropertiesInterface.init,
+		PhysicalDevicePropertiesInterface.alloc,
+		PhysicalDevicePropertiesInterface.copy,
+		func() {
+			C.vkGetPhysicalDeviceProperties2(
+				*(*C.VkPhysicalDevice)(unsafe.Pointer(&physicalDevice)),
+				(*C.VkPhysicalDeviceProperties2)(unsafe.Pointer(&properties)),
+			)
+		},
+		append([]PhysicalDevicePropertiesInterface{&properties}, next...)...,
+	)
 	return properties
 }
 
